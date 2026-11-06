@@ -63,3 +63,5 @@
   on the pairing panel, re-checks every 3 s and logs `awdl_state` events
   (`session/awdl_detector.gd`, `tests/awdl_detector_test.gd`). Setup guidance
   is in `docs/development.md`. The host never disables AWDL itself.
+- 2026-11-06: The owner confirmed on the physical host that the amber AWDL
+  warning appears on the pairing panel while AWDL is active.
