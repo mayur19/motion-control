@@ -47,11 +47,15 @@ from `TYPE_ACCELEROMETER`. Total acceleration including gravity must not enter
 the common racket transform. Platform filtering differences remain calibration
 and preprocessing concerns; they do not change axis signs.
 
-Android's rotation-vector quaternion already maps device coordinates into its
-reference frame. Core Motion's attitude quaternion uses the inverse convention
-for this contract, so the iOS sensor adapter transmits its quaternion inverse
-`(-x, -y, -z, w)`. This conversion happens once at the native sensor boundary;
-all protocol consumers then use the device-to-reference convention below.
+Android's rotation-vector quaternion and Core Motion's attitude quaternion
+both already map device coordinates into their reference frame, so both
+controllers transmit them unchanged. Physical check: an upright portrait
+iPhone reports Core Motion pitch +90°, quaternion `(sin 45°, 0, 0, cos 45°)`,
+which rotates `+Y_D` onto vertical `+Z`. (TMB-026 originally inverted the iOS
+quaternion; TMB-027's first physical calibration showed this rejected every
+correct grip, and the inversion was removed.) The iOS adapter at the native
+sensor boundary is therefore a pass-through; all protocol consumers use the
+device-to-reference convention below.
 
 ## 2. Required neutral grip
 

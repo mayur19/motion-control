@@ -1,11 +1,10 @@
 import simd
 
 enum MotionCoordinateAdapter {
-    /// Core Motion attitude uses the inverse of the protocol's active
-    /// device-to-reference convention. Unit-quaternion inversion negates the
-    /// vector part and retains the scalar part.
+    /// Core Motion attitude already rotates device axes into its reference
+    /// frame (upright portrait reports pitch +90°, mapping +Y_D to +Z), which
+    /// is the protocol's device-to-reference convention. Pass it through.
     static func deviceToReferenceQuaternion(_ coreMotion: SIMD4<Float>) -> SIMD4<Float> {
-        SIMD4(-coreMotion.x, -coreMotion.y, -coreMotion.z, coreMotion.w)
+        coreMotion
     }
 }
-
