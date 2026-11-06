@@ -2,7 +2,7 @@
 
 Checkpoint and working rules for coding agents (Codex, Claude Code). Read this
 first, then `git log`, `git status` and the ticket you are working on.
-Last checkpoint: 2026-11-06, written after `4694d18` (TMB-026 done).
+Last checkpoint: 2026-11-06, written after `7836d3c` (TMB-029 done; TMB-030 capture in progress).
 
 ## Project
 
@@ -95,45 +95,59 @@ killing it truncates the last line.
 
 ## State at checkpoint
 
-Done and physically verified (see the ticket logs and `docs/evidence/`):
-TMB-001 to TMB-023 implemented. TMB-019/020/021 pairing, clock sync, reconnect
-and host-loss pass on iPhone and Galaxy. TMB-022 soak, Wi-Fi host, AWDL off:
-both phones pass (0.12% / 0.17% loss + late). **Gate A (TMB-025) has a final
-`GO`** (owner decision, accepted evidence exception; see the TMB-025 decision
-record). **TMB-026** (common racket coordinate frame) is done at `4694d18`.
+Done and physically verified (ticket logs, `docs/evidence/`):
 
-**TMB-027** (slow-swing calibration) is Done: physically verified on iPhone
-and Galaxy, both hands, within the owner's physical repeatability limits
-(0.05 m/s² accel bias, 0.10 rad/s gyro bias, 5° tilt). The iPhone run fixed a
-TMB-026 defect: Core Motion attitude is already device-to-reference and is no
-longer inverted. Rejoin resends the stored calibration. See
-`docs/evidence/TMB-027-calibration.txt`. Not pushed.
+- TMB-001–023: protocol, controllers, host ingest, pairing, clock sync,
+  reconnect, soak (both phones pass with Wi-Fi host and AWDL off).
+- TMB-025 Gate A: final `GO` (owner decision with an evidence exception).
+- TMB-026 common racket frame (`docs/racket-coordinate-system.md`). Core Motion
+  attitude is device-to-reference and is **not** inverted (ADR-011).
+- TMB-027 slow-swing calibration on iPhone and Galaxy, both hands, within the
+  owner's physical limits (0.05 m/s², 0.10 rad/s, 5°). Rejoin resends the
+  stored calibration; both apps have Recalibrate.
+- TMB-028 host calibration gate (`motion/calibration_normalizer.gd`): raw axes
+  are kept, `normalized` is attached, and only `normalized_sample_received`
+  feeds detection. F5 shows a raw vs normalized plot.
+- TMB-029 labeled capture/replay (`docs/capture-format.md`): F6 capture panel,
+  immutable `raw.jsonl` + `raw.sha256`, append-only `labels.jsonl`, headless
+  replay; live and replay detector events are identical.
 
-Open items (not blocking M2 unless noted):
-- TMB-022: an Ethernet-host run is impossible on this Mac; the AWDL-off run
-  lasted 198 s of the agreed 5 minutes.
-- Galaxy needs an on-device check of the debug-panel wrap fix (the latest build
-  is installed).
-- `--latency-test` starts with the stimulus armed, which hides the pairing QR
-  (press F4 to pair, then F4 again). Plan text says F4 arms it; small host fix
-  pending.
-- Android stops background network traffic after about 5 s; a background
-  longer than about 17 s returns as a new player. A foreground service is an
+In progress / review:
+
+- **TMB-030 dataset (owner-run, In Progress).** Plan:
+  `docs/test-plans/tmb-030-dataset-capture-plan.md` (full target chosen: per
+  phone 4 swing + 4 non-swing sessions of ≤ 6 min; S4/N4 held out). Done:
+  iPhone S1 (34 swings, estimated counts, tune) and N1 (tune). Inventory:
+  iPhone 34/100 swings, 5.4/20 non-swing minutes; Galaxy none. Captures and
+  `dataset-splits.json` live in the host user-data `captures/` folder
+  (not in git). Only the owner can record sessions; never invent labels or
+  counts.
+- **TMB-031 preprocessing and TMB-032 `early_rise` detector: Review** under an
+  owner-approved dependency exception. Thresholds are provisional, and the
+  backswing vs forward-swing question needs labeled data
+  (`docs/motion-preprocessing.md`, `docs/swing-detection.md`).
+- TMB-033 onward are blocked by data; all gameplay waits for the TMB-035 gate.
+
+Open items:
+
+- TMB-022: no Ethernet-host run is possible on this Mac.
+- `--latency-test` starts armed, which hides the pairing QR (press F4 twice);
+  small host fix pending.
+- Android stops background traffic after ~5 s; a foreground service is an
   owner decision.
-- The Galaxy once failed to receive WELCOME (not reproducible); join debug
-  logging (tag `MotionBadminton`) is in place.
-- The PRD's thresholds for rate and frame stall were set by the owner for
-  TMB-022: median >= 99 Hz, no frame > 150 ms, frame p99 < 50 ms.
+- A paused controller (invalid calibration) is not told on screen (no
+  protocol message). Duplicate samples are dropped by preprocessing.
 
-TMB-028 host calibration is Done (`docs/evidence/TMB-028-host-calibration.txt`).
-TMB-029 capture/replay is Done (`docs/evidence/TMB-029-capture-replay.txt`).
-TMB-030 baseline dataset: In Progress. Plan in
-`docs/test-plans/tmb-030-dataset-capture-plan.md`; captures + `dataset-splits.json`
-live in the host user-data `captures/` folder; report with
-`python3 -I tools/dataset-inventory.py <captures dir> --markdown out.md`.
-TMB-031 preprocessing and TMB-032 early-rise detector: Review under an
-owner-approved dependency exception (provisional thresholds; tuning and the
-backswing question wait for TMB-030 data). Docs: `docs/motion-preprocessing.md`,
-`docs/swing-detection.md`.
-Then onward per
-`implementation-tickets/README.md`.
+Hard-won gotchas:
+
+- The protocol is **big-endian**. MOTION gyro sits at datagram bytes 48–59.
+- Godot `JSON.stringify` loses precision on 64-bit ints: store session ids as
+  decimal strings.
+- The GDScript project treats inferred-Variant warnings as errors (use typed
+  `var x: T = …`). A `SceneTree` test with a parse error never quits, so run
+  tests under `timeout`.
+- `--print-session` prints the live pairing secret: don't use it in agent runs.
+- zsh does not word-split `$var` in loops.
+
+Next by plan: owner sessions for TMB-030 (iPhone S2/N2 next), TMB-033
+evaluation tooling, then onward per `implementation-tickets/README.md`.
