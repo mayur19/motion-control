@@ -1,0 +1,45 @@
+TMB-005 iOS controller shell evidence
+Captured: 2026-11-06 (Asia/Kolkata)
+
+Build target
+============
+
+Xcode 26.4.1 (17E202)
+Swift 6 language mode
+iPhone 17 QA simulator, iOS 26.4.1
+App version 0.1.0 (1)
+
+$ xcodegen generate
+Created project at apps/controller-ios/MotionControllerIOS.xcodeproj
+
+$ xcodebuild ... test
+ControllerStateTests.testDebugAdvanceCyclesThroughEveryState: passed
+ControllerStateTests.testKeepAwakeIsLimitedToActiveSessionStates: passed
+ControllerStateTests.testStateNamesAndOrderMatchProtocolFlow: passed
+Executed 3 tests, with 0 failures
+** TEST SUCCEEDED **
+
+$ xcrun simctl install booted MotionControllerIOS.app
+Exit status: 0
+
+$ xcrun simctl launch booted com.motionbadminton.controller.ios
+Launch succeeded
+
+Generated Info.plist permission descriptions
+============================================
+
+Camera: Scan the badminton host QR code to join a local game session.
+Motion: Read phone motion to detect badminton swings during an active session.
+Local network: Connect to the badminton host on your local network and stream controller motion.
+
+Visual evidence
+===============
+
+TMB-005-ios-shell.png shows the simulator launch, version, device information,
+Not Paired state and Keep awake: Disabled.
+
+Physical-device evidence
+========================
+
+Deferred by explicit project owner direction; required before hardware release
+acceptance.

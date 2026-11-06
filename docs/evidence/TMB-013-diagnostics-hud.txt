@@ -1,0 +1,40 @@
+TMB-013 host networking diagnostics HUD evidence
+Date: 2026-11-06
+
+Automated behavior check
+------------------------
+Command:
+  godot --headless --path apps/host-godot --script res://tests/diagnostics_hud_test.gd
+Result:
+  TMB-013_HUD_TEST_OK history=[120, 0] f3_toggle=true
+
+This proves that a 150-sample input stream is capped at 120 graph entries and that
+F3 hides and restores the HUD while the independently bound ingest object remains
+active.
+
+Clean 1080p run
+---------------
+Generator configuration: seed=42, 2 controllers, 200 Hz/controller, 2 seconds.
+Generator result: 800 datagrams emitted; no loss, duplicates, reorder or invalid
+packets.
+Host result: 800 processed; 400 received per controller; loss=0, duplicates=0,
+reordered=0; graph histories=[120, 120].
+Screenshot: TMB-013-hud-clean.png (1920x1080)
+
+Deterministic impaired 1080p run
+--------------------------------
+Generator configuration: seed=42, 2 controllers, 200 Hz/controller, 2 seconds,
+loss=0.05, duplicate=0.03, reorder=0.04, invalid-every=50.
+Generator result: 781 datagrams emitted; 24 valid duplicates; 22 detectably
+reordered valid datagrams; 57 expected detectable losses; 15 invalid packets.
+Host result:
+  controller 0A0B0C0D: received=388, loss=25, duplicates=14, reordered=13
+  controller 0A0B0C0E: received=378, loss=32, duplicates=10, reordered=9
+  totals: loss=57, duplicates=24, reordered=22; 15 rejected packets account for
+  the difference between 781 processed datagrams and 766 accepted samples.
+  graph histories=[120, 120].
+Screenshot: TMB-013-hud-impaired.png (1920x1080)
+
+The displayed impairment totals agree exactly with the deterministic generator
+summary. Both screenshots were visually inspected at original resolution and the
+endpoint, state, six metrics, legend and signal plots are legible.

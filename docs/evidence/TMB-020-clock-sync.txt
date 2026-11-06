@@ -1,0 +1,73 @@
+TMB-020 monotonic clock synchronization evidence
+Date: 2026-11-06
+
+Deterministic estimator tests
+-----------------------------
+Command:
+  godot --headless --path apps/host-godot \
+    --script res://tests/clock_synchronizer_test.gd
+Result:
+  TMB-020_CLOCK_TEST_OK known_offset_ms=50.000
+  jitter_offset_ms=30.000 asymmetry_error_ms=2.000
+  drift_ppm=100.0 backward_corrections=1
+
+Coverage includes known offset/delay, variable jitter with low-RTT preference,
+asymmetric path bias, five simulated minutes of 100 ppm drift, a visible clock
+step, and prevention/counting of backward adjusted time.
+
+Live protocol/pipeline integration
+----------------------------------
+Command:
+  godot --headless --path apps/host-godot \
+    --script res://tests/clock_service_integration_test.gd
+Result:
+  TMB-020_CLOCK_INTEGRATION_OK offset_ms=50.470 rtt_ms=0.060
+  adjusted_age_ms=0.119
+
+This runs HELLO/WELCOME, host PING, controller PONG and MOTION over real local
+UDP sockets. It proves immediate post-pair synchronization, correct four-time
+handling, controller-ID association, conversion into host monotonic time, and
+adjusted sample-age calculation in the ingest pipeline.
+
+Controller implementations
+--------------------------
+iOS keeps its paired Network.framework UDP control path open and answers PING
+with DispatchTime monotonic timestamps. Android retains its paired DatagramSocket
+on a dedicated control thread and answers with System.nanoTime timestamps. Both
+validate session/controller identity before replying. iOS has 12 passing tests;
+Android unit tests and debug assembly pass.
+
+Physical iPhone evidence
+------------------------
+A 639-second physical iPhone 17e stream produced 128 clock-sync observations
+over 10.5 minutes. The resulting plot is:
+
+  docs/evidence/TMB-020-iphone-clock-stability.svg
+
+The plot shows a 3.093 ms controller-offset range and 6.314 ms median clock
+exchange RTT. Eight early observations retain the previously discovered
+-198,804 ppm estimator artifact; they are visibly clipped and annotated rather
+than omitted. That artifact led to the one-second forward-time drift-baseline
+guard and regression test described above. The physical run log SHA-256 is:
+
+  f2d657cfa1ca3c48f657759759c51deba25e888db4afe7253d5d61da246dbc91
+
+The plot is reproducible with:
+
+  ruby tools/plot-clock-sync.rb INPUT.jsonl \
+    docs/evidence/TMB-020-iphone-clock-stability.svg
+
+An Android physical stability plot remains pending until the Galaxy reference
+device is connected. The deterministic five-minute drift simulation remains
+the cross-platform estimator evidence, not a substitute for Android oscillator
+evidence.
+
+Android time-base defect (physical Galaxy M14 5G, 2026-11-06)
+-------------------------------------------------------------
+The Android controller mixed time bases: SensorEvent.timestamp
+(elapsedRealtimeNanos) against PONG times from System.nanoTime(). On a phone that
+had slept about 18.4 h since boot, every sample converted to about 66,355 s in
+the future. Fixed by protocol/ProtocolClock.kt (elapsedRealtimeNanos for every
+wire timestamp); physical post-fix median sample age is 8.3 ms. See
+TMB-016-017-android-motion.txt. The spec's "drop if more than 20 ms in the
+future" rule would otherwise have discarded every Android sample.

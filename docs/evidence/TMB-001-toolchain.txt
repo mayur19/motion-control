@@ -1,0 +1,77 @@
+TMB-001 toolchain evidence
+Captured: 2026-11-06 (Asia/Kolkata)
+Host: Apple silicon Mac, macOS 26.6.2 (25G83)
+
+Selected tool output
+====================
+
+$ godot --version
+4.7.2.stable.official.ed1daf0bf
+
+$ xcodebuild -version
+Xcode 26.4.1
+Build version 17E202
+
+$ swift --version
+swift-driver version: 1.148.6 Apple Swift version 6.3.1
+Target: arm64-apple-macosx26.0
+
+$ xcodebuild -showsdks
+iOS 26.4                     -sdk iphoneos26.4
+Simulator - iOS 26.4         -sdk iphonesimulator26.4
+macOS 26.4                   -sdk macosx26.4
+
+$ Android Studio version metadata
+Android Studio 2026.1.1
+Build AI-261.23567.138.2611.15646644
+Bundled runtime: OpenJDK 21.0.10
+
+$ sdkmanager --list_installed (selected rows)
+build-tools;36.1.0                  36.1.0
+cmdline-tools;latest                20.0
+platform-tools                      37.0.0
+platforms;android-36                2
+
+$ adb version
+Android Debug Bridge version 1.0.41
+Version 36.0.0-13206524
+
+$ /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home/bin/java -version
+openjdk version "17.0.18" 2026-01-20
+OpenJDK Runtime Environment Homebrew (build 17.0.18+0)
+OpenJDK 64-Bit Server VM Homebrew (build 17.0.18+0, mixed mode, sharing)
+
+$ git --version
+git version 2.50.1 (Apple Git-155)
+
+Device inventory
+================
+
+$ xcrun xctrace list devices
+- iPhone 17e, iOS 26.6.2: available, paired and Developer Mode enabled
+- Device identifiers redacted
+
+$ adb devices -l
+- No Android device connected
+
+Physical-device launch evidence
+===============================
+
+iPhone 17e: PASS - automatically signed development build installed and
+launched successfully on 2026-11-06; the physical-device XCTest bundle also
+passed all 12 tests. Identifiers are redacted.
+Android reference device: PENDING - device is not currently connected.
+
+Godot smoke evidence
+====================
+
+$ godot --headless --path .tmb-001-godot-smoke --editor --quit
+Godot Engine v4.7.2.stable.official.ed1daf0bf
+Project initialization: DONE
+Editor loading: DONE
+Exit status: 0
+
+$ godot --headless --path .tmb-001-godot-smoke
+Godot Engine v4.7.2.stable.official.ed1daf0bf
+TMB-001_GODOT_SMOKE_OK
+Exit status: 0

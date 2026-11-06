@@ -1,0 +1,45 @@
+TMB-011 UDP ingest evidence
+Captured: 2026-11-06 (Asia/Kolkata)
+
+Clean integration run
+=====================
+
+Generator: 2 controllers × 200 Hz × 2 seconds
+Generator emitted: 800
+Host processed: 800
+Controller 0x0A0B0C0D received: 400
+Controller 0x0A0B0C0E received: 400
+Loss: 0
+Duplicates: 0
+Reordered: 0
+Rejections: 0
+Queue drops: 0
+Maximum poll call: 5.558 ms (includes first-script warmup; below 8.33 ms fixed tick)
+
+Seeded impairment integration run
+=================================
+
+Generator configuration: seed 42, 5% loss, 3% duplicate, 4% reorder,
+invalid every 50, 2 controllers × 200 Hz × 2 seconds.
+
+Generator receiver-observable counters:
+- datagrams emitted: 781
+- valid duplicates: 24
+- reordered valid datagrams: 22
+- expected detectable loss: 57
+- invalid: 15
+
+Host counters:
+- packets processed: 781
+- duplicates: 14 + 10 = 24
+- reordered: 13 + 9 = 22
+- loss/gaps: 25 + 32 = 57
+- UNSUPPORTED_VERSION rejections: 15
+- accepted motion packets: 766
+- queue capacity: 500
+- queue size: 500
+- explicit oldest-sample queue drops: 266
+- maximum poll call: 2.120 ms
+
+The host process exited normally after both runs. Invalid traffic produced only
+bounded rejection counters and never entered the detector queue.

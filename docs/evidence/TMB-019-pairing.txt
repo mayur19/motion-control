@@ -1,0 +1,60 @@
+TMB-019 controller join and handshake evidence
+Date: 2026-11-06
+
+Host UDP handshake test
+-----------------------
+Command:
+  godot --headless --path apps/host-godot \
+    --script res://tests/pairing_server_test.gd
+Result:
+  TMB-019_PAIRING_SERVER_OK first=P1 second=P2 retry_stable=true
+  expired_reconnect=P1 third=FULL wrong=SECRET expired=EXPIRED
+
+This test uses four independently bound UDP clients against the actual host
+ingest socket. It proves first/second slot assignment, stable identity across a
+HELLO retry, a clear full-session response for a third controller, constant-time
+secret authentication behavior, explicit expired-code rejection, and bounded
+reclaim of an existing P1 reservation after the public QR window expires.
+
+Controller validation and build tests
+-------------------------------------
+- iOS: 12 XCTest cases passed with 0 failures. The three pairing cases verify
+  exact URI parsing, expired/altered/wrong-version errors, and all WELCOME
+  rejection states.
+- Android: Gradle `testDebugUnitTest assembleDebug` completed successfully. The
+  three corresponding JUnit cases verify the same inputs and rejection states.
+- Godot protocol fixtures: 8 positive and 7 negative fixtures still pass after
+  adding rejection-form WELCOME states.
+
+Implemented controller behavior
+--------------------------------
+- iOS uses AVFoundation QR metadata capture restricted to QR codes. Android uses
+  Google Code Scanner 16.1.0 restricted to QR, with auto-zoom and its on-device,
+  permissionless scanner UI.
+- Both platforms also accept a pasted join URI for camera-unavailable/debug use.
+- Both validate scheme, version, IPv4, port, nonzero session, 128-bit secret and
+  expiry before network access.
+- Both send HELLO on a bounded retry/backoff schedule, decode WELCOME, adopt the
+  host's stable controller/player assignment, and configure subsequent MOTION
+  headers with that identity.
+- Errors distinguish expired code, altered/rejected code, unsupported version,
+  unreachable host and full session. The temporary raw host/port fields remain
+  in the debug panel but normal use is exposed through Scan host QR.
+
+Protocol note
+-------------
+WELCOME `session_state` now uses 1=paired, 2=expired, 3=secret rejected, 4=full,
+5=unsupported. Rejections use player 0 and a throwaway nonzero header ID; the
+secret is never echoed. This is documented in protocol/spec.md and supported by
+all Swift/Kotlin/GDScript codecs.
+
+Physical iPhone camera evidence
+-------------------------------
+On 2026-11-06 the iPhone 17e scanned a live host QR through AVFoundation,
+received its WELCOME assignment, completed clock synchronization and streamed
+at 99.6 accepted packets/s. This was a genuine camera scan; no launch argument
+or pasted URI was used for that run.
+
+The Android/Galaxy camera scan and a physical two-phone join-order swap remain
+pending until the Galaxy is connected. Deterministic P1/P2 ordering and all
+negative handshake behavior remain covered by the real-UDP test above.

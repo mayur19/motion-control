@@ -1,0 +1,23 @@
+TMB-012 structured session logging evidence
+Captured: 2026-11-06 (Asia/Kolkata)
+
+$ godot --headless --path apps/host-godot \
+    --script res://tests/session_logger_test.gd \
+    -- --output=docs/evidence/TMB-012-sample-session.jsonl
+
+TMB-012_LOGGER_OK records=22 sample_bytes=5798 bounded_bytes=2006
+
+Verification
+============
+
+- All 22 LF-delimited records parse independently as JSON objects.
+- First record is schema-v1 session_header with app 0.1.0-dev, protocol v1,
+  Godot/OS/model metadata and privacy declaration.
+- Twenty packet records contain sequence, sensor/arrival time, size and OK result.
+- Final event record records sample completion.
+- 2,048-byte ceiling test stopped at 2,006 bytes with only complete records.
+- Disabled logger returned OK and created no file.
+- Logger flush interval is 1,000 ms and clean close always flushes.
+
+Sample: docs/evidence/TMB-012-sample-session.jsonl
+Schema: docs/log-schema.md

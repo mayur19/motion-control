@@ -1,0 +1,57 @@
+TMB-006 Android controller shell evidence
+Captured: 2026-11-06 (Asia/Kolkata)
+
+Build target
+============
+
+Android Gradle Plugin 9.2.1
+Gradle 9.4.1 wrapper
+Built-in Kotlin Gradle Plugin 2.2.10
+OpenJDK 17.0.18
+compileSdk/targetSdk 36; Build Tools 36.0.0
+App version 0.1.0 (1)
+
+$ ./gradlew clean testDebugUnitTest assembleDebug --warning-mode=all
+ControllerStateTest.debugAdvanceCyclesThroughEveryState: passed
+ControllerStateTest.keepAwakeIsLimitedToActiveSessionStates: passed
+ControllerStateTest.stateNamesAndOrderMatchIosFlow: passed
+BUILD SUCCESSFUL
+No compiler warnings
+
+$ adb install -r app/build/outputs/apk/debug/app-debug.apk
+Success
+
+$ adb shell am start -W -n com.motionbadminton.controller.android/.MainActivity
+Status: ok
+LaunchState: COLD
+Activity: com.motionbadminton.controller.android/.MainActivity
+
+Runtime state exercise via accessibility hierarchy
+==================================================
+
+state OK: Pairing
+state OK: Calibration
+state OK: Connected
+state OK: Paused
+state OK: Not Paired
+
+Packaged permissions
+====================
+
+android.permission.INTERNET
+android.permission.ACCESS_NETWORK_STATE
+android.permission.CAMERA
+android.permission.HIGH_SAMPLING_RATE_SENSORS
+android.permission.WAKE_LOCK
+
+Visual evidence
+===============
+
+TMB-006-android-shell.png shows the emulator launch, version, device information,
+Not Paired state and Keep awake: Disabled.
+
+Physical-device evidence
+========================
+
+Deferred by explicit project owner direction; required before hardware release
+acceptance.

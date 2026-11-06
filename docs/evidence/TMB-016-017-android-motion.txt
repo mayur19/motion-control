@@ -1,0 +1,108 @@
+TMB-016 / TMB-017 Android motion pipeline evidence
+Date: 2026-11-06
+
+Build and unit tests
+--------------------
+Command:
+  ANDROID_HOME=/Users/napkin/Library/Android/sdk \
+    ./gradlew testDebugUnitTest assembleDebug
+Result:
+  BUILD SUCCESSFUL
+
+The three new motion-pipeline tests prove:
+- the 256-entry sensor/network handoff uses an explicit drop-oldest policy;
+- duplicate or backward native timestamps are rejected and counted;
+- each accepted synthetic sample produces one independently decodable 80-byte
+  protocol-v1 MOTION datagram with a unique sequence number.
+
+Emulator-to-host integration
+----------------------------
+The debug APK was installed on the running Android 15 emulator. Destination was
+set to the host alias 10.0.2.2:7000 and the controller advanced to Connected.
+
+Controller observation:
+- Sensor status: Sampling
+- Requested / actual: 200 / 101 Hz
+- Accuracy: 3
+- Queue: 0 / 256
+- Dropped local: 0
+- Non-monotonic: 0
+- Network status: Streaming
+
+Host capture after 111 packets:
+- Received: 111
+- Packet Hz: 111 (screenshot refresh showed 103 Hz)
+- Loss / duplicate / reorder: 0 / 0 / 0
+- Last packet age: <1 ms at capture
+- Live accelerometer and gyroscope graph data visible
+
+Screenshots:
+- TMB-016-android-motion-debug.png
+- TMB-017-android-streaming-debug.png
+- TMB-017-android-emulator-host.png
+
+Lifecycle/resource check
+------------------------
+After sending the app to the background, `dumpsys wifi` contained no
+`MotionBadminton:streaming` lock. On resume the debug panel showed:
+- State: Paused
+- Sensor: Background, actual rate 0 Hz
+- Network: Stopped, sent rate 0 Hz
+- Low-latency Wi-Fi: Released
+- 3,326 packets sent with 0 network errors before backgrounding
+
+Screenshot: TMB-017-android-resources-released.png
+
+Implementation inspection confirms accelerometer values stay in Android's native
+m/s^2, gyro stays in rad/s, axes are not remapped, SensorEvent.timestamp is used,
+all network work is on a dedicated single-thread executor, and the low-latency
+Wi-Fi lock exists only between streamer start and stop.
+
+Deferred physical evidence
+--------------------------
+By project-owner direction, work must proceed without waiting for a Pixel. The
+required 10-minute physical-device >=100 Hz sampling/streaming run and <1%
+reference-LAN loss measurement remain explicit release evidence gates. The
+short emulator run is useful integration evidence but is not represented as a
+substitute for that hardware test.
+
+Physical Android device: first session (2026-11-06)
+---------------------------------------------------
+Device: Samsung SM-M146B (Galaxy M14 5G, codename m14x), not an M15. Android 15
+(API 35), arm64-v8a. Connected over USB adb; the serial is not recorded. Sensors:
+LSM6DSL accelerometer and gyroscope (continuous, 6.25-500 Hz) and Samsung Game
+Rotation Vector (maximum 100 Hz). Same Wi-Fi /24 subnet as the Mac host.
+
+Run 1 (pre-fix app; genuine camera QR pairing, P1, platform 2), 91 Connected
+intervals, about 90 s:
+  controller sensor rate  median 250 Hz (requested 200 Hz)
+  accepted motion         median 249.3/s (231.1-261.9), about 22,770 packets
+  loss 8 (0.035%), duplicates 0, reordered 0, queue drops 0
+  jitter median 5.5 ms; clock RTT median 12.9 ms
+  DEFECT: every sample appeared about 66,354,638 ms (18.4 h) in the future.
+  The host clamps negative age to 0, so sample age read 0.0 ms. Cause:
+  SensorEvent.timestamp uses the elapsedRealtimeNanos base (counts through
+  sleep), while PONG/STATUS used System.nanoTime() (pauses in sleep). The error
+  equals the phone's total sleep since boot.
+
+Fix: protocol/ProtocolClock.kt. All wire timestamps (PONG receive/send, STATUS
+sender time, host-liveness timing) now use SystemClock.elapsedRealtimeNanos().
+Unit tests 17/17 PASS; assembleDebug PASS.
+
+Run 2 (fixed app, reinstalled with `adb install -r`, re-paired by camera QR,
+phone flat and still), 52 Connected intervals:
+  raw sample age          median 8.3 ms, p95 74.8 ms (13,413 packets)
+  host sample_age_ms      median 8.0 ms, p95 73.1 ms, maximum 128.9 ms
+  sensor 250 Hz; accepted median 249.3/s (minimum 228.4)
+  loss 8, duplicates 0, reordered 0, queue drops 0; RTT 6.6 ms
+The reinstall killed the running app, and the host showed Degraded then
+Disconnected (heartbeat timeout) at 1 s/2 s as designed.
+
+Session log SHA-256 is recorded once the host is closed (see below).
+
+Open observations:
+- The device delivers 250 Hz while HELLO declares max_sample_hz=200.
+- A p95 sample age of about 73 ms matches the earlier iPhone run (73.6 ms) and
+  is likely Wi-Fi power-save burstiness; not yet investigated.
+- Still pending: the 10-minute >=100 Hz physical run, background, reconnect
+  and host-loss checks on this device.

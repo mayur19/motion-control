@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="740" viewBox="0 0 960 740" role="img">
+<title>Physical iPhone clock synchronization stability</title>
+<desc>Three time-series plots over 10.5 minutes show controller clock offset change, clock exchange round-trip time, and estimated drift. Extreme startup drift values are clipped and annotated.</desc>
+<rect width="960" height="740" fill="#ffffff"/>
+<text x="92" y="30" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="20" font-weight="600" fill="#111827">Physical iPhone clock stability</text>
+<text x="92" y="52" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="12" fill="#4b5563">128 synchronization observations · 10.5 minutes · monotonic four-timestamp exchange</text>
+<text x="92" y="78" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="13" font-weight="600" fill="#111827">Offset change from first estimate (ms)</text>
+<rect x="92" y="92" width="828" height="146" fill="#ffffff" stroke="#9ca3af" stroke-width="1"/>
+<line x1="92" y1="238.00" x2="920" y2="238.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="83" y="242.00" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">-0.68</text>
+<line x1="92" y1="189.33" x2="920" y2="189.33" stroke="#e5e7eb" stroke-width="1"/>
+<text x="83" y="193.33" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">0.60</text>
+<line x1="92" y1="140.67" x2="920" y2="140.67" stroke="#e5e7eb" stroke-width="1"/>
+<text x="83" y="144.67" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">1.87</text>
+<line x1="92" y1="92.00" x2="920" y2="92.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="83" y="96.00" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">3.15</text>
+<line x1="92.00" y1="92" x2="92.00" y2="238" stroke="#f3f4f6" stroke-width="1"/>
+<line x1="257.60" y1="92" x2="257.60" y2="238" stroke="#f3f4f6" stroke-width="1"/>
+<line x1="423.20" y1="92" x2="423.20" y2="238" stroke="#f3f4f6" stroke-width="1"/>
+<line x1="588.80" y1="92" x2="588.80" y2="238" stroke="#f3f4f6" stroke-width="1"/>
+<line x1="754.40" y1="92" x2="754.40" y2="238" stroke="#f3f4f6" stroke-width="1"/>
+<line x1="920.00" y1="92" x2="920.00" y2="238" stroke="#f3f4f6" stroke-width="1"/>
+<polyline points="92.00,212.05 92.00,212.05 98.57,212.05 105.25,212.05 111.71,212.05 118.33,212.05 124.97,212.05 131.44,212.05 138.06,212.25 144.58,212.42 151.16,212.55 157.72,212.65 164.49,212.74 170.86,212.81 177.44,212.86 184.01,212.90 190.58,213.73 197.15,215.54 203.72,216.98 210.37,218.14 216.86,219.06 223.45,219.80 230.01,220.40 236.58,219.44 243.15,220.11 249.72,220.64 256.29,221.06 262.87,221.40 269.44,221.68 276.01,221.89 282.68,222.07 289.15,222.21 295.77,222.32 302.30,222.96 308.87,223.46 315.44,223.87 322.01,223.65 328.58,222.33 335.16,221.27 341.72,220.14 348.29,219.24 354.86,218.51 361.44,217.93 368.08,217.47 374.58,214.26 381.16,211.69 387.72,209.52 394.29,207.78 400.86,206.39 407.43,204.68 414.01,203.31 420.58,202.21 427.15,201.34 433.73,200.64 440.39,200.08 446.86,198.72 453.48,197.63 460.00,196.77 466.57,196.07 473.15,195.52 479.72,195.07 486.30,194.72 492.86,194.43 499.43,194.20 506.00,191.99 512.57,190.21 519.14,188.79 525.78,187.66 532.29,188.79 538.87,186.93 545.43,185.45 552.00,184.27 558.58,183.32 565.14,182.56 571.71,181.27 578.29,180.23 584.86,175.51 591.43,171.73 598.10,168.70 604.58,166.28 611.18,168.24 617.72,166.13 624.29,164.44 630.86,163.09 637.43,162.01 644.00,161.14 650.57,160.45 657.15,159.89 663.73,159.45 670.41,159.10 676.86,158.81 683.50,158.59 690.00,158.19 696.58,157.87 703.14,157.62 709.72,157.42 716.29,156.30 722.86,155.41 729.43,153.48 736.00,151.94 742.57,150.71 749.15,149.72 755.81,148.93 762.28,147.87 768.89,147.02 775.43,146.34 782.00,144.90 788.57,143.75 795.14,142.29 801.71,141.13 808.28,140.19 814.85,138.37 821.43,136.91 828.00,135.74 834.57,129.71 841.20,124.89 847.72,121.03 854.29,117.95 860.86,115.48 867.44,113.50 874.00,111.92 880.57,110.66 887.15,109.65 893.71,108.84 900.28,107.99 906.86,107.23 913.52,106.62 920.00,106.13" fill="none" stroke="#0868ac" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="92" y="288" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="13" font-weight="600" fill="#111827">Clock exchange round-trip time (ms)</text>
+<rect x="92" y="302" width="828" height="146" fill="#ffffff" stroke="#9ca3af" stroke-width="1"/>
+<line x1="92" y1="448.00" x2="920" y2="448.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="83" y="452.00" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">5.37</text>
+<line x1="92" y1="399.33" x2="920" y2="399.33" stroke="#e5e7eb" stroke-width="1"/>
+<text x="83" y="403.33" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">5.86</text>
+<line x1="92" y1="350.67" x2="920" y2="350.67" stroke="#e5e7eb" stroke-width="1"/>
+<text x="83" y="354.67" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">6.35</text>
+<line x1="92" y1="302.00" x2="920" y2="302.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="83" y="306.00" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">6.84</text>
+<line x1="92.00" y1="302" x2="92.00" y2="448" stroke="#f3f4f6" stroke-width="1"/>
+<line x1="257.60" y1="302" x2="257.60" y2="448" stroke="#f3f4f6" stroke-width="1"/>
+<line x1="423.20" y1="302" x2="423.20" y2="448" stroke="#f3f4f6" stroke-width="1"/>
+<line x1="588.80" y1="302" x2="588.80" y2="448" stroke="#f3f4f6" stroke-width="1"/>
+<line x1="754.40" y1="302" x2="754.40" y2="448" stroke="#f3f4f6" stroke-width="1"/>
+<line x1="920.00" y1="302" x2="920.00" y2="448" stroke="#f3f4f6" stroke-width="1"/>
+<polyline points="92.00,400.01 92.00,400.01 98.57,400.01 105.25,400.01 111.71,400.01 118.33,400.01 124.97,400.01 131.44,400.01 138.06,399.94 144.58,399.94 151.16,399.94 157.72,399.94 164.49,399.94 170.86,399.94 177.44,399.94 184.01,399.94 190.58,316.13 197.15,351.75 203.72,351.75 210.37,351.75 216.86,351.75 223.45,351.75 230.01,351.75 236.58,347.07 243.15,351.75 249.72,351.75 256.29,351.75 262.87,351.75 269.44,351.75 276.01,351.75 282.68,351.75 289.15,351.75 295.77,351.75 302.30,398.13 308.87,398.13 315.44,398.13 322.01,351.75 328.58,316.13 335.16,316.13 341.72,347.07 348.29,347.07 354.86,347.07 361.44,347.07 368.08,347.07 374.58,359.84 381.16,359.84 387.72,377.43 394.29,377.43 400.86,377.43 407.43,369.49 414.01,369.49 420.58,369.49 427.15,369.49 433.73,369.49 440.39,369.49 446.86,362.68 453.48,362.68 460.00,362.68 466.57,362.68 473.15,362.68 479.72,362.68 486.30,362.68 492.86,362.68 499.43,362.68 506.00,351.57 512.57,351.57 519.14,351.57 525.78,351.57 532.29,362.68 538.87,335.82 545.43,335.82 552.00,335.82 558.58,335.82 565.14,335.82 571.71,351.01 578.29,351.01 584.86,340.02 591.43,340.02 598.10,340.02 604.58,340.02 611.18,351.01 617.72,373.29 624.29,373.29 630.86,373.29 637.43,373.29 644.00,373.29 650.57,373.29 657.15,373.29 663.73,373.29 670.41,373.29 676.86,373.29 683.50,373.29 690.00,340.02 696.58,340.02 703.14,340.02 709.72,340.02 716.29,329.83 722.86,329.83 729.43,365.36 736.00,365.36 742.57,365.36 749.15,365.36 755.81,365.36 762.28,356.35 768.89,356.35 775.43,356.35 782.00,356.91 788.57,356.91 795.14,339.05 801.71,339.05 808.28,339.05 814.85,341.27 821.43,341.27 828.00,341.27 834.57,343.48 841.20,343.48 847.72,343.48 854.29,343.48 860.86,343.48 867.44,343.48 874.00,343.48 880.57,343.48 887.15,343.48 893.71,343.48 900.28,330.60 906.86,433.87 913.52,433.87 920.00,433.87" fill="none" stroke="#238b45" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<text x="92" y="498" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="13" font-weight="600" fill="#111827">Estimated clock drift (ppm; display clipped to ±100)</text>
+<rect x="92" y="512" width="828" height="146" fill="#ffffff" stroke="#9ca3af" stroke-width="1"/>
+<line x1="92" y1="658.00" x2="920" y2="658.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="83" y="662.00" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">-100</text>
+<line x1="92" y1="609.33" x2="920" y2="609.33" stroke="#e5e7eb" stroke-width="1"/>
+<text x="83" y="613.33" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">-33</text>
+<line x1="92" y1="560.67" x2="920" y2="560.67" stroke="#e5e7eb" stroke-width="1"/>
+<text x="83" y="564.67" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">33</text>
+<line x1="92" y1="512.00" x2="920" y2="512.00" stroke="#e5e7eb" stroke-width="1"/>
+<text x="83" y="516.00" text-anchor="end" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">100</text>
+<line x1="92.00" y1="512" x2="92.00" y2="658" stroke="#f3f4f6" stroke-width="1"/>
+<text x="92.00" y="676" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">0.0</text>
+<line x1="257.60" y1="512" x2="257.60" y2="658" stroke="#f3f4f6" stroke-width="1"/>
+<text x="257.60" y="676" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">2.1</text>
+<line x1="423.20" y1="512" x2="423.20" y2="658" stroke="#f3f4f6" stroke-width="1"/>
+<text x="423.20" y="676" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">4.2</text>
+<line x1="588.80" y1="512" x2="588.80" y2="658" stroke="#f3f4f6" stroke-width="1"/>
+<text x="588.80" y="676" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">6.3</text>
+<line x1="754.40" y1="512" x2="754.40" y2="658" stroke="#f3f4f6" stroke-width="1"/>
+<text x="754.40" y="676" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">8.4</text>
+<line x1="920.00" y1="512" x2="920.00" y2="658" stroke="#f3f4f6" stroke-width="1"/>
+<text x="920.00" y="676" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">10.5</text>
+<polyline points="92.00,585.00 92.00,585.00 98.57,585.00 105.25,585.00 111.71,585.00 118.33,585.00 124.97,585.00 131.44,585.00 138.06,658.00 144.58,658.00 151.16,658.00 157.72,658.00 164.49,658.00 170.86,658.00 177.44,658.00 184.01,658.00 190.58,586.27 197.15,606.95 203.72,606.95 210.37,606.95 216.86,606.95 223.45,606.95 230.01,606.95 236.58,581.96 243.15,581.96 249.72,581.96 256.29,581.96 262.87,581.96 269.44,581.96 276.01,581.96 282.68,581.96 289.15,581.96 295.77,581.96 302.30,587.62 308.87,587.62 315.44,587.62 322.01,587.62 328.58,587.62 335.16,587.62 341.72,584.46 348.29,584.46 354.86,584.46 361.44,584.46 368.08,584.46 374.58,581.11 381.16,581.11 387.72,584.74 394.29,584.74 400.86,584.74 407.43,584.74 414.01,584.74 420.58,584.74 427.15,584.74 433.73,584.74 440.39,584.74 446.86,581.52 453.48,581.52 460.00,581.52 466.57,581.52 473.15,581.52 479.72,581.52 486.30,581.52 492.86,581.52 499.43,581.52 506.00,581.52 512.57,581.52 519.14,581.52 525.78,581.52 532.29,588.00 538.87,581.48 545.43,581.48 552.00,581.48 558.58,581.48 565.14,581.48 571.71,582.80 578.29,582.80 584.86,566.33 591.43,566.33 598.10,566.33 604.58,566.33 611.18,566.33 617.72,578.59 624.29,578.59 630.86,578.59 637.43,578.59 644.00,578.59 650.57,578.59 657.15,578.59 663.73,578.59 670.41,578.59 676.86,578.59 683.50,578.59 690.00,578.59 696.58,578.59 703.14,578.59 709.72,578.59 716.29,583.99 722.86,583.99 729.43,583.99 736.00,583.99 742.57,583.99 749.15,583.99 755.81,583.99 762.28,584.62 768.89,584.62 775.43,584.62 782.00,584.62 788.57,584.62 795.14,584.36 801.71,584.36 808.28,584.36 814.85,574.66 821.43,574.66 828.00,574.66 834.57,536.20 841.20,536.20 847.72,536.20 854.29,536.20 860.86,536.20 867.44,536.20 874.00,536.20 880.57,536.20 887.15,536.20 893.71,536.20 900.28,536.20 906.86,584.89 913.52,584.89 920.00,584.89" fill="none" stroke="#6a51a3" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"/>
+<circle cx="138.06" cy="658.00" r="3.5" fill="#b91c1c"/>
+<circle cx="144.58" cy="658.00" r="3.5" fill="#b91c1c"/>
+<circle cx="151.16" cy="658.00" r="3.5" fill="#b91c1c"/>
+<circle cx="157.72" cy="658.00" r="3.5" fill="#b91c1c"/>
+<circle cx="164.49" cy="658.00" r="3.5" fill="#b91c1c"/>
+<circle cx="170.86" cy="658.00" r="3.5" fill="#b91c1c"/>
+<circle cx="177.44" cy="658.00" r="3.5" fill="#b91c1c"/>
+<circle cx="184.01" cy="658.00" r="3.5" fill="#b91c1c"/>
+<text x="506" y="711" text-anchor="middle" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="12" fill="#111827">Elapsed time (minutes)</text>
+<text x="92" y="732" font-family="-apple-system,BlinkMacSystemFont,sans-serif" font-size="11" fill="#4b5563">Median RTT 6.314 ms · offset range -0.311 to 2.782 ms · 8 pre-fix startup drift observations clipped (raw minimum -198804 ppm)</text>
+</svg>

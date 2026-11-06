@@ -1,0 +1,17 @@
+TMB-022 soak telemetry preparation evidence
+Date: 2026-11-06
+
+Command:
+  godot --headless --path apps/host-godot \
+    --script res://tests/soak_telemetry_test.gd -- \
+    --output=<temporary>/telemetry.jsonl
+Result:
+  TMB-022_SOAK_TELEMETRY_OK interval_s=1 controller=7
+  received_hz=1 bounded=true
+
+The test feeds a valid MOTION packet through host ingest, records a one-second
+telemetry interval, reads the JSONL back and verifies controller identity,
+accepted-motion rate, sample-age/frame-time summaries and memory fields.
+
+This verifies instrumentation only. The Ethernet-host and Wi-Fi-host ten-minute
+two-phone runs remain deferred and are not represented as passing.

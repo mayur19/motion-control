@@ -1,0 +1,24 @@
+TMB-004 Godot host evidence
+Captured: 2026-11-06 (Asia/Kolkata)
+
+$ godot --headless --path apps/host-godot --editor --quit
+Godot Engine v4.7.2.stable.official.ed1daf0bf
+Project initialization: DONE
+Editor loading: DONE
+Exit status: 0
+
+$ godot --headless --path apps/host-godot -- --smoke-test
+Godot Engine v4.7.2.stable.official.ed1daf0bf
+TMB-004_HOST_SMOKE_OK version=0.1.0-dev physics_hz=120
+Exit status: 0
+
+$ godot --path apps/host-godot -- --capture-screenshot=.../TMB-004-host-shell.png
+OpenGL API 4.1 Metal - Compatibility - Apple M2 Pro
+TMB-004_SCREENSHOT_OK
+Exit status: 0
+
+Rendered layout checks
+======================
+
+- 1280x720: passed visual inspection; evidence image TMB-004-host-shell.png
+- 800x600: passed visual inspection; no clipped or overlapping controls

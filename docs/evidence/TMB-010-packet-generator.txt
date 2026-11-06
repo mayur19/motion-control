@@ -1,0 +1,50 @@
+TMB-010 synthetic packet generator evidence
+Captured: 2026-11-06 (Asia/Kolkata)
+
+Paced UDP run, two controllers
+===============================
+
+Configuration: 200 Hz/controller, 2 seconds, seed 7, no impairments
+samples_generated: 800
+codec_validated: 800
+codec_rejections: 0
+datagrams_emitted: 800
+wall_elapsed_s: 1.997520
+generated_rate_hz_per_controller: 200.248
+
+Logical ten-minute capacity run
+===============================
+
+Configuration: 200 Hz/controller, 600 seconds logical, 2 controllers, --no-pace
+samples_generated: 240000
+codec_validated: 240000
+codec_rejections: 0
+datagrams_emitted: 240000
+
+Deterministic impaired run
+==========================
+
+Configuration: 200 Hz/controller, 10 seconds logical, 2 controllers, seed 42,
+loss 0.05, duplicate 0.03, reorder 0.04, delay 8 ms, invalid every 50.
+
+Both repeated runs produced these identical impairment counters:
+
+samples_generated: 4000
+codec_validated: 4000
+codec_rejections: 0
+datagrams_emitted: 3925
+lost: 194
+duplicates: 119
+valid_duplicates_emitted: 119
+reorder_events: 147
+invalid: 76
+
+Elapsed wall time is intentionally excluded from the determinism comparison.
+
+Receiver-observable counters are also emitted so overlapping impairments can be
+compared exactly with host metrics. For the two-second seed-42 integration run:
+
+valid_duplicates_emitted: 24
+reordered_valid_datagrams: 22
+expected_detectable_loss: 57
+invalid: 15

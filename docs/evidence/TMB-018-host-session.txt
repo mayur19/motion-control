@@ -1,0 +1,35 @@
+TMB-018 host session and QR evidence
+Date: 2026-11-06
+
+Automated test
+--------------
+Command:
+  godot --headless --path apps/host-godot \
+    --script res://tests/session_manager_test.gd \
+    -- --output=docs/evidence/TMB-018-qr.png
+Result:
+  TMB-018_SESSION_OK candidates=2 selected=en0 vpn_warning=true rotated=true
+  qr=53x53
+
+The deterministic test proves:
+- loopback, link-local and IPv6 addresses are not advertised;
+- automatic selection prefers Wi-Fi over a VPN tunnel;
+- explicitly selecting the VPN preserves a visible warning;
+- every generated URI round-trips through strict parsing;
+- expiry changes from valid to expired at the exact Unix-second boundary;
+- session rotation replaces both the session ID and pairing secret;
+- the manual code contains the complete ephemeral secret;
+- the QR generator returns a square symbol with a four-module quiet zone.
+
+Rendered host verification
+--------------------------
+Screenshot: TMB-018-host-pairing.png (1920x1080)
+Observed address/interface: 192.168.1.5:7000 on en0
+The interface selector, manual code, rotation control and QR are visible.
+
+Apple Core Image independently decoded exactly one QR from the full host
+screenshot:
+  motion-badminton://join?v=1&host=192.168.1.5&port=7000&session=74F126694CEBB050&secret=<redacted>&expires=1793935743
+
+The URI contains only an ephemeral 120-second secret; no durable credential is
+stored in or rendered by the host session manager.

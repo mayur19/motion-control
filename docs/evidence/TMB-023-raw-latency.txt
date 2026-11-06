@@ -1,0 +1,31 @@
+TMB-023 raw-input latency stimulus evidence
+Date: 2026-11-06
+
+Command:
+  godot --headless --path apps/host-godot \
+    --script res://tests/raw_latency_stimulus_test.gd
+Result:
+  TMB-023_RAW_LATENCY_OK burst_count=1 adjustable=true timestamps=5
+  render_after_threshold=true
+
+The deterministic test injects direct accepted samples into the same signal used
+by live UDP ingest. It verifies that a burst creates only one response, a sample
+below the configured threshold does not trigger, a runtime threshold change is
+effective, and sensor/arrival/threshold/simulation/render markers are present
+and ordered.
+
+Implementation properties
+-------------------------
+- Direct angular-velocity magnitude threshold; no final detector/gameplay path.
+- Full-screen black/white mutation with no animation or transition.
+- Color is queued by a deferred callback and marked at the next process/render
+  frame boundary.
+- Per-controller 700 ms cooldown.
+- F4 arm/exit and 0.25 rad/s live threshold adjustment with [ / ].
+- JSONL `raw_latency_stimulus` event contains all available software stages.
+
+Deferred physical evidence
+--------------------------
+The controlled-swing video and matching physical event log require a phone and
+240 FPS camera and are deferred by explicit project-owner direction. No
+automated result is represented as camera-measured latency.

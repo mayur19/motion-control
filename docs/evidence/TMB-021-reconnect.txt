@@ -1,0 +1,286 @@
+TMB-021 heartbeat, disconnect and reconnect evidence
+Date: 2026-11-06
+
+Automated real-UDP integration
+------------------------------
+Command:
+  godot --headless --path apps/host-godot \
+    --script res://tests/reconnect_integration_test.gd
+Result:
+  TMB-021_RECONNECT_OK disconnect_ms=2000 player_stable=P1
+  clock_gate=true background_gate=true resume_gate=true p2_continued=true
+  stale_endpoint_rejected=true
+
+The test uses three local UDP endpoints and covers initial status/clock gating,
+accepted synchronized motion, a second active player, immediate background
+pause, deterministic heartbeat timeout, stable P1 assignment on a new endpoint,
+fresh post-reconnect PING/PONG, continued P2 input, unchanged host session and
+rejection of packets from the old endpoint. It also verifies that foreground
+resume clears the old motion-port pin, resets the clock estimate, rejects early
+motion, completes a fresh PING/PONG and restores motion acceptance.
+
+Controller and host verification
+--------------------------------
+- Godot editor script scan: PASS
+- Godot host smoke test: PASS (TMB-004_HOST_SMOKE_OK)
+- iOS simulator build and tests: PASS (12 tests)
+- iPhone 17e physical XCTest bundle: PASS (12 tests)
+- Android unit tests and debug APK assembly: PASS
+
+iOS uses a recurring 500 ms Network.framework STATUS send on the retained UDP
+connection. Android sends at the same interval from its dedicated DatagramSocket
+control thread. Both persist a random installation ID and report foreground,
+sensor validity and measured sampling rate.
+
+iOS now recreates its control connection and repeats HELLO after foreground
+resume or a Network.framework path interruption. The reconnect attempt listens
+for the path becoming ready and retries for up to 12 seconds. The host permits
+the known installation to reclaim its active 15-second reservation after the QR
+join window expires, while still rejecting expired codes for new assignments.
+
+Physical iPhone evidence
+------------------------
+On 2026-11-06, an iPhone 17e physically paired over the LAN, synchronized its
+clock and streamed at approximately 100 Hz. Backgrounding produced an immediate
+Paused status, stopped motion acceptance and reached Disconnected after the
+documented two-second timeout. The foreground-resume defect discovered during
+this run was fixed and added to the automated integration test above.
+
+A genuine camera QR run then streamed at 99.6 packets/s. Turning Wi-Fi off
+produced `Paused` followed by `Disconnected`; motion later returned on a new UDP
+port, but the retained control socket did not. That physical failure exposed a
+second iOS defect: the host correctly kept the unsynchronized motion gated. The
+control client now re-HELLOs on foreground/path recovery as described above.
+
+The rebuilt app passed all 12 tests on the physical phone, paired again by
+camera and reproduced the physical Wi-Fi disconnect. The phone remained off the
+LAN past the 15-second reservation in the post-fix attempt. A later foreground
+launch did exercise the fix: the controller automatically re-HELLOed on a new
+control endpoint, reached Connected after fresh clock synchronization and
+resumed motion at 81.1 packets/s before it was backgrounded again. Because that
+occurred after the bounded reservation expired, the host issued a new controller
+ID; same-reservation/same-player restoration is therefore not claimed yet. One
+timely post-fix restore cycle and the Android/Galaxy matrix remain pending. No
+automated result is represented as completed physical restore evidence.
+
+Post-fix physical log SHA-256:
+  926c0d66c5886f861100665a850170ca71303ac53307e06e31ac7d5259afdb2f
+
+Timely same-reservation physical restore (iPhone 17e)
+-----------------------------------------------------
+Date: 2026-11-06. Fresh visible host:
+  godot --path apps/host-godot -- --print-session --session-log-max-mb=128
+Mac and iPhone on the same Wi-Fi network. The installed controller was launched
+normally, paired by camera QR, streamed, then Wi-Fi was turned off for about
+5 s, turned on, and the user returned to the app immediately.
+
+Analyzer:
+  python3 -I tools/check-reconnect-log.py <session.jsonl>
+  NOTE  ignored unterminated final line 21531 (257 bytes)
+  PASS  initial P1 pairing: controller_id=201461948
+  PASS  Paused/Disconnected: Paused
+  PASS  re-HELLO on new endpoint: port changed
+  PASS  same controller ID and P1: controller_id=201461948 player=P1
+  PASS  within 15 s reservation: 9426 ms after Disconnected
+  PASS  Reconnecting:
+  PASS  fresh clock_sync/PONG: samples=1 rtt_ms=5.2
+  PASS  Connected after fresh sync: 171 ms after re-HELLO
+  PASS  no motion accepted before sync: 0 gated interval(s), 0 with accepted motion
+  PASS  motion resumes > 80/s: median 99.9 Hz over 5 interval(s)
+  TMB-021_PHYSICAL_RECONNECT_OK
+
+Timeline (host monotonic seconds):
+  28.83  pairing reason=paired P1, fresh clock sync, Connected; ~100 packets/s
+  45.28  Paused (controller backgrounded while Wi-Fi was toggled)
+  47.92  Disconnected (heartbeat timeout)
+  57.34  pairing reason=reconnect, same controller ID, P1, new control endpoint
+  57.34  Reconnecting; fresh clock_sync samples=1..3
+  57.51  Connected
+  58.5+  accepted motion 97.7-104.3 packets/s, zero queue drops
+
+Motion gate, verified from packet records: 25 motion packets arrived between
+re-HELLO and Connected (sequence 1640-1648 and then 0-15). The one-second
+interval that contained all of them, ending 57.515, accepted exactly one sample:
+sequence 16, which arrived at 57.515 after Connected at 57.514. The analyzer's
+"0 gated intervals" line is weak by itself because resynchronization took less
+than one telemetry interval; the packet-level check above is the evidence.
+
+Before the QR scan, the app re-HELLOed nine times with the previous host's
+session ID; each was rejected as wrong_session with no assignment.
+
+Defect found: the reconnected motion socket restarts its sender-local sequence
+at 0 (allowed by protocol section 3), but host ingest kept one sequence window
+per controller ID. Telemetry therefore counted ~1,624 false reorders until the
+new counter passed the old high-water mark, plus 5 artefactual losses. Accepted
+motion was unaffected. This is fixed in motion_ingest.gd, with
+tests/motion_stream_restart_test.gd (TMB-021_MOTION_STREAM_RESTART_OK). It has
+not yet been re-run physically, because this log came from the host before the
+fix.
+
+The host was stopped with SIGTERM, which is not a clean close, so the final
+line is unterminated. All 21,530 complete lines parse.
+
+Physical log SHA-256 (as stopped, including the truncated tail):
+  431d924425a3aedc5242d0b4d580d422a9a234f499787736c7091d4caf6d2078
+
+Physical re-run with the stream-restart fix (iPhone 17e)
+--------------------------------------------------------
+Date: 2026-11-06. Fresh host built from the fixed ingest, same command and
+procedure, fresh QR scan. The user closed the host window, so the log closed
+cleanly: 5,870 lines, newline-terminated.
+
+Analyzer:
+  PASS  initial P1 pairing: controller_id=146278602
+  PASS  Paused/Disconnected: Paused
+  PASS  re-HELLO on new endpoint: port changed
+  PASS  same controller ID and P1: controller_id=146278602 player=P1
+  PASS  within 15 s reservation: 7999 ms after Disconnected
+  PASS  Reconnecting:
+  PASS  fresh clock_sync/PONG: samples=1 rtt_ms=6.5
+  PASS  Connected after fresh sync: 173 ms after re-HELLO
+  PASS  no motion accepted before sync: 0 gated interval(s), 0 with accepted motion
+  PASS  motion resumes > 80/s: median 100.3 Hz over 5 interval(s)
+  TMB-021_PHYSICAL_RECONNECT_OK
+
+Timeline (host monotonic seconds): paired P1 and Connected at 16.38-16.40;
+Paused 34.35; Disconnected 36.98; re-HELLO reason=reconnect with the same ID and
+P1 at 44.97; Connected 45.15.
+
+Fix exercised: the new motion socket again sent 1797-1807 and then restarted at
+sequence 0. After 27 post-reconnect telemetry intervals (accepted motion
+92.4-104.3 packets/s), the cumulative loss, duplicate, reorder and queue-drop
+counts were all 0. That compares with ~1,624 false reorders before the fix.
+
+Motion gate, from packet records: 25 motion packets arrived between re-HELLO
+and Connected. The interval 44.946-45.953 accepted 83 samples, which is exactly
+the number of packets that arrived after Connected, so none of the 25 was
+accepted.
+
+Physical log SHA-256:
+  959a17a873a28fd3947cecd59ec2d0bdab0052b4a18f605a4ba3b90092dbf1a2
+
+Still pending: the Android/Galaxy reconnect matrix.
+
+Open controller-side defect: after the host window was closed, the iPhone kept
+showing Connected. The controllers do not detect host loss. See the TMB-021
+implementation log.
+Fix implemented (automated evidence only so far): host STATUS heartbeat and
+GOODBYE, plus controller host-liveness timeout and rejoin on iOS and Android.
+  TMB-021_HOST_HEARTBEAT_OK interval_ms=500 goodbye_reason=3 skips_disconnected=true
+  iOS simulator: 17 tests, 0 failures
+  Android unit tests: 17 tests, 0 failures; assembleDebug PASS
+
+Physical host-loss checks (iPhone 17e, rebuilt app)
+---------------------------------------------------
+The rebuilt app passed all 17 XCTest cases on the physical iPhone and was
+installed on it.
+
+1. Clean host close (GOODBYE path). The phone paired as P1, reached Connected
+   and streamed at about 99 packets/s; the user then closed the host window.
+   The host log ends cleanly at 46.24 s. User observation: the phone left
+   Connected immediately and showed the "host ended the session" message. The
+   host does not log outbound GOODBYE, so the phone-side result rests on that
+   observation.
+   Host log SHA-256: 569e4050ba5fa7352cdbe01a4ed87059edb7e37d5a5bf43e2af85e0cd87e3872
+
+2. Host crash (timeout path). After a fresh pair and Connected, the host was
+   force-killed with SIGKILL at 12:29:08, so no GOODBYE could be sent. User
+   observation: the phone left Connected ("disconnected") and returned to
+   pairing mode, its rejoin state, which stops streaming. The exact detection
+   latency and the final "host is unreachable" message after the 12 s rejoin
+   window were not timed or confirmed.
+   Host log SHA-256 (SIGKILL, so the tail may be truncated):
+   3b36df7b2d2e717971e802a79574a6efe11457d7798cc98e1a1770364e2df3fb
+
+Not yet verified physically: host restart within the reservation (timeout ->
+rejoin -> same player), and the Android path.
+
+Physical Android: Galaxy M14 5G (SM-M146B, Android 15), 2026-11-06
+------------------------------------------------------------------
+First attempt (session 12-36-29) found three defects:
+ 1. Android resume left the phone Paused while the host was Connected. Fixed
+    with ControllerState.resumed(paired), applied in onResume.
+ 2. A Wi-Fi drop ended Not Paired: no HELLO reached the host for 21 s and the
+    reservation expired. The 12 s rejoin window was shorter than reassociation
+    plus the reservation, and while Wi-Fi was off, HELLO left over mobile data.
+    Fixed with RejoinPolicy (wait for Wi-Fi, 15 s window matching the host
+    reservation, stop on real rejection) and WifiNetwork, which binds pairing,
+    control and motion sockets to the Wi-Fi Network.
+ 3. Host HUD cards stayed on the first two controller IDs ever seen, so after
+    reinstalls or expiry the live controller was hidden and the cards read
+    DISCONNECTED. Fixed: ui/hud_slots.gd maps cards by assigned player and
+    prefers the live, most recent controller (tests/hud_slots_test.gd).
+ The log also showed that a backgrounded Android app stops all control traffic
+ about 5 s after Home (OS app freezing, no foreground service), so a background
+ stay longer than about 17 s returns as a new player. This is not changed.
+ Session log SHA-256: 0e97a814270cf2cb828efd73784c2b85bd2c255d82e146779810888e81ea84ea
+
+Retest (session 12-51-35, fixed app and host); the user reports both the phone
+and the Godot card recovered to Connected in both tests:
+  python3 -I tools/check-reconnect-log.py -> TMB-021_PHYSICAL_RECONNECT_OK
+  (first reconnect: same controller ID, P1, 2.9 s after Disconnected; fresh
+  PONG RTT 15.5 ms; Connected 16 ms after re-HELLO; motion median 247.9/s)
+  Home test:  Paused 12.75, Disconnected 19.56 (background freeze), re-HELLO
+              reason=reconnect at 22.50, same ID and P1, Connected 22.52
+  Wi-Fi test: Degraded 30.98, Disconnected 31.98, re-HELLO reason=reconnect at
+              45.73 (13.7 s after Disconnected, inside the 15 s reservation),
+              same ID and P1, Connected 45.75
+  Packet-level gate: in each boundary interval, accepted samples equal packets
+  that arrived after Connected (93/93 and 58/58); the 20 motion packets that
+  arrived before the Home-test Connected were not accepted.
+  Totals: loss 23, duplicates 0, reordered 0, queue drops 0. Brief Degraded
+  (>1 s) blips at 47.29 and 71.12 recovered within 0.3 s.
+  Raw sample age median 16.7 ms, p95 154.6 ms (worse than the 8.3/74.8 ms
+  still run; this session included handling and Wi-Fi recovery).
+Analyzer fix: the connection manager logs "Connected (clock synchronized)"
+microseconds before the logger writes the same clock_sync emission; the
+analyzer now accepts only that same-emission case (within 1 ms).
+
+Note: the Wi-Fi reconnect needed 13.7 of the 15 s reservation; slower Wi-Fi
+reassociation would come back as a new player.
+  Retest session log SHA-256 (closed cleanly by the user, the GOODBYE test below):
+  4e5472154c0476e2fa845640d2a049335e5e0139091236cbedbcf12d2a525dfb
+
+Android host-loss checks (Galaxy M14 5G)
+----------------------------------------
+1. Clean close (GOODBYE): the user closed the host window (session 12-51-35);
+   the phone moved to Not Paired. User observation.
+2. Host crash (timeout): after a fresh pair and Connected (session 12-58-01),
+   the host was SIGKILLed at 12:59:42. adb screenshots:
+     12:59:51-53  PAIRING (rejoin loop; Connected has been left)
+                  TMB-021-android-host-crash-rejoining.png
+     13:00:04     NOT PAIRED, "The host is unreachable. Check Wi-Fi and ask
+                  for a new code."  TMB-021-android-host-crash-unreachable.png
+   This matches a 2 s timeout plus the 15 s rejoin window. The first
+   screenshot was about 10 s after the kill, so the 2 s detection was not
+   directly timed.
+   Host log SHA-256 (SIGKILL): 4ae25a7f8f9535a567df4473eaa4fca16ebd6d57c5a82fc901e3c69e636aa395
+   Minor UI defect: the debug panel's right-aligned error text is clipped.
+
+Configurable-window physical check (session 13-12-00, reconnect_window_s=30)
+-------------------------------------------------------------------------
+Both phones paired at once: iPhone 17e P1 (id 1890781337) and Galaxy M14 5G P2
+(id 10435071). With the iPhone's Wi-Fi off for about 20 s: Paused 471.21,
+Disconnected 473.88, re-HELLO reason=reconnect at 497.28 (23.4 s after
+Disconnected; beyond the old 15 s, inside the new 30 s), same ID and P1,
+Connected 499.50. The Galaxy P2 logged no state change throughout. The user
+confirmed both phones.
+
+Findings:
+- iOS HELLO burst: retries scheduled while the path was down were all sent when
+  it came back (11 retry HELLOs in about 100 ms), each restarting host clock
+  sync. Recovery still succeeded. To fix: send HELLO only when the connection
+  is .ready.
+- iOS sends STATUS about 6/s instead of 2/s: updateStatus() sends immediately
+  on every sampler snapshot as well as on the 500 ms timer.
+- Galaxy join intermittently failed earlier in this session (13:13:50): the
+  host received 5 HELLOs and assigned P2, but the phone never accepted a WELCOME
+  and gave up. This was not reproducible: a later attempt joined first try with
+  WELCOME 121 ms after HELLO. Debug logging (tag MotionBadminton; no secrets or
+  addresses) was added to the Android join exchange to diagnose recurrence.
+- A rescan more than 120 s after a code was issued is rejected locally as
+  expired; the Android debug panel shows why, but the main card only says
+  Not Paired.
+
+Session 13-12-00 (configurable-window check and TMB-022 soak) log SHA-256:
+  f837405a056fcecdcd8177d8235718732388d16c77cc609d85c24f988393f79e

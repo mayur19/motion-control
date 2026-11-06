@@ -1,0 +1,96 @@
+TMB-014 / TMB-015 iOS motion pipeline evidence
+Date: 2026-11-06
+
+Simulator build and tests
+-------------------------
+Command:
+  xcodebuild test -project MotionControllerIOS.xcodeproj \
+    -scheme MotionControllerIOS \
+    -destination 'platform=iOS Simulator,id=4A3A7BA2-2688-4BD8-9A2B-8536B0E787FF' \
+    CODE_SIGNING_ALLOWED=NO
+Result:
+  ** TEST SUCCEEDED **
+  Executed 12 tests, with 0 failures.
+
+Physical-device tests
+---------------------
+Command:
+  xcodebuild test -project MotionControllerIOS.xcodeproj \
+    -scheme MotionControllerIOS \
+    -destination 'platform=iOS,name=<redacted>' \
+    -allowProvisioningUpdates
+Result:
+  ** TEST SUCCEEDED **
+  Executed 12 tests on iPhone 17e / iOS 26.6.2, with 0 failures.
+
+The first physical run exposed three fixture-test failures because the tests
+resolved protocol vectors through the Mac checkout path. The shared golden
+vectors are now resources of the test bundle, so the same tests pass in both
+the sandboxed device bundle and Simulator.
+
+New motion-pipeline tests prove:
+- the 256-entry sensor/network handoff uses an explicit drop-oldest policy;
+- duplicate or backward native timestamps are rejected and counted;
+- each accepted synthetic sample produces one independently decodable 80-byte
+  protocol-v1 MOTION datagram with a unique sequence number.
+
+Implementation inspection
+-------------------------
+- Core Motion requests 200 Hz and uses CMDeviceMotion.timestamp (monotonic).
+- Acceleration is converted from g to m/s^2; gyro remains rad/s; axes are not
+  remapped; quaternion order is protocol x/y/z/w.
+- The Core Motion callback only normalizes data and offers it to a bounded,
+  lock-protected buffer. UDP work runs on a dedicated dispatch queue.
+- Foreground calibration/connected states start sampling. Leaving the active
+  scene stops sampling and streaming, clears the queue and transitions the UI to
+  Paused.
+- The debug panel exposes destination, requested/actual Hz, queue depth, local
+  drops, non-monotonic rejects, send count/rate, errors and last successful send.
+- The UDP streamer emits one datagram per dequeued sample; it has no batching,
+  retries or transport-level retransmission.
+
+Simulator screenshot: TMB-014-ios-motion-debug.png
+
+Physical iPhone 17e run
+-----------------------
+Date: 2026-11-06
+Device/OS: iPhone 17e, iOS 26.6.2 (identifiers redacted)
+Topology: iPhone and host on the same 5 GHz LAN
+
+The automatically signed build was installed and launched through Xcode's
+device tooling. A continuous foreground host log produced:
+
+- duration: 639.064 seconds;
+- physical Core Motion callback rate: median 101 Hz;
+- accepted host motion rate: median 100.316 Hz;
+- 63,561 MOTION datagrams and 337 inferred losses (0.5274%);
+- zero duplicates, zero reordered packets and zero host queue drops;
+- strictly increasing native sensor timestamps for the complete run;
+- sample-age per-interval median: 12.580 ms;
+- median of per-interval sample-age p95: 74.489 ms;
+- clock RTT median/p95: 6.337/6.497 ms;
+- host frame p95/max: 7.143/9.625 ms;
+- static host memory: 34,047,586 bytes at start, 34,159,838 at end,
+  34,170,434 peak; queue size peak 10.
+
+The raw JSONL remains in the local Godot user-data logs directory. SHA-256:
+`f2d657cfa1ca3c48f657759759c51deba25e888db4afe7253d5d61da246dbc91`.
+It contains no pairing secret, audio, video, account identifier, device UDID or
+serial number.
+
+Real-device defects found and fixed during execution
+----------------------------------------------------
+
+- Swift 6 actor-executor inheritance caused traps when Core Motion and UDP
+  callbacks ran on their intended worker queues; handlers are now constructed
+  from nonisolated helpers.
+- Pairing used the LAN destination while the separate motion socket retained
+  the debug loopback destination; validated join host/port now feed both paths.
+- The engineering host now drains samples after diagnostics/telemetry signals,
+  preventing its not-yet-implemented gameplay queue from filling during soaks.
+- Foreground resume restores Connected state and restarts sampling/streaming.
+
+Foreground/background behavior was physically observed: backgrounding sent an
+immediate Paused status, stopped MOTION traffic and produced a host timeout.
+Resume clock/port gating is covered by the real-UDP integration test; the full
+iPhone Wi-Fi-off/restore matrix remains part of TMB-021 physical evidence.
