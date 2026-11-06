@@ -42,6 +42,9 @@ CAPTURE** *before* pairing, then pair and calibrate.
 | 4 | `lift` | 7 swings |
 | 5 | `handling` | ~1 min: adjust grip, lower the phone, pick it up again |
 
+- Count swings aloud and do exactly the planned number. Set **Speed** and
+  **Swings in take** *before* **END TAKE** (S1 had to be relabeled
+  afterwards from estimates). Exact counts are mandatory for held-out sessions.
 - Set **Swings in take** to the number actually performed. Mark a take
   **invalid** (never delete it) if a swing was unsafe, ambiguous or
   performed incorrectly.
