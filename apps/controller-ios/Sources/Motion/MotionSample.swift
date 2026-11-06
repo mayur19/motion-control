@@ -97,6 +97,20 @@ struct CalibrationRecord: Equatable, Sendable {
     let hand: CalibrationHand
 }
 
+/// What the slow-swing capture measured, shown with swing failures so the
+/// player (and physical test notes) can see how far off the attempt was.
+struct SwingMetrics: Equatable, Sendable {
+    let excursionDegrees: Float
+    let peakRadiansPerSecond: Float
+
+    var summary: String {
+        String(
+            format: "Measured arc %.0f° (need 20–140°), peak %.2f rad/s (need 0.6–5.0).",
+            excursionDegrees, peakRadiansPerSecond
+        )
+    }
+}
+
 enum CalibrationFailure: String, Error, Equatable, Sendable {
     case confirmScreen = "Confirm that the screen faces you before capturing."
     case sensorsUnavailable = "Motion sensors are not ready. Keep the app open and try again."
@@ -137,6 +151,8 @@ final class SlowSwingCalibration {
     private(set) var phase: CalibrationPhase = .idle
     private(set) var record: CalibrationRecord?
 
+    private(set) var lastSwingMetrics: SwingMetrics?
+
     /// The accepted record, only once neutral and slow swing both passed.
     var completedRecord: CalibrationRecord? { phase == .complete ? record : nil }
     private var hand: CalibrationHand = .right
@@ -145,6 +161,7 @@ final class SlowSwingCalibration {
 
     func reset() {
         phase = .idle
+        lastSwingMetrics = nil
         record = nil
         neutralSamples.removeAll(keepingCapacity: true)
         swingSamples.removeAll(keepingCapacity: true)
@@ -160,6 +177,7 @@ final class SlowSwingCalibration {
     func beginSlowSwing() {
         guard phase == .readyForSlowSwing else { return }
         swingSamples.removeAll(keepingCapacity: true)
+        lastSwingMetrics = nil
         phase = .capturingSlowSwing
     }
 
@@ -228,6 +246,7 @@ final class SlowSwingCalibration {
         let first = swingSamples.first!.orientation
         let excursion = swingSamples.map { Self.angularDistance(first, $0.orientation) }.max() ?? 0
         let peak = swingSamples.map { Self.length($0.angularVelocity) }.max() ?? 0
+        lastSwingMetrics = SwingMetrics(excursionDegrees: excursion * 180 / .pi, peakRadiansPerSecond: peak)
         guard excursion >= Self.degrees(20), peak >= 0.6 else { throw fail(.swingTooSmall) }
         guard excursion <= Self.degrees(140), peak <= 5.0 else { throw fail(.swingTooFast) }
         guard let record else { throw fail(.sensorsUnavailable) }

@@ -96,6 +96,36 @@ final class MotionPipelineTests: XCTestCase {
         XCTAssertEqual(payload.handedness, CalibrationHand.left.rawValue)
     }
 
+    func testSmallSwingReportsMeasuredArcAndSpeed() throws {
+        let calibration = SlowSwingCalibration()
+        try calibration.beginNeutral(hand: .right, screenFacingPlayerConfirmed: true)
+        let upright = SIMD4<Float>(sin(.pi / 4), 0, 0, cos(.pi / 4))
+        for index in 0...120 {
+            calibration.append(calibrationSample(index: index, orientation: upright, acceleration: .zero))
+        }
+        _ = try calibration.finishNeutral()
+        calibration.beginSlowSwing()
+        for index in 0...120 {
+            let angle = Float.pi / 2 + (Float(index) / 120) * (Float.pi / 18) // 10° arc
+            calibration.append(calibrationSample(
+                index: index,
+                orientation: SIMD4<Float>(sin(angle / 2), 0, 0, cos(angle / 2)),
+                acceleration: .zero,
+                angularVelocity: SIMD3<Float>(0.3, 0, 0)
+            ))
+        }
+        XCTAssertThrowsError(try calibration.finishSlowSwing()) { error in
+            XCTAssertEqual(error as? CalibrationFailure, .swingTooSmall)
+        }
+        let metrics = try XCTUnwrap(calibration.lastSwingMetrics)
+        XCTAssertEqual(metrics.excursionDegrees, 10, accuracy: 0.5)
+        XCTAssertEqual(metrics.peakRadiansPerSecond, 0.3, accuracy: 0.01)
+        XCTAssertEqual(
+            metrics.summary,
+            "Measured arc 10° (need 20–140°), peak 0.30 rad/s (need 0.6–5.0)."
+        )
+    }
+
     func testStoredRecordIsAvailableOnlyAfterCompletedCalibration() throws {
         let calibration = SlowSwingCalibration()
         try calibration.beginNeutral(hand: .left, screenFacingPlayerConfirmed: true)

@@ -199,6 +199,12 @@ final class MotionRuntime: ObservableObject {
 
     private func publishCalibrationFailure(_ failure: CalibrationFailure) {
         calibrationPhase = .failed(failure)
-        calibrationMessage = failure.rawValue
+        switch failure {
+        case .swingTooSmall, .swingTooFast:
+            let detail = calibration.lastSwingMetrics.map { " " + $0.summary } ?? ""
+            calibrationMessage = failure.rawValue + detail
+        default:
+            calibrationMessage = failure.rawValue
+        }
     }
 }
