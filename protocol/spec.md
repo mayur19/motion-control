@@ -164,6 +164,14 @@ is ignored as an unsolicited `PONG`.
 
 ### 4.5 `MOTION` (type 5)
 
+Motion vectors use the portrait native-device axes defined in
+`docs/racket-coordinate-system.md`: `+X` toward the screen's right edge, `+Y`
+toward the top edge and `+Z` out of the screen. `accel_*` is gravity-free
+linear acceleration, not total accelerometer output. `orientation_*` is an
+active device-to-reference quaternion in `(x, y, z, w)` order; a native API
+with the inverse convention must invert it before encoding. These semantics are
+identical on iOS and Android and do not change with display rotation.
+
 | Offset | Size | Field | Type | Units / constraint |
 | ---: | ---: | --- | --- | --- |
 | 0 | 8 | `sensor_monotonic_ns` | `u64` | Native sensor timestamp; > 0 |

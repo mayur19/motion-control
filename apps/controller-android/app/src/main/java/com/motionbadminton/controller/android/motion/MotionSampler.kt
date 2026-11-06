@@ -22,7 +22,9 @@ class MotionSampler(
         const val REQUESTED_PERIOD_MICROSECONDS = 1_000_000 / REQUESTED_HZ
     }
 
-    private val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    // Match Core Motion's userAcceleration and the protocol contract: this
+    // signal excludes gravity. Never silently fall back to total acceleration.
+    private val linearAcceleration = sensorManager.getDefaultSensor(Sensor.TYPE_LINEAR_ACCELERATION)
     private val gyroscope = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE_UNCALIBRATED)
         ?: sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
     private val rotation = sensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR)
@@ -38,12 +40,12 @@ class MotionSampler(
 
     fun start(): Boolean {
         if (status == "Sampling") return true
-        if (accelerometer == null || gyroscope == null || rotation == null) {
+        if (linearAcceleration == null || gyroscope == null || rotation == null) {
             synchronized(lock) { status = "Unavailable" }
             return false
         }
         val accelerationRegistered = sensorManager.registerListener(
-            this, accelerometer, REQUESTED_PERIOD_MICROSECONDS, 0,
+            this, linearAcceleration, REQUESTED_PERIOD_MICROSECONDS, 0,
         )
         val gyroscopeRegistered = sensorManager.registerListener(
             this, gyroscope, REQUESTED_PERIOD_MICROSECONDS, 0,
@@ -80,7 +82,7 @@ class MotionSampler(
                     orientation = listOf(quaternion[1], quaternion[2], quaternion[3], quaternion[0])
                 }
             }
-            Sensor.TYPE_ACCELEROMETER -> {
+            Sensor.TYPE_LINEAR_ACCELERATION -> {
                 val sample: MotionSample?
                 synchronized(lock) {
                     acceleration = event.values.take(3)

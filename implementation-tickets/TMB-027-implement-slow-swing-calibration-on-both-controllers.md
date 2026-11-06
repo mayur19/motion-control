@@ -1,6 +1,7 @@
 # TMB-027 — Implement slow-swing calibration on both controllers
 
-**Status:** Blocked — TMB-026 is gated by Gate A  
+**Status:** Ready — TMB-026 complete
+
 **Labels:** `detection`, `controller-ios`, `controller-android`, `safety`  
 **Estimate:** 1.5 days  
 **Dependencies:** TMB-026

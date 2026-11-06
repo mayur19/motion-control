@@ -1,0 +1,109 @@
+{
+  "schema_version": 1,
+  "quaternion_order": "xyzw",
+  "tolerance": 0.00001,
+  "handedness": {
+    "right": {
+      "basis_rows": [[1, 0, 0], [0, 1, 0], [0, 0, 1]],
+      "quaternion_xyzw": [0, 0, 0, 1]
+    },
+    "left": {
+      "basis_rows": [[-1, 0, 0], [0, 1, 0], [0, 0, -1]],
+      "quaternion_xyzw": [0, 1, 0, 0]
+    }
+  },
+  "cases": [
+    {
+      "name": "right_identity",
+      "handedness": "right",
+      "neutral_orientation_xyzw": [0, 0, 0, 1],
+      "orientation_xyzw": [0, 0, 0, 1],
+      "acceleration_m_s2": [1, 2, 3],
+      "acceleration_bias_m_s2": [0, 0, 0],
+      "angular_velocity_rad_s": [0.1, 0.2, 0.3],
+      "gyroscope_bias_rad_s": [0, 0, 0],
+      "expected_acceleration_r": [1, 2, 3],
+      "expected_angular_velocity_r": [0.1, 0.2, 0.3],
+      "expected_orientation_r_xyzw": [0, 0, 0, 1]
+    },
+    {
+      "name": "left_mirror_matches_right",
+      "handedness": "left",
+      "neutral_orientation_xyzw": [0, 0, 0, 1],
+      "orientation_xyzw": [0, 0, 0, 1],
+      "acceleration_m_s2": [-1, 2, -3],
+      "acceleration_bias_m_s2": [0, 0, 0],
+      "angular_velocity_rad_s": [-0.1, 0.2, -0.3],
+      "gyroscope_bias_rad_s": [0, 0, 0],
+      "expected_acceleration_r": [1, 2, 3],
+      "expected_angular_velocity_r": [0.1, 0.2, 0.3],
+      "expected_orientation_r_xyzw": [0, 0, 0, 1]
+    },
+    {
+      "name": "absolute_yaw_cancels",
+      "handedness": "right",
+      "neutral_orientation_xyzw": [0, 0, 0.70710678, 0.70710678],
+      "orientation_xyzw": [0, 0, 0.70710678, 0.70710678],
+      "acceleration_m_s2": [1, 2, 3],
+      "acceleration_bias_m_s2": [0, 0, 0],
+      "angular_velocity_rad_s": [0.1, 0.2, 0.3],
+      "gyroscope_bias_rad_s": [0, 0, 0],
+      "expected_acceleration_r": [1, 2, 3],
+      "expected_angular_velocity_r": [0.1, 0.2, 0.3],
+      "expected_orientation_r_xyzw": [0, 0, 0, 1]
+    },
+    {
+      "name": "right_quarter_turn_about_shaft",
+      "handedness": "right",
+      "neutral_orientation_xyzw": [0, 0, 0, 1],
+      "orientation_xyzw": [0, 0.70710678, 0, 0.70710678],
+      "acceleration_m_s2": [1, 0, 0],
+      "acceleration_bias_m_s2": [0, 0, 0],
+      "angular_velocity_rad_s": [0, 1, 0],
+      "gyroscope_bias_rad_s": [0, 0, 0],
+      "expected_acceleration_r": [0, 0, -1],
+      "expected_angular_velocity_r": [0, 1, 0],
+      "expected_orientation_r_xyzw": [0, 0.70710678, 0, 0.70710678]
+    },
+    {
+      "name": "bias_subtracted_before_rotation",
+      "handedness": "right",
+      "neutral_orientation_xyzw": [0, 0, 0, 1],
+      "orientation_xyzw": [0, 0.70710678, 0, 0.70710678],
+      "acceleration_m_s2": [2, 4, 6],
+      "acceleration_bias_m_s2": [1, 2, 3],
+      "angular_velocity_rad_s": [0.2, 1.2, 0.4],
+      "gyroscope_bias_rad_s": [0.1, 0.2, 0.3],
+      "expected_acceleration_r": [3, 2, -1],
+      "expected_angular_velocity_r": [0.1, 1, -0.1],
+      "expected_orientation_r_xyzw": [0, 0.70710678, 0, 0.70710678]
+    },
+    {
+      "name": "quaternion_sign_canonicalized",
+      "handedness": "right",
+      "neutral_orientation_xyzw": [0, 0, 0, 1],
+      "orientation_xyzw": [0, 0, 0, -1],
+      "acceleration_m_s2": [0, 0, 0],
+      "acceleration_bias_m_s2": [0, 0, 0],
+      "angular_velocity_rad_s": [0, 0, 0],
+      "gyroscope_bias_rad_s": [0, 0, 0],
+      "expected_acceleration_r": [0, 0, 0],
+      "expected_angular_velocity_r": [0, 0, 0],
+      "expected_orientation_r_xyzw": [0, 0, 0, 1]
+    },
+    {
+      "name": "left_orientation_basis_change",
+      "handedness": "left",
+      "neutral_orientation_xyzw": [0, 0, 0, 1],
+      "orientation_xyzw": [0.70710678, 0, 0, 0.70710678],
+      "acceleration_m_s2": [0, 1, 0],
+      "acceleration_bias_m_s2": [0, 0, 0],
+      "angular_velocity_rad_s": [1, 0, 0],
+      "gyroscope_bias_rad_s": [0, 0, 0],
+      "expected_acceleration_r": [0, 0, -1],
+      "expected_angular_velocity_r": [-1, 0, 0],
+      "expected_orientation_r_xyzw": [-0.70710678, 0, 0, 0.70710678]
+    }
+  ]
+}
+

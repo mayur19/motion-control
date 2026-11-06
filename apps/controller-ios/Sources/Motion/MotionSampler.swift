@@ -106,12 +106,12 @@ final class MotionSampler: ObservableObject, @unchecked Sendable {
                 Float(motion.rotationRate.y),
                 Float(motion.rotationRate.z)
             ),
-            orientation: SIMD4<Float>(
+            orientation: MotionCoordinateAdapter.deviceToReferenceQuaternion(SIMD4<Float>(
                 Float(motion.attitude.quaternion.x),
                 Float(motion.attitude.quaternion.y),
                 Float(motion.attitude.quaternion.z),
                 Float(motion.attitude.quaternion.w)
-            ),
+            )),
             accuracy: Self.protocolAccuracy(motion.magneticField.accuracy),
             sensorFlags: 0x07
         )
