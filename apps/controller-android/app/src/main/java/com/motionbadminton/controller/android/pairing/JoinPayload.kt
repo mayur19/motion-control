@@ -35,11 +35,14 @@ data class JoinPayload(
         fun parse(rawValue: String, nowUnixSeconds: Long = System.currentTimeMillis() / 1000): JoinPayload {
             val uri = try { URI(rawValue) } catch (_: Exception) { reject(Error.INVALID_CODE) }
             if (uri.scheme != "motion-badminton" || uri.host != "join") reject(Error.INVALID_CODE)
-            val values = uri.rawQuery?.split("&")?.associate { pair ->
+            val pairs = uri.rawQuery?.split("&")?.map { pair ->
                 val parts = pair.split("=", limit = 2)
                 if (parts.size != 2) reject(Error.INVALID_CODE)
                 parts[0] to URLDecoder.decode(parts[1], StandardCharsets.UTF_8)
             } ?: reject(Error.INVALID_CODE)
+            // Repeated parameters (e.g. two `secret`s) are ambiguous; reject them.
+            if (pairs.map { it.first }.toSet().size != pairs.size) reject(Error.INVALID_CODE)
+            val values = pairs.toMap()
             if (values["v"]?.toIntOrNull() != VERSION) reject(Error.UNSUPPORTED_VERSION)
             val host = values["host"] ?: reject(Error.INVALID_ADDRESS)
             if (!isIPv4(host)) reject(Error.INVALID_ADDRESS)

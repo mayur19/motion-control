@@ -25,11 +25,15 @@ struct JoinPayload: Equatable, Sendable {
               components.scheme == scheme,
               components.host == "join"
         else { throw ValidationError.invalidCode }
-        let values = Dictionary(
-            uniqueKeysWithValues: (components.queryItems ?? []).compactMap { item in
-                item.value.map { (item.name, $0) }
-            }
-        )
+        let items = (components.queryItems ?? []).compactMap { item in
+            item.value.map { (item.name, $0) }
+        }
+        // Repeated parameters (e.g. two `secret`s) are ambiguous and would trap
+        // Dictionary(uniqueKeysWithValues:) on untrusted QR input; reject them.
+        guard Set(items.map(\.0)).count == items.count else {
+            throw ValidationError.invalidCode
+        }
+        let values = Dictionary(items, uniquingKeysWith: { first, _ in first })
         guard Int(values["v"] ?? "") == version else {
             throw ValidationError.unsupportedVersion
         }

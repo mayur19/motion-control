@@ -25,6 +25,7 @@ import com.motionbadminton.controller.android.motion.MotionSampler
 import com.motionbadminton.controller.android.motion.MotionStreamer
 import com.motionbadminton.controller.android.pairing.HostLoss
 import com.motionbadminton.controller.android.pairing.JoinPayload
+import com.motionbadminton.controller.android.pairing.LaunchJoin
 import com.motionbadminton.controller.android.pairing.PairingClient
 import com.motionbadminton.controller.android.pairing.PairingResult
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -76,7 +77,10 @@ class MainActivity : Activity() {
         pairingClient = PairingClient(this)
         setContentView(buildInterface())
         renderState()
-        intent.getStringExtra("join_uri")?.let(::beginJoin)
+        LaunchJoin.acceptedUri(
+            intent.getStringExtra(LaunchJoin.EXTRA_JOIN_URI),
+            debugBuild = BuildConfig.DEBUG,
+        )?.let(::beginJoin)
     }
 
     override fun onResume() {

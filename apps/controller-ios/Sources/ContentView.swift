@@ -34,6 +34,9 @@ struct ContentView: View {
         .onAppear {
             updateIdleTimer(for: controllerState)
             updateMotionRuntime()
+            #if DEBUG
+            // Debug automation only (Xcode/devicectl launch arguments); release
+            // builds join solely through a user-scanned code.
             if !processedLaunchJoin {
                 processedLaunchJoin = true
                 if let argument = ProcessInfo.processInfo.arguments.first(where: {
@@ -42,6 +45,7 @@ struct ContentView: View {
                     beginJoin(String(argument.dropFirst("--join-uri=".count)))
                 }
             }
+            #endif
         }
         .onChange(of: controllerState) { _, newState in
             updateIdleTimer(for: newState)

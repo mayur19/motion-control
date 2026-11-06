@@ -48,4 +48,11 @@ final class PairingTests: XCTestCase {
             XCTAssertEqual(welcome.player, 0)
         }
     }
+
+    func testDuplicateQueryParametersAreRejectedNotCrashing() {
+        let duplicated = valid + "&secret=ffeeddccbbaa99887766554433221100"
+        XCTAssertThrowsError(try JoinPayload.parse(duplicated, nowUnixSeconds: 1_800_000_000)) {
+            XCTAssertEqual($0 as? JoinPayload.ValidationError, .invalidCode)
+        }
+    }
 }

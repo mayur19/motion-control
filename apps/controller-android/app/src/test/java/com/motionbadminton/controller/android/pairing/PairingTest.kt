@@ -53,4 +53,13 @@ class PairingTest {
             assertEquals(0, welcome.player)
         }
     }
+
+    @Test
+    fun `duplicate query parameters are rejected`() {
+        val duplicated = valid + "&secret=ffeeddccbbaa99887766554433221100"
+        val error = assertThrows(JoinPayload.ValidationException::class.java) {
+            JoinPayload.parse(duplicated, nowUnixSeconds = 1_800_000_000)
+        }
+        assertEquals(JoinPayload.Error.INVALID_CODE, error.reason)
+    }
 }
