@@ -110,6 +110,11 @@ host, single short session; values from the host session-log
   identical resent `calibration` event (left, L2 values) and Connected about
   0.5 s later, with no recalibration requested.
 
+Owner decision (2026-11-06): accept looser physical repeatability limits,
+per axis: accel bias 0.05 m/s², gyro bias 0.10 rad/s, neutral tilt 5°
+(recorded in docs/racket-coordinate-system.md §6). The synthetic 0.02 m/s²
+limit remains for unit fixtures. iPhone result against the physical limits:
+PASS (worst: accel 0.040 m/s², gyro 0.056 rad/s, tilt 2.3°).
+
 Not yet done
 - Galaxy (Android) physical calibration run, both hands.
-- Owner decision on a physical repeatability tolerance.

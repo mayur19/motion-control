@@ -174,6 +174,21 @@ neutral quaternion, acceleration bias, gyroscope bias and quality.
 
 Repeatability is tested with two captures whose acceleration bias differs by
 0.01 m/s² on one axis; the accepted records must remain within 0.02 m/s².
+That limit applies to the synthetic unit-test fixtures only.
+
+Physical repeatability (owner decision, 2026-11-06): two accepted
+calibrations by the same player, hand and phone must agree within
+
+| Quantity | Per-axis limit |
+| --- | --- |
+| Acceleration bias | 0.05 m/s² |
+| Gyroscope bias | 0.10 rad/s |
+| Neutral shaft and screen tilt | 5° |
+
+Neutral yaw is not compared, because the reference yaw origin is arbitrary
+and the host uses orientation relative to neutral. These limits are about
+two orders of magnitude below swing-detection signal levels. The product
+does not integrate acceleration into position (no 1:1 tracking; see the PRD).
 
 ## 7. Numeric examples
 
