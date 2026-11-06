@@ -27,10 +27,8 @@ func replay(directory: String, detector_config: Dictionary, series_path := "") -
 	if not bool(configured.ok):
 		return {"ok": false, "error": "detector config: %s" % str(configured.error)}
 
-	var ingest := Ingest.new()
 	var events: Array[Dictionary] = []
 	var speeds: Array[Dictionary] = []
-	pipeline.event_detected.connect(func(event: Dictionary): events.append(event))
 	var series: FileAccess = null
 	if not series_path.is_empty():
 		series = FileAccess.open(series_path, FileAccess.WRITE)
@@ -39,6 +37,8 @@ func replay(directory: String, detector_config: Dictionary, series_path := "") -
 		pipeline.sample_preprocessed.connect(func(sample: Dictionary, prepared: Dictionary):
 			series.store_line(JSON.stringify(_series_row(sample, prepared)))
 		)
+	var ingest := Ingest.new()
+	pipeline.event_detected.connect(func(event: Dictionary): events.append(event))
 	pipeline.bind_ingest(ingest)
 	ingest.normalized_sample_received.connect(func(sample: Dictionary):
 		var omega: Array = sample.normalized.angular_velocity
@@ -88,6 +88,7 @@ static func _series_row(sample: Dictionary, prepared: Dictionary) -> Dictionary:
 		"normalized_angular_speed": Vector3(float(omega[0]), float(omega[1]), float(omega[2])).length(),
 		"preprocessed_angular_speed": float(prepared.preprocessed.angular_speed),
 		"preprocessed_angular_accel": float(prepared.preprocessed.angular_accel),
+		"preprocessed_angular_velocity": prepared.preprocessed.angular_velocity,
 		"normalized_acceleration": sample.normalized.acceleration,
 		"preprocessed_acceleration": prepared.preprocessed.acceleration,
 		"gap_reset": bool(prepared.preprocessed.gap_reset),

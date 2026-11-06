@@ -51,8 +51,12 @@ gyro. The filter mainly matters for Android's rawer, faster stream. Plots:
 
 - Every step uses the real `Δt`. Irregular spacing changes `α`, never the
   output scale.
-- Duplicate or out-of-order sensor times (`Δt ≤ 0`) are dropped
-  (`non_monotonic`).
+- Duplicate or slightly out-of-order sensor times (`−max_gap_ms ≤ Δt ≤ 0`)
+  are dropped (`non_monotonic`).
+- A larger backward jump (`Δt < −max_gap_ms`) means a new stream on the same
+  controller id (another phone, or a restarted sensor clock). It reseeds like
+  a gap, and the detector clears its refractory/arm state for that controller,
+  instead of dropping the new stream until its clock catches up.
 - Non-finite or missing normalized values are dropped (`non_finite`,
   `not_normalized`), and filter state is kept.
 - A gap above `max_gap_ms` (default 50 ms, i.e. 5 missing iPhone samples) reseeds

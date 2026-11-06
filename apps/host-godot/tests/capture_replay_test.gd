@@ -18,7 +18,7 @@ class FakeSessions:
 	var current_session := {"session_id": SESSION_A}
 
 
-const CONFIG := {"detector": "angular_speed_probe", "threshold_rad_s": 3.0, "refractory_ms": 400}
+const CONFIG := {"detector": "early_rise", "onset_speed_rad_s": 3.0, "min_rise_rad_s2": 20.0}
 
 
 func _initialize() -> void:
@@ -56,6 +56,10 @@ func _initialize() -> void:
 	if not row.has("normalized_angular_speed") or not row.has("preprocessed_angular_speed") \
 			or not row.has("normalized_acceleration") or not row.has("preprocessed_acceleration"):
 		return _fail("Series row incomplete: %s" % str(row))
+	var default_run := replayer.replay(stopped.directory, Pipeline.DEFAULTS)
+	if not bool(default_run.ok) or str(default_run.detector.detector) != "early_rise" \
+			or not default_run.takes[0].has("take_id") or int(default_run.takes[0].event_count) != default_run.events.size():
+		return _fail("Replay with the default detector must summarize takes: %s" % str(default_run.takes))
 	var first := replayer.replay(stopped.directory, CONFIG)
 	var second := replayer.replay(stopped.directory, CONFIG)
 	if not bool(first.ok):
@@ -66,7 +70,7 @@ func _initialize() -> void:
 		return _fail("Replay events differ from live: %s vs %s" % [str(first.events), str(live_events)])
 	if str(first.raw_sha256) != str(stopped.raw_sha256) or not bool(first.raw_verified):
 		return _fail("Replay must verify the raw checksum")
-	if str(first.detector.detector) != "angular_speed_probe" or float(first.detector.config.threshold_rad_s) != 3.0:
+	if str(first.detector.detector) != "early_rise" or float(first.detector.config.onset_speed_rad_s) != 3.0:
 		return _fail("Replay result must embed detector config: %s" % str(first.detector))
 	var take: Dictionary = first.takes[0]
 	if str(take.labels.intended_shot) != "smash" or int(take.event_count) != live_events.size() \

@@ -76,8 +76,11 @@ detection until it delivers a new valid `CALIBRATION`.
 The `detector_config` event (once at host start) records the live detector's
 `detector` name, `version` and full `config`. Each `detector_event` records
 `detector`, `controller_id`, `sequence`, the source `sensor_monotonic_ns` and
-`arrival_monotonic_ns`, and detector-specific fields (the TMB-029 placeholder
-adds `angular_speed_rad_s`). Labeled raw captures are separate files; see
+`arrival_monotonic_ns`, and detector-specific fields. The default `early_rise`
+detector adds `version`, `detector_time_ns`, `confidence`,
+`angular_speed_rad_s`, `rise_rate_rad_s2` and `shaft_fraction`
+(`docs/swing-detection.md`). `detector_config` also includes the
+`preprocessing` stage. Labeled raw captures are separate files; see
 `docs/capture-format.md`.
 
 ## Normalized sample record

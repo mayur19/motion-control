@@ -1,58 +1,62 @@
 class_name DetectorPipeline
 extends RefCounted
 
-## TMB-029 detector boundary shared by live play and offline replay. It
-## consumes only `MotionIngest.normalized_sample_received` samples (calibrated,
-## common racket frame), so live and replay run the identical implementation
-## for identical input. TMB-032 replaces the placeholder detector below.
+## Detector boundary shared by live play and offline replay (TMB-029). It
+## consumes only `MotionIngest.normalized_sample_received` samples, runs
+## MotionPreprocessor (TMB-031) and then the configured detector:
+## `early_rise` (TMB-032, default) or the `angular_speed_probe` reference.
+## Identical input and configuration give identical events.
 
 signal event_detected(event: Dictionary)
 ## Each accepted normalized sample with its preprocessing output (TMB-031).
 signal sample_preprocessed(sample: Dictionary, prepared: Dictionary)
 
 const Preprocessor = preload("res://detection/motion_preprocessor.gd")
-const PROBE := "angular_speed_probe"
-const PROBE_VERSION := 1
-const DEFAULTS := {"detector": PROBE, "threshold_rad_s": 3.5, "refractory_ms": 700}
+const EarlyRise = preload("res://detection/early_swing_detector.gd")
+const Probe = preload("res://detection/angular_speed_probe.gd")
+const DEFAULTS := {"detector": EarlyRise.NAME}
 
-var _config: Dictionary = DEFAULTS.duplicate(true)
 var _preprocessor := Preprocessor.new()
-## controller_id -> {above: bool, last_event_ns: int}
-var _state: Dictionary = {}
+var _detector: RefCounted = EarlyRise.new()
 
 
-## Validates and applies a full configuration; returns {ok, error?}.
+## Validates and applies a full configuration: `detector` selects the
+## implementation, `preprocessing` configures the filter, every other key is
+## the detector's own configuration. Returns {ok, error?}.
 func configure(config: Dictionary) -> Dictionary:
-	var preprocessor := Preprocessor.new()
 	var preprocessing: Variant = config.get("preprocessing", {})
 	if typeof(preprocessing) != TYPE_DICTIONARY:
 		return {"ok": false, "error": "preprocessing must be an object"}
+	var preprocessor := Preprocessor.new()
 	var preprocessed := preprocessor.configure(preprocessing)
 	if not bool(preprocessed.ok):
 		return {"ok": false, "error": "preprocessing: %s" % str(preprocessed.error)}
-	var merged := DEFAULTS.duplicate(true)
-	merged.merge(config, true)
-	merged.erase("preprocessing")
-	if str(merged.detector) != PROBE:
-		return {"ok": false, "error": "unknown detector %s" % str(merged.detector)}
-	var threshold := float(merged.threshold_rad_s)
-	var refractory := int(merged.refractory_ms)
-	if not is_finite(threshold) or threshold <= 0.0 or refractory < 0:
-		return {"ok": false, "error": "threshold_rad_s must be > 0 and refractory_ms >= 0"}
-	_config = {"detector": PROBE, "threshold_rad_s": threshold, "refractory_ms": refractory}
+	var name := str(config.get("detector", DEFAULTS.detector))
+	var detector: RefCounted
+	match name:
+		EarlyRise.NAME:
+			detector = EarlyRise.new()
+		Probe.NAME:
+			detector = Probe.new()
+		_:
+			return {"ok": false, "error": "unknown detector %s" % name}
+	var detector_config := config.duplicate(true)
+	detector_config.erase("detector")
+	detector_config.erase("preprocessing")
+	var configured: Dictionary = detector.configure(detector_config)
+	if not bool(configured.ok):
+		return configured
 	_preprocessor = preprocessor
-	_state = {}
+	_detector = detector
 	return {"ok": true}
 
 
-## Everything needed to reproduce a run: detector name, version and config.
+## Everything needed to reproduce a run: detector, version, config and the
+## preprocessing stage.
 func describe() -> Dictionary:
-	return {
-		"detector": str(_config.detector),
-		"version": PROBE_VERSION,
-		"config": _config.duplicate(true),
-		"preprocessing": _preprocessor.describe(),
-	}
+	var description: Dictionary = _detector.describe()
+	description["preprocessing"] = _preprocessor.describe()
+	return description
 
 
 func bind_ingest(ingest: MotionIngest) -> void:
@@ -61,41 +65,17 @@ func bind_ingest(ingest: MotionIngest) -> void:
 
 
 func reset() -> void:
-	_state = {}
 	_preprocessor.reset()
+	_detector.reset()
 
 
-## Placeholder (not the TMB-032 detector): one event per rising crossing of
-## preprocessed (TMB-031) angular speed above the threshold, outside the
-## refractory window.
 func process(sample: Dictionary) -> Array[Dictionary]:
-	var events: Array[Dictionary] = []
 	var prepared := _preprocessor.process(sample)
 	if not bool(prepared.ok):
-		return events  # dropped: duplicate/out-of-order, non-finite or uncalibrated
+		var none: Array[Dictionary] = []
+		return none  # dropped: duplicate/out-of-order, non-finite or uncalibrated
 	sample_preprocessed.emit(sample, prepared)
-	var speed := float(prepared.preprocessed.angular_speed)
-	var controller_id := int(sample.get("controller_id", 0))
-	var sensor_ns := int(sample.get("sensor_monotonic_ns", 0))
-	var state: Dictionary = _state.get(controller_id, {"above": false, "last_event_ns": -1})
-	var above := speed >= float(_config.threshold_rad_s)
-	var refractory_ns := int(_config.refractory_ms) * 1_000_000
-	var outside_refractory := (
-		int(state.last_event_ns) < 0 or sensor_ns - int(state.last_event_ns) >= refractory_ns
-	)
-	if above and not bool(state.above) and outside_refractory:
-		events.append({
-			"detector": str(_config.detector),
-			"controller_id": controller_id,
-			"sequence": int(sample.get("sequence", 0)),
-			"sensor_monotonic_ns": sensor_ns,
-			"arrival_monotonic_ns": int(sample.get("arrival_monotonic_ns", 0)),
-			"angular_speed_rad_s": speed,
-		})
-		state.last_event_ns = sensor_ns
-	state.above = above
-	_state[controller_id] = state
-	return events
+	return _detector.process(prepared)
 
 
 func _on_normalized_sample(sample: Dictionary) -> void:

@@ -131,5 +131,9 @@ TMB-030 baseline dataset: In Progress. Plan in
 `docs/test-plans/tmb-030-dataset-capture-plan.md`; captures + `dataset-splits.json`
 live in the host user-data `captures/` folder; report with
 `python3 -I tools/dataset-inventory.py <captures dir> --markdown out.md`.
+TMB-031 preprocessing and TMB-032 early-rise detector: Review under an
+owner-approved dependency exception (provisional thresholds; tuning and the
+backswing question wait for TMB-030 data). Docs: `docs/motion-preprocessing.md`,
+`docs/swing-detection.md`.
 Then onward per
 `implementation-tickets/README.md`.

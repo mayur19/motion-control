@@ -52,10 +52,16 @@ func process(sample: Dictionary) -> Dictionary:
 	var dt_s := 0.0
 	if not gap_reset:
 		var delta_ns := sensor_ns - int(state.last_ns)
-		if delta_ns <= 0:
+		var max_gap_ns := int(_config.max_gap_ms) * 1_000_000
+		if delta_ns < -max_gap_ns:
+			# A large backward jump is a new stream (another phone or a restarted
+			# sensor clock on the same controller id), not a reorder: restart.
+			gap_reset = true
+		elif delta_ns <= 0:
 			return {"ok": false, "dropped": "non_monotonic"}
-		dt_s = delta_ns / 1e9
-		gap_reset = delta_ns > int(_config.max_gap_ms) * 1_000_000
+		else:
+			dt_s = delta_ns / 1e9
+			gap_reset = delta_ns > max_gap_ns
 
 	var omega: Vector3 = omega_raw
 	var accel: Vector3 = accel_raw

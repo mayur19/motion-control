@@ -83,6 +83,7 @@ sample count, peak angular speed, detector event count and first-event time
 after take start) and every detector event.
 
 The live host logs the same detector's configuration (`detector_config`) and
-events (`detector_event`) in the session log. Until TMB-032 the detector is a
-placeholder (`angular_speed_probe`: rising normalized angular-speed threshold
-with a refractory period), not the swing detector.
+events (`detector_event`) in the session log. The default detector is
+`early_rise` (TMB-032, `docs/swing-detection.md`) after TMB-031 preprocessing;
+`--config` can select the `angular_speed_probe` reference. `--series=FILE`
+also writes normalized vs preprocessed values per sample.

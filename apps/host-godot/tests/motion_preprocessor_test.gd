@@ -34,6 +34,18 @@ func _initialize() -> void:
 	if absf(float(after_gap.preprocessed.angular_speed) - 6.0) > 0.0001 \
 			or float(after_gap.preprocessed.angular_accel) != 0.0:
 		return _fail("Gap reset must reseed without a derivative spike: %s" % str(after_gap))
+	var reordered := pre.process(_sample(1, 195_000_000, 6.0))
+	if bool(reordered.ok) or str(reordered.dropped) != "non_monotonic":
+		return _fail("A small reorder (5 ms back) must still be dropped: %s" % str(reordered))
+	var restarted := pre.process(_sample(1, 3_000_000, 2.0))
+	if not bool(restarted.ok) or not bool(restarted.preprocessed.gap_reset) \
+			or float(restarted.preprocessed.angular_accel) != 0.0:
+		return _fail("A large backward clock jump must restart the stream, not drop forever: %s" % str(restarted))
+	var continued := pre.process(_sample(1, 13_000_000, 2.0))
+	if not bool(continued.ok) or bool(continued.preprocessed.gap_reset):
+		return _fail("The restarted stream must continue normally: %s" % str(continued))
+	pre.reset()
+	pre.process(_sample(1, 200_000_000, 6.0))
 	var irregular_ok := true
 	var t := 200_000_000
 	for step in [3, 11, 4, 9, 13, 2, 8]:
