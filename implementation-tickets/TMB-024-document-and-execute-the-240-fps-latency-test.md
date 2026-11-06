@@ -34,3 +34,10 @@
   is deferred by explicit project-owner direction. No synthetic values are used.
 
 
+- 2026-11-06: Camera availability: the owner's iPhone 17e records Slo-mo 1080p
+  at 240 fps, so it can film the Galaxy controller run; the iPhone controller
+  run still needs a second 240 FPS camera. Added `tools/latency-frames.py`, a
+  frame-assist tool that proposes F_start/F_display candidates per swing,
+  measures the video's real FPS and writes review strips (5 synthetic-video
+  tests recover known 50.0/62.5/79.167 ms latencies exactly). It does not
+  replace the two blinded reviewers. Still deferred: physical execution.

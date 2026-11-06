@@ -39,6 +39,34 @@ response for five controlled practice swings. Record the final value. The
    reason; do not replace inconvenient valid measurements.
 5. Repeat the complete sequence for the other phone without changing the setup.
 
+## Camera: iPhone Slo-mo
+
+The project's iPhone 17e records genuine **Slo-mo 1080p HD at 240 fps**
+(Settings > Camera > Record Slo-mo). It can film the Android controller run;
+the iPhone controller run needs a second 240 FPS camera. Lock focus/exposure
+(press and hold on the subject) before recording. Transfer the **original**
+file: in Photos choose Share > Options > "All Photos Data", or AirDrop with
+that option, so the 240 FPS frames are not re-timed to 30 FPS playback. Check
+with `ffprobe` that the stream reports about 240 fps before analysis.
+
+## Frame-assist tool
+
+`tools/latency-frames.py` applies the frame rule below to two rectangles you
+choose in the video (phone marker and host stimulus patch). It proposes
+`F_start`/`F_display` for every swing, computes the statistics and can write
+review strips of the frames around each candidate:
+
+```sh
+python3 -I tools/latency-frames.py swing.MOV \
+  --marker X,Y,W,H --display X,Y,W,H --contact-dir review/
+```
+
+Its output is a candidate list, **not** the measurement: both reviewers still
+mark frames independently (blinded to its output and to log timing) and
+resolve disagreements; the tool's candidates become a third, recorded opinion.
+Flagged takes (`moving-at-window-start`, `no-motion-found`) are excluded from
+its statistics and need manual review.
+
 ## Frame rule and calculation
 
 `F_start` is the first video frame in which the rigid phone marker has visibly
