@@ -1,0 +1,6 @@
+# Normalize text to LF in the repository; Windows batch scripts need CRLF.
+* text=auto
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.png binary
+*.jar binary
