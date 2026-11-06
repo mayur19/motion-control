@@ -169,6 +169,19 @@ struct ContentView: View {
             if controllerState == .calibration {
                 calibrationControls
             }
+
+            if controllerState == .connected {
+                Button {
+                    motion.resetCalibration()
+                    controllerState = .calibration
+                } label: {
+                    Label("Recalibrate", systemImage: "gyroscope")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.bordered)
+                .tint(accent)
+                .accessibilityIdentifier("recalibrate")
+            }
         }
         .padding(22)
         .frame(maxWidth: .infinity)
@@ -318,8 +331,15 @@ struct ContentView: View {
                 sessionID: assignment.sessionID,
                 controllerID: assignment.controllerID
             )
-            controllerState = .calibration
             UIApplication.shared.isIdleTimerDisabled = true
+            switch motion.calibrationPhase.joinAction {
+            case .calibrate:
+                controllerState = .calibration
+            case .resendStoredCalibration:
+                motion.resendCalibration(host: debugHost, port: UInt16(debugPort) ?? 7000) { sent in
+                    controllerState = sent ? .connected : .calibration
+                }
+            }
         }
     }
 

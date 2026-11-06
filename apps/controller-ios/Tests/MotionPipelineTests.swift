@@ -96,9 +96,34 @@ final class MotionPipelineTests: XCTestCase {
         XCTAssertEqual(payload.handedness, CalibrationHand.left.rawValue)
     }
 
+    func testStoredRecordIsAvailableOnlyAfterCompletedCalibration() throws {
+        let calibration = SlowSwingCalibration()
+        try calibration.beginNeutral(hand: .left, screenFacingPlayerConfirmed: true)
+        XCTAssertNil(calibration.completedRecord)
+        let upright = SIMD4<Float>(sin(.pi / 4), 0, 0, cos(.pi / 4))
+        for index in 0...120 {
+            calibration.append(calibrationSample(index: index, orientation: upright, acceleration: .zero))
+        }
+        _ = try calibration.finishNeutral()
+        XCTAssertNil(calibration.completedRecord, "neutral alone must not be resent")
+
+        let completed = try completedCalibrator(hand: .left, accelerationBias: .zero)
+        XCTAssertEqual(completed.completedRecord?.hand, .left)
+        completed.reset()
+        XCTAssertNil(completed.completedRecord)
+        XCTAssertEqual(completed.phase, .idle)
+    }
+
     private func completedCalibration(
         hand: CalibrationHand, accelerationBias: SIMD3<Float>
     ) throws -> CalibrationRecord {
+        let calibration = try completedCalibrator(hand: hand, accelerationBias: accelerationBias)
+        return try XCTUnwrap(calibration.completedRecord)
+    }
+
+    private func completedCalibrator(
+        hand: CalibrationHand, accelerationBias: SIMD3<Float>
+    ) throws -> SlowSwingCalibration {
         let calibration = SlowSwingCalibration()
         try calibration.beginNeutral(hand: hand, screenFacingPlayerConfirmed: true)
         let upright = SIMD4<Float>(sin(.pi / 4), 0, 0, cos(.pi / 4))
@@ -117,7 +142,8 @@ final class MotionPipelineTests: XCTestCase {
                 angularVelocity: SIMD3<Float>(1, 0, 0)
             ))
         }
-        return try calibration.finishSlowSwing()
+        try calibration.finishSlowSwing()
+        return calibration
     }
 
     private func calibrationSample(

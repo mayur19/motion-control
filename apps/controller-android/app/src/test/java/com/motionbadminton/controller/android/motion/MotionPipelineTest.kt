@@ -4,6 +4,7 @@ import com.motionbadminton.controller.android.protocol.ProtocolV1
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.math.PI
@@ -96,7 +97,39 @@ class MotionPipelineTest {
         assertEquals(CalibrationHand.LEFT.code, payload.handedness)
     }
 
-    private fun completedCalibration(hand: CalibrationHand, acceleration: List<Float>): CalibrationRecord {
+    @Test
+    fun `join without completed calibration enters calibration`() {
+        CalibrationPhase.entries.filter { it != CalibrationPhase.COMPLETE }.forEach { phase ->
+            assertEquals(phase.name, JoinCalibrationAction.CALIBRATE, phase.joinAction)
+        }
+    }
+
+    @Test
+    fun `rejoin after completed calibration resends stored calibration`() {
+        assertEquals(JoinCalibrationAction.RESEND_STORED_CALIBRATION, CalibrationPhase.COMPLETE.joinAction)
+    }
+
+    @Test
+    fun `stored record is available only after completed calibration`() {
+        val neutralOnly = SlowSwingCalibration()
+        neutralOnly.beginNeutral(CalibrationHand.LEFT, true)
+        assertNull(neutralOnly.completedRecord)
+        val upright = listOf(sin(PI / 4).toFloat(), 0f, 0f, cos(PI / 4).toFloat())
+        (0..120).forEach { neutralOnly.append(calibrationSample(it, upright)) }
+        neutralOnly.finishNeutral()
+        assertNull("neutral alone must not be resent", neutralOnly.completedRecord)
+
+        val completed = completedCalibrator(CalibrationHand.LEFT, listOf(0f, 0f, 0f))
+        assertEquals(CalibrationHand.LEFT, completed.completedRecord?.hand)
+        completed.reset()
+        assertNull(completed.completedRecord)
+        assertEquals(CalibrationPhase.IDLE, completed.phase)
+    }
+
+    private fun completedCalibration(hand: CalibrationHand, acceleration: List<Float>): CalibrationRecord =
+        requireNotNull(completedCalibrator(hand, acceleration).completedRecord)
+
+    private fun completedCalibrator(hand: CalibrationHand, acceleration: List<Float>): SlowSwingCalibration {
         val calibration = SlowSwingCalibration()
         calibration.beginNeutral(hand, true)
         val upright = listOf(sin(PI / 4).toFloat(), 0f, 0f, cos(PI / 4).toFloat())
@@ -112,7 +145,8 @@ class MotionPipelineTest {
                 listOf(1f, 0f, 0f),
             ))
         }
-        return calibration.finishSlowSwing()
+        calibration.finishSlowSwing()
+        return calibration
     }
 
     private fun calibrationSample(

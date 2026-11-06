@@ -7,7 +7,10 @@ final class MotionRuntime: ObservableObject {
     let streamer: MotionStreamer
 
     @Published private(set) var calibrationPhase: CalibrationPhase = .idle
-    @Published private(set) var calibrationMessage = "Select your hand, confirm the screen faces you, then capture neutral."
+    @Published private(set) var calibrationMessage = MotionRuntime.initialCalibrationMessage
+
+    private static let initialCalibrationMessage =
+        "Select your hand, confirm the screen faces you, then capture neutral."
 
     private let buffer: MotionSampleBuffer
     private let calibration = SlowSwingCalibration()
@@ -71,6 +74,36 @@ final class MotionRuntime: ObservableObject {
 
     func configureIdentity(sessionID: UInt64, controllerID: UInt32) {
         streamer.configure(sessionID: sessionID, controllerID: controllerID)
+    }
+
+    /// Clears the active calibration so the player can capture a new one.
+    func resetCalibration() {
+        calibrationTask?.cancel()
+        calibrationTask = nil
+        calibration.reset()
+        calibrationPhase = calibration.phase
+        calibrationMessage = Self.initialCalibrationMessage
+    }
+
+    /// Resends the accepted calibration after a rejoin; the host may be a new
+    /// process or session that never received it.
+    func resendCalibration(
+        host: String,
+        port: UInt16,
+        completion: @escaping @MainActor (Bool) -> Void
+    ) {
+        guard let record = calibration.completedRecord else {
+            resetCalibration()
+            completion(false)
+            return
+        }
+        streamer.sendCalibration(record, host: host, port: port) { [weak self] sent in
+            if !sent {
+                self?.calibration.reset()
+                self?.publishCalibrationFailure(.sensorsUnavailable)
+            }
+            completion(sent)
+        }
     }
 
     func beginNeutral(hand: CalibrationHand, screenFacingPlayerConfirmed: Bool) {

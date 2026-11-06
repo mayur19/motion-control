@@ -27,6 +27,7 @@ import com.motionbadminton.controller.android.motion.MotionStreamer
 import com.motionbadminton.controller.android.motion.CalibrationException
 import com.motionbadminton.controller.android.motion.CalibrationHand
 import com.motionbadminton.controller.android.motion.CalibrationPhase
+import com.motionbadminton.controller.android.motion.JoinCalibrationAction
 import com.motionbadminton.controller.android.motion.SlowSwingCalibration
 import com.motionbadminton.controller.android.pairing.HostLoss
 import com.motionbadminton.controller.android.pairing.JoinPayload
@@ -72,6 +73,7 @@ class MainActivity : Activity() {
     private lateinit var calibrationHandButton: Button
     private lateinit var calibrationConfirmation: CheckBox
     private lateinit var calibrationAction: Button
+    private lateinit var recalibrateButton: Button
     private val refreshHandler = Handler(Looper.getMainLooper())
     private var isForeground = false
     private var sampling = false
@@ -220,6 +222,15 @@ class MainActivity : Activity() {
             addView(calibrationAction)
         })
         content.addView(calibrationPanel)
+        recalibrateButton = Button(this).apply {
+            text = "Recalibrate"
+            setOnClickListener {
+                calibration.reset()
+                controllerState = ControllerState.CALIBRATION
+                renderState()
+            }
+        }
+        content.addView(recalibrateButton)
 
         content.addView(panel(verticalLayout(12).apply {
             addView(label("⚒  DEBUG PANEL", 13, R.color.text_secondary, true))
@@ -287,6 +298,9 @@ class MainActivity : Activity() {
         if (::calibrationPanel.isInitialized) {
             calibrationPanel.visibility = if (controllerState == ControllerState.CALIBRATION) View.VISIBLE else View.GONE
             renderCalibration()
+        }
+        if (::recalibrateButton.isInitialized) {
+            recalibrateButton.visibility = if (controllerState == ControllerState.CONNECTED) View.VISIBLE else View.GONE
         }
         applyKeepAwakePolicy()
         updateMotionRuntime()
@@ -363,8 +377,13 @@ class MainActivity : Activity() {
                     debugAssignment.text =
                         "P${result.assignment.player} / ${result.assignment.controllerId.toString(16)}"
                     paired = true
-                    controllerState = ControllerState.CALIBRATION
-                    renderState()
+                    when (calibration.phase.joinAction) {
+                        JoinCalibrationAction.CALIBRATE -> {
+                            controllerState = ControllerState.CALIBRATION
+                            renderState()
+                        }
+                        JoinCalibrationAction.RESEND_STORED_CALIBRATION -> resendCalibration()
+                    }
                 }
                 is PairingResult.Failed -> showPairingError(result.message)
             }
@@ -424,6 +443,27 @@ class MainActivity : Activity() {
             // renderCalibration presents the specific corrective message.
         }
         renderCalibration()
+    }
+
+    /** Resends the accepted calibration after a rejoin; the host may be new. */
+    private fun resendCalibration() {
+        val record = calibration.completedRecord ?: run {
+            calibration.reset()
+            controllerState = ControllerState.CALIBRATION
+            renderState()
+            return
+        }
+        val host = debugHost.text.toString()
+        val port = debugPort.text.toString().toIntOrNull() ?: 7000
+        Thread {
+            val sent = motionStreamer.sendCalibration(record, host, port)
+            runOnUiThread {
+                if (!sent) calibration.reset()
+                controllerState = if (sent) ControllerState.CONNECTED else ControllerState.CALIBRATION
+                renderState()
+                if (!sent) calibrationStatus.text = "Could not resend calibration to the host. Calibrate again."
+            }
+        }.start()
     }
 
     private fun renderCalibration() {

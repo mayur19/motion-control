@@ -25,4 +25,17 @@ final class ControllerStateTests: XCTestCase {
         XCTAssertTrue(ControllerState.connected.keepsScreenAwake)
         XCTAssertFalse(ControllerState.paused.keepsScreenAwake)
     }
+
+    func testJoinWithoutCompletedCalibrationEntersCalibration() {
+        let phases: [CalibrationPhase] = [
+            .idle, .capturingNeutral, .readyForSlowSwing, .capturingSlowSwing, .failed(.tooShort),
+        ]
+        for phase in phases {
+            XCTAssertEqual(phase.joinAction, .calibrate, "\(phase)")
+        }
+    }
+
+    func testRejoinAfterCompletedCalibrationResendsStoredCalibration() {
+        XCTAssertEqual(CalibrationPhase.complete.joinAction, .resendStoredCalibration)
+    }
 }

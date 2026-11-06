@@ -35,7 +35,15 @@ enum class CalibrationFailure(val userMessage: String) {
 
 class CalibrationException(val failure: CalibrationFailure) : IllegalStateException(failure.userMessage)
 
-enum class CalibrationPhase { IDLE, CAPTURING_NEUTRAL, READY_FOR_SLOW_SWING, CAPTURING_SLOW_SWING, COMPLETE, FAILED }
+enum class CalibrationPhase {
+    IDLE, CAPTURING_NEUTRAL, READY_FOR_SLOW_SWING, CAPTURING_SLOW_SWING, COMPLETE, FAILED;
+
+    /** A completed calibration is resent on (re)join; anything else recalibrates. */
+    val joinAction: JoinCalibrationAction
+        get() = if (this == COMPLETE) JoinCalibrationAction.RESEND_STORED_CALIBRATION else JoinCalibrationAction.CALIBRATE
+}
+
+enum class JoinCalibrationAction { CALIBRATE, RESEND_STORED_CALIBRATION }
 
 class SlowSwingCalibration {
     var phase = CalibrationPhase.IDLE
@@ -44,6 +52,10 @@ class SlowSwingCalibration {
         private set
     var record: CalibrationRecord? = null
         private set
+
+    /** The accepted record, only once neutral and slow swing both passed. */
+    val completedRecord: CalibrationRecord?
+        get() = if (phase == CalibrationPhase.COMPLETE) record else null
     private var hand = CalibrationHand.RIGHT
     private val neutral = mutableListOf<MotionSample>()
     private val swing = mutableListOf<MotionSample>()

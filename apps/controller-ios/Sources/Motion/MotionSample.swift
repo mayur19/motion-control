@@ -118,6 +118,17 @@ enum CalibrationPhase: Equatable, Sendable {
     case capturingSlowSwing
     case complete
     case failed(CalibrationFailure)
+
+    /// What a (re)join does: a completed calibration is resent so reconnects
+    /// resume streaming; anything else returns the player to calibration.
+    var joinAction: JoinCalibrationAction {
+        self == .complete ? .resendStoredCalibration : .calibrate
+    }
+}
+
+enum JoinCalibrationAction: Equatable, Sendable {
+    case calibrate
+    case resendStoredCalibration
 }
 
 /// Deterministic TMB-027 calibration validator. UI code owns timing and feeds
@@ -125,6 +136,9 @@ enum CalibrationPhase: Equatable, Sendable {
 final class SlowSwingCalibration {
     private(set) var phase: CalibrationPhase = .idle
     private(set) var record: CalibrationRecord?
+
+    /// The accepted record, only once neutral and slow swing both passed.
+    var completedRecord: CalibrationRecord? { phase == .complete ? record : nil }
     private var hand: CalibrationHand = .right
     private var neutralSamples: [MotionSample] = []
     private var swingSamples: [MotionSample] = []
