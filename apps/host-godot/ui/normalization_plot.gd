@@ -15,6 +15,8 @@ const GRID := Color("2a3a4d")
 const TEXT := Color("9fb0c5")
 const MIN_SCALE_RAD_S := 2.0
 const PANEL_GAP := 12.0
+const OVERLAY_HEIGHT := 220.0
+const OVERLAY_MARGIN := 16.0
 
 ## controller_id -> {raw: [Array x3], normalized: [Array x3]}
 var _history: Dictionary = {}
@@ -26,6 +28,18 @@ func _ready() -> void:
 	custom_minimum_size = Vector2(0, 180)
 	size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	set_process_unhandled_key_input(true)
+
+
+## Pins the plot across the bottom of a full-window parent, above the layout,
+## so the fixed 1280x720 host stack cannot push it off-screen.
+func place_as_overlay() -> void:
+	set_anchors_preset(Control.PRESET_BOTTOM_WIDE)
+	offset_left = OVERLAY_MARGIN
+	offset_right = -OVERLAY_MARGIN
+	offset_top = -OVERLAY_HEIGHT - OVERLAY_MARGIN
+	offset_bottom = -OVERLAY_MARGIN
+	z_index = 10
+	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 
 func bind_ingest(ingest: MotionIngest) -> void:

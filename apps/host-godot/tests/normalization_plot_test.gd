@@ -48,6 +48,20 @@ func _run() -> void:
 	plot.queue_redraw()
 	await process_frame
 
+	# The host layout is a full 1280x720 stack; the plot must overlay the
+	# window bottom instead of being pushed off-screen by the stack.
+	var window := Control.new()
+	window.size = Vector2(1280, 720)
+	root.add_child(window)
+	var overlay := Plot.new()
+	window.add_child(overlay)
+	overlay.place_as_overlay()
+	overlay.visible = true
+	await process_frame
+	var rect := overlay.get_rect()
+	if rect.position.y < 0 or rect.end.y > 720.5 or rect.size.y < 180 or rect.size.x < 1000:
+		return _fail("Overlay plot not fully on screen: %s" % str(rect))
+
 	print("TMB-028_NORMALIZATION_PLOT_OK history=%d f5_toggle=true calibrated_only=true" % Plot.HISTORY)
 	quit(0)
 

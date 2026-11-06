@@ -267,8 +267,6 @@ func _build_interface() -> void:
 
 	diagnostics_hud = DiagnosticsHUDNode.new()
 	content.add_child(diagnostics_hud)
-	normalization_plot = NormalizationPlotNode.new()
-	content.add_child(normalization_plot)
 
 	var footer := _label(
 		"Fixed simulation: %d Hz  •  Local session  •  Engineering shell" %
@@ -278,6 +276,12 @@ func _build_interface() -> void:
 	)
 	footer.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	content.add_child(footer)
+
+	# F5 debug plot overlays the window bottom (TMB-028); it is not part of the
+	# layout stack, which already fills the 720 px window.
+	normalization_plot = NormalizationPlotNode.new()
+	add_child(normalization_plot)
+	normalization_plot.place_as_overlay()
 
 
 func _player_card(title: String, state: String, badge: String) -> PanelContainer:
