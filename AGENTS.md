@@ -121,5 +121,5 @@ Open items (not blocking M2 unless noted):
 - The PRD's thresholds for rate and frame stall were set by the owner for
   TMB-022: median >= 99 Hz, no frame > 150 ms, frame p99 < 50 ms.
 
-Next by plan: TMB-028 host calibration (implemented, physical plot pending), TMB-029
+Next by plan: TMB-028 host calibration (Review; live F5 overlay check pending), TMB-029
 capture/replay tools, and onward per `implementation-tickets/README.md`.

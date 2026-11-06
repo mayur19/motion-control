@@ -1,0 +1,42 @@
+TMB-028 host calibration application and verification evidence
+Date: 2026-11-06 Asia/Kolkata
+Commits: 98700d1 (normalizer, gating, logging, plots, fixtures), a84d785 (F5
+plot overlay fix)
+
+Automated
+- godot ... --script res://tests/calibration_normalizer_test.gd
+  TMB-028_NORMALIZER_OK session_scoped=true active_session_only=true
+  pause_on_invalid=true raw_unchanged=true
+- godot ... --script res://tests/calibration_ingest_test.gd
+  TMB-028_NORMALIZED_LOG_OK packet_records_unchanged=true
+  TMB-027_CALIBRATION_INGEST_OK handedness=left common_frame=true logged=true
+  raw_separate=true  (also: CALIBRATION from an unpaired IP ignored; motion
+  after session rotation not normalized)
+- godot ... --script res://tests/calibration_normalization_fixture_test.gd
+  TMB-028_NORMALIZATION_FIXTURE_OK variants=4 samples=120 max_error=0.000006
+  (iOS- and Android-like yaw origins, tilts and biases; right and left hand.
+  Mutation check: mislabelling one left-hand variant fails at step 1 with
+  error 0.0115.)
+- godot ... --script res://tests/normalization_plot_test.gd
+  TMB-028_NORMALIZATION_PLOT_OK history=240 f5_toggle=true calibrated_only=true
+  (overlay stays fully inside a 1280x720 window)
+- Full host suite 22/22, --smoke-test OK, python3 -m pytest tools/ 25 passed.
+
+Physical (iPhone 17e, operator-performed short session, host run with
+--log-normalized-motion; one right-hand calibration, then four slow swings)
+- Log: 3354 packet records, 3192 normalized_sample records, one
+  `calibration` and one `calibration_state calibrated` event.
+- Plot: docs/evidence/TMB-028-raw-vs-normalized-iphone.png
+  (tools/plot-normalization.py), raw device-frame axes beside the common
+  racket frame for acceleration and angular velocity.
+- Consistency: normalization is bias subtraction plus rotation, so vector
+  length must be preserved. Max |norm(raw - bias) - norm(normalized)| over
+  all 3192 samples: 4.2e-07 m/s² (accel), 4.1e-07 rad/s (gyro).
+- Raw packet records keep only the pre-TMB-028 fields (arrival time,
+  controller, endpoint, message type, size, sequence, session, sensor time,
+  validation); normalized values appear only in normalized_sample records.
+
+Not verified physically
+- The live F5 overlay after the a84d785 fix (operator confirmation pending).
+- Galaxy normalized capture (covered by the cross-platform fixture and the
+  TMB-027 Galaxy calibration run).

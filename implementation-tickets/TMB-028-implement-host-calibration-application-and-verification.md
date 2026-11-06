@@ -1,6 +1,6 @@
 # TMB-028 — Implement host calibration application and verification
 
-**Status:** In Progress — implementation complete; physical plot evidence pending
+**Status:** Review — evidence recorded; live F5 overlay confirmation pending
 
 **Labels:** `detection`, `host`, `quality`  
 **Estimate:** 1 day  
@@ -49,4 +49,9 @@
 - Known limits: the controller is not told when the host pauses it (no
   protocol message); duplicate/reordered sequences still reach the
   normalized stream and are left to the detector (TMB-030+) to de-duplicate.
+- Evidence (2026-11-06): `docs/evidence/TMB-028-host-calibration.txt` and the
+  physical iPhone plot `docs/evidence/TMB-028-raw-vs-normalized-iphone.png`
+  (3192 normalized samples; vector lengths preserved to 4e-7). The first F5
+  attempt showed nothing because the plot was laid out below the 720 px
+  window; fixed in `a84d785` as a bottom overlay.
 
