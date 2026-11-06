@@ -10,6 +10,10 @@ signal calibration_received(controller_id: int, calibration: Dictionary)
 ## this signal, never `sample_received`, so invalid calibration cannot reach it.
 signal normalized_sample_received(sample: Dictionary)
 signal calibration_state_changed(controller_id: int, state: String, reason: String)
+## Byte-exact MOTION/CALIBRATION datagrams that passed pairing/endpoint gates,
+## for TMB-029 capture. Never carries HELLO (pairing secret) or other control
+## traffic, so captures can be replayed without storing secrets.
+signal datagram_accepted(packet: PackedByteArray, endpoint: String, arrival_ns: int)
 signal message_received(message: Dictionary, source_ip: String, source_port: int, arrival_ns: int)
 
 const Codec = preload("res://protocol/protocol_v1.gd")
@@ -143,6 +147,15 @@ func snapshot() -> Dictionary:
 	}
 
 
+## Processes one datagram exactly as the UDP poll loop does. Offline replay
+## (TMB-029) uses this so recorded and live traffic share one code path.
+func ingest_datagram(packet: PackedByteArray, endpoint: String, arrival_ns: int) -> void:
+	var separator := endpoint.rfind(":")
+	var source_ip := endpoint.substr(0, separator) if separator >= 0 else endpoint
+	var source_port := int(endpoint.substr(separator + 1)) if separator >= 0 else 0
+	_process_packet(packet, endpoint, arrival_ns, source_ip, source_port)
+
+
 func send_to(packet: PackedByteArray, destination_ip: String, destination_port: int) -> Error:
 	if not is_running():
 		return ERR_UNCONFIGURED
@@ -195,6 +208,7 @@ func _process_packet(
 			_rejections["CALIBRATION_NOT_PAIRED"] = int(_rejections.get("CALIBRATION_NOT_PAIRED", 0)) + 1
 			packet_rejected.emit("CALIBRATION_NOT_PAIRED")
 			return
+		datagram_accepted.emit(packet, endpoint, arrival_ns)
 		if int(decoded.payload.result) == 1:
 			var calibration := {
 				"handedness": "right" if int(decoded.payload.handedness) == 1 else "left",
@@ -224,6 +238,7 @@ func _process_packet(
 	):
 		_paused_motion_packets += 1
 		return
+	datagram_accepted.emit(packet, endpoint, arrival_ns)
 	var metrics := _metrics_for(controller_id, endpoint)
 	if int(metrics.received) > 0 and str(metrics.endpoint) != endpoint:
 		_begin_new_stream(metrics)

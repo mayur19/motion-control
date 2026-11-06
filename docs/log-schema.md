@@ -73,6 +73,13 @@ controller: `controller_id`, `state` (`calibrated` or `paused`) and `reason`
 (for example `INVALID_QUATERNION`). A paused controller sends nothing to swing
 detection until it delivers a new valid `CALIBRATION`.
 
+The `detector_config` event (once at host start) records the live detector's
+`detector` name, `version` and full `config`. Each `detector_event` records
+`detector`, `controller_id`, `sequence`, the source `sensor_monotonic_ns` and
+`arrival_monotonic_ns`, and detector-specific fields (the TMB-029 placeholder
+adds `angular_speed_rad_s`). Labeled raw captures are separate files; see
+`docs/capture-format.md`.
+
 ## Normalized sample record
 
 Opt-in with `--log-normalized-motion` (or the

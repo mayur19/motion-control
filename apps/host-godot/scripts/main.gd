@@ -4,6 +4,8 @@ const MotionIngestNode = preload("res://network/motion_ingest.gd")
 const SessionLoggerNode = preload("res://logging/session_logger.gd")
 const DiagnosticsHUDNode = preload("res://ui/diagnostics_hud.gd")
 const NormalizationPlotNode = preload("res://ui/normalization_plot.gd")
+const CapturePanelNode = preload("res://ui/capture_panel.gd")
+const DetectorPipelineScript = preload("res://detection/detector_pipeline.gd")
 const SessionManagerNode = preload("res://session/session_manager.gd")
 const QrCodeGeneratorNode = preload("res://addons/greaby_qrcode/qr_code.gd")
 const PairingServerNode = preload("res://session/pairing_server.gd")
@@ -26,6 +28,8 @@ var motion_ingest: MotionIngest
 var session_logger: SessionLogger
 var diagnostics_hud: DiagnosticsHUD
 var normalization_plot: NormalizationPlot
+var capture_panel: CapturePanel
+var detector_pipeline := DetectorPipelineScript.new()
 var session_manager: HostSessionManager
 var qr_generator: QrCode
 var session_address_label: Label
@@ -101,6 +105,8 @@ func _start_motion_ingest() -> void:
 		return
 	diagnostics_hud.bind_ingest(motion_ingest)
 	normalization_plot.bind_ingest(motion_ingest)
+	capture_panel.bind_ingest(motion_ingest)
+	detector_pipeline.bind_ingest(motion_ingest)
 	motion_ingest.set_session_manager(session_manager)
 	pairing_server = PairingServerNode.new()
 	add_child(pairing_server)
@@ -215,6 +221,10 @@ func _start_session_logger(port: int) -> void:
 	soak_telemetry = SoakTelemetryNode.new()
 	add_child(soak_telemetry)
 	soak_telemetry.attach(motion_ingest, clock_service, connection_manager, session_logger)
+	detector_pipeline.event_detected.connect(func(event: Dictionary) -> void:
+		session_logger.log_event("detector_event", event)
+	)
+	session_logger.log_event("detector_config", detector_pipeline.describe())
 	session_logger.log_event("host_started", {
 		"udp_port": port,
 		"reconnect_window_s": pairing_server.reconnect_window_ms() / 1000,
@@ -282,6 +292,10 @@ func _build_interface() -> void:
 	normalization_plot = NormalizationPlotNode.new()
 	add_child(normalization_plot)
 	normalization_plot.place_as_overlay()
+	# F6 labeled capture controls (TMB-029), also an overlay.
+	capture_panel = CapturePanelNode.new()
+	add_child(capture_panel)
+	capture_panel.place_as_overlay()
 
 
 func _player_card(title: String, state: String, badge: String) -> PanelContainer:

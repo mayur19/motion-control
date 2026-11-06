@@ -60,6 +60,10 @@ cd apps/controller-android
 export JAVA_HOME=/opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk/Contents/Home ANDROID_HOME=$HOME/Library/Android/sdk
 ./gradlew testDebugUnitTest assembleDebug && adb install -r app/build/outputs/apk/debug/app-debug.apk
 
+# Capture (host F6 panel) and offline replay (TMB-029; docs/capture-format.md)
+godot --headless --path apps/host-godot --script res://replay/replay_capture.gd -- --capture=DIR --output=result.json
+python3 -I tools/capture-labels.py {list|verify|correct --take N --set field=value} DIR
+
 # Tools
 python3 -m pytest -q tools/
 python3 -I tools/check-reconnect-log.py <session.jsonl>          # TMB-021 physical reconnect checks

@@ -14,6 +14,7 @@ var _calibration_events := 0
 var _sample: Dictionary = {}
 var _normalized_samples: Array[Dictionary] = []
 var _calibration_states: Array[String] = []
+var _accepted_datagrams: Array[int] = []
 
 
 func _initialize() -> void:
@@ -33,6 +34,9 @@ func _initialize() -> void:
 	ingest.calibration_received.connect(func(_id: int, _value: Dictionary): _calibration_events += 1)
 	ingest.sample_received.connect(func(value: Dictionary): _sample = value)
 	ingest.normalized_sample_received.connect(func(value: Dictionary): _normalized_samples.append(value))
+	ingest.datagram_accepted.connect(
+		func(packet: PackedByteArray, _endpoint: String, _arrival: int): _accepted_datagrams.append(packet[3])
+	)
 	ingest.calibration_state_changed.connect(
 		func(_id: int, state: String, _reason: String): _calibration_states.append(state)
 	)
@@ -149,6 +153,10 @@ func _initialize() -> void:
 	ingest._process_packet(after_rotation.data, "192.0.2.1:7000", 2_200_000_000)
 	if _normalized_samples.size() != 1 or str(_sample.get("calibration_state", "")) != "uncalibrated":
 		_fail("Old-session motion must not be normalized after session rotation: %s" % str(_sample))
+		return
+
+	if _accepted_datagrams != [Codec.TYPE_MOTION, Codec.TYPE_CALIBRATION, Codec.TYPE_MOTION, Codec.TYPE_MOTION]:
+		_fail("datagram_accepted must carry exactly the accepted MOTION/CALIBRATION: %s" % str(_accepted_datagrams))
 		return
 
 	print("TMB-028_NORMALIZED_LOG_OK packet_records_unchanged=true")
