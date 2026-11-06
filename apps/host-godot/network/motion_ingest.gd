@@ -5,9 +5,11 @@ signal metrics_updated(controller_id: int, metrics: Dictionary)
 signal packet_rejected(reason: String)
 signal packet_observed(record: Dictionary)
 signal sample_received(sample: Dictionary)
+signal calibration_received(controller_id: int, calibration: Dictionary)
 signal message_received(message: Dictionary, source_ip: String, source_port: int, arrival_ns: int)
 
 const Codec = preload("res://protocol/protocol_v1.gd")
+const RacketFrameTransform = preload("res://motion/racket_frame.gd")
 const MAX_PACKETS_PER_FRAME := 512
 const MAX_POLL_MICROSECONDS := 2000
 const RECENT_SEQUENCE_CAPACITY := 512
@@ -25,6 +27,7 @@ var _max_poll_microseconds := 0
 var _clock_service: HostClockService
 var _connection_manager: ControllerConnectionManager
 var _paused_motion_packets := 0
+var _calibrations: Dictionary = {}
 
 
 func start(port: int, bind_address := "0.0.0.0") -> Error:
@@ -170,6 +173,20 @@ func _process_packet(
 		"sensor_monotonic_ns": decoded.payload.get("sensor_monotonic_ns", 0),
 	})
 	message_received.emit(decoded, source_ip, source_port, arrival_ns)
+	if decoded.header.message_type == Codec.TYPE_CALIBRATION:
+		var calibration_controller_id: int = decoded.header.controller_id
+		if int(decoded.payload.result) == 1:
+			var calibration := {
+				"handedness": "right" if int(decoded.payload.handedness) == 1 else "left",
+				"neutral_orientation": decoded.payload.neutral_orientation,
+				"acceleration_bias": decoded.payload.acceleration_bias,
+				"gyroscope_bias": decoded.payload.gyroscope_bias,
+				"quality": decoded.payload.quality,
+				"sensor_monotonic_ns": decoded.payload.sensor_monotonic_ns,
+			}
+			_calibrations[calibration_controller_id] = calibration
+			calibration_received.emit(calibration_controller_id, calibration.duplicate(true))
+		return
 	if decoded.header.message_type != Codec.TYPE_MOTION:
 		return
 
@@ -205,6 +222,15 @@ func _process_packet(
 		"sensor_flags": decoded.payload.sensor_flags,
 		"packet_size": packet.size(),
 	}
+	if _calibrations.has(controller_id) and (int(decoded.payload.sensor_flags) & 0x10) == 0:
+		var transformed := RacketFrameTransform.transform_sample(sample, _calibrations[controller_id])
+		if not transformed.ok:
+			packet_rejected.emit("INVALID_CALIBRATION_TRANSFORM")
+			return
+		sample.acceleration = transformed.acceleration
+		sample.angular_velocity = transformed.angular_velocity
+		sample.orientation = transformed.orientation
+		sample["common_racket_frame"] = true
 	if _clock_service != null:
 		var adjusted := _clock_service.controller_to_host(controller_id, int(decoded.payload.sensor_monotonic_ns))
 		sample["clock_synchronized"] = bool(adjusted.initialized)

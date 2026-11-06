@@ -133,7 +133,7 @@
     },
     {
       "file": "positive/calibration.bin",
-      "sha256": "603b4dfefb2a7770fccd4e917e0f16f8fb89c1ce3346c7dd1aea3a0aa927ad2c",
+      "sha256": "ee5de3cae2dc66dd0bc743172ec5d172842c5ec9ecf53235c2bf9cfdaeac71dc",
       "message_type": 6,
       "message_name": "CALIBRATION",
       "expected": {
@@ -163,7 +163,8 @@
             0.03
           ],
           "quality": 0.95,
-          "result": 1
+          "result": 1,
+          "handedness": 1
         }
       }
     },

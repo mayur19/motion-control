@@ -149,7 +149,29 @@ sensors, so the calibration UI must show it and ask for confirmation. Failed
 captures retain no active transform and must return a specific corrective
 reason.
 
-## 6. Numeric examples
+## 6. Controlled slow-swing acceptance range
+
+After neutral capture succeeds, the player performs exactly one controlled
+practice swing. Both native controllers apply the same checks:
+
+| Check | Required range |
+| --- | --- |
+| Capture duration | 600 ms to 3 s |
+| Accepted samples | At least 50 and at least 100 Hz effective rate |
+| Orientation excursion | 20° to 140° from the first swing sample |
+| Peak angular speed | 0.6 to 5.0 rad/s |
+| Sensor availability | Acceleration, gyroscope and orientation valid on every sample |
+
+The UI must say “slow, controlled practice swing” and must explicitly prohibit
+a full-force swing. Excursion or angular speed below the minimum asks for a
+wider controlled arc. Either maximum being exceeded asks the player to slow
+down. A successful record includes protocol version 1, the selected hand,
+neutral quaternion, acceleration bias, gyroscope bias and quality.
+
+Repeatability is tested with two captures whose acceleration bias differs by
+0.01 m/s² on one axis; the accepted records must remain within 0.02 m/s².
+
+## 7. Numeric examples
 
 ### Handedness
 
@@ -173,7 +195,7 @@ For a right-handed player with identity neutral and a live +90° rotation about
 `+Y`, `q_t = (0, 0.70710678, 0, 0.70710678)`. A device vector `(1, 0, 0)` maps
 to approximately `(0, 0, -1)` in the common frame.
 
-## 7. Executable fixture contract
+## 8. Executable fixture contract
 
 `protocol/racket-coordinate-fixtures.json` is the language-neutral executable
 contract. Every future Swift, Kotlin or GDScript implementation must consume

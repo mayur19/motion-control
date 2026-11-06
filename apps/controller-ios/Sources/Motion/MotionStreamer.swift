@@ -38,6 +38,35 @@ enum MotionPacketFactory {
     }
 }
 
+enum CalibrationPacketFactory {
+    static func encode(
+        record: CalibrationRecord,
+        sessionID: UInt64,
+        controllerID: UInt32,
+        sequence: UInt32
+    ) throws -> Data {
+        try ProtocolV1.encode(ProtocolV1.Message(
+            header: ProtocolV1.Header(
+                protocolVersion: ProtocolV1.version,
+                messageType: .calibration,
+                flags: 0,
+                sessionID: sessionID,
+                controllerID: controllerID,
+                sequence: sequence
+            ),
+            payload: .calibration(ProtocolV1.Calibration(
+                sensorMonotonicNs: record.sensorMonotonicNanoseconds,
+                neutralOrientation: record.neutralOrientation,
+                accelerationBias: record.accelerationBias,
+                gyroscopeBias: record.gyroscopeBias,
+                quality: record.quality,
+                result: 1,
+                handedness: record.hand.rawValue
+            ))
+        ))
+    }
+}
+
 final class MotionStreamer: ObservableObject, @unchecked Sendable {
     @Published private(set) var snapshot = MotionStreamerSnapshot(
         sent: 0,
@@ -131,6 +160,35 @@ final class MotionStreamer: ObservableObject, @unchecked Sendable {
         refreshTimer?.invalidate()
         refreshTimer = nil
         publish(status: "Stopped")
+    }
+
+    @MainActor
+    func sendCalibration(
+        _ record: CalibrationRecord,
+        host: String,
+        port: UInt16,
+        completion: @escaping @MainActor (Bool) -> Void
+    ) {
+        guard !host.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+              let endpointPort = NWEndpoint.Port(rawValue: port),
+              let packet = try? CalibrationPacketFactory.encode(
+                record: record,
+                sessionID: sessionID,
+                controllerID: controllerID,
+                sequence: sequence
+              ) else {
+            completion(false)
+            return
+        }
+        sequence &+= 1
+        let calibrationConnection = NWConnection(
+            host: NWEndpoint.Host(host), port: endpointPort, using: .udp
+        )
+        calibrationConnection.start(queue: worker)
+        calibrationConnection.send(content: packet, completion: .contentProcessed { error in
+            calibrationConnection.cancel()
+            Task { @MainActor in completion(error == nil) }
+        })
     }
 
     private func sendOneIfAvailable() {

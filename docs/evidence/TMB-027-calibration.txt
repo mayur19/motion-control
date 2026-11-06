@@ -1,0 +1,56 @@
+TMB-027 slow-swing calibration evidence
+Date: 2026-11-06 Asia/Kolkata
+
+Implemented at checkpoint
+- Mirrored Swift/Kotlin neutral and controlled slow-swing validation.
+- Explicit right/left hand selection and screen-facing confirmation.
+- Invalid orientation, instability, bias, sample-rate, small/fast/long swing
+  failures have specific corrective messages.
+- Both UIs prohibit full-force calibration swings.
+- Successful calibration is sent before MOTION streaming starts.
+- Protocol v1 CALIBRATION byte 53 carries handedness; all codecs and golden
+  fixtures updated atomically (ADR-010).
+- Host retains successful calibration and publishes transformed common-frame
+  motion; visualization and pause-on-invalid remain scoped to TMB-028.
+
+Verified
+1. Android JVM suite
+   ANDROID_HOME=/Users/napkin/Library/Android/sdk ./gradlew testDebugUnitTest --no-daemon
+   Result: BUILD SUCCESSFUL; includes both hands, repeatability, invalid
+   orientation and CALIBRATION handedness round trip.
+
+2. Golden vectors regenerated
+   ruby protocol/golden-vectors/generate.rb
+   Result: Generated 8 positive and 7 negative fixtures.
+
+3. Godot protocol fixture suite
+   godot --headless --path apps/host-godot --script res://tests/protocol_fixture_test.gd
+   Result: TMB-009_GDSCRIPT_CODEC_OK positives=8 negatives=7.
+
+4. iOS simulator suite
+   xcodebuild test -project MotionControllerIOS.xcodeproj \
+     -scheme MotionControllerIOS \
+     -destination 'platform=iOS Simulator,name=iPhone 17 QA' \
+     CODE_SIGNING_ALLOWED=NO
+   Result: TEST SUCCEEDED; 27 tests, 0 failures. Calibration cases cover both
+   hands, repeatability, invalid orientation and handedness wire round trip.
+
+5. Godot calibration ingest
+   godot --headless --path apps/host-godot \
+     --script res://tests/calibration_ingest_test.gd
+   Result: TMB-027_CALIBRATION_INGEST_OK handedness=left common_frame=true.
+
+6. Fixture drift and whitespace
+   ruby protocol/golden-vectors/generate.rb --check
+   git diff --check
+   Result: TMB-008_FIXTURES_OK positives=8 negatives=7; no whitespace errors.
+
+7. Remaining build/smoke checks
+   ANDROID_HOME=/Users/napkin/Library/Android/sdk ./gradlew assembleDebug --no-daemon
+   godot --headless --path apps/host-godot --script res://tests/racket_frame_test.gd
+   Result: Android BUILD SUCCESSFUL; TMB-026_RACKET_FRAME_OK cases=7 invalid_checks=2.
+
+Checkpoint caveat
+- No physical-phone calibration was requested or performed in this checkpoint;
+  automated evidence uses identical synthetic sensor cases for both native
+  implementations and both hands.

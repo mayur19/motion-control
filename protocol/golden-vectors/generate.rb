@@ -73,7 +73,7 @@ motion_payload = [123_456_789].pack("Q>") +
   [3, 7, 0].pack("CCn")
 calibration_payload = [123_500_000].pack("Q>") +
   floats(0.0, 0.0, 0.0, 1.0, 0.1, -0.1, 0.05, 0.01, -0.02, 0.03, 0.95) +
-  [1].pack("C") + "\x00\x00\x00"
+  [1, 1].pack("CC") + "\x00\x00"
 status_payload = [999_000_000, 85, 2, 0, 0, 200, 0, 42].pack("Q>CCCCnnN")
 goodbye_payload = [1].pack("C") + "\x00\x00\x00" + [99, 123_999_999].pack("NQ>")
 
@@ -158,7 +158,8 @@ positive = {
       accel_bias_xyz: [0.1, -0.1, 0.05],
       gyro_bias_xyz: [0.01, -0.02, 0.03],
       quality: 0.95,
-      result: 1
+      result: 1,
+      handedness: 1
     }
   },
   "status.bin" => {

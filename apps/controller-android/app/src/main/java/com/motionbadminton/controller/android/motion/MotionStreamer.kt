@@ -45,6 +45,31 @@ object MotionPacketFactory {
         )
 }
 
+object CalibrationPacketFactory {
+    fun encode(record: CalibrationRecord, sessionId: ULong, controllerId: UInt, sequence: UInt) =
+        ProtocolV1.encode(
+            ProtocolV1.Message(
+                ProtocolV1.Header(
+                    ProtocolV1.VERSION,
+                    ProtocolV1.MessageType.CALIBRATION,
+                    0,
+                    sessionId,
+                    controllerId,
+                    sequence,
+                ),
+                ProtocolV1.Calibration(
+                    record.sensorMonotonicNanoseconds.toULong(),
+                    record.neutralOrientation,
+                    record.accelerationBias,
+                    record.gyroscopeBias,
+                    record.quality,
+                    1,
+                    record.hand.code,
+                ),
+            ),
+        )
+}
+
 class MotionStreamer(
     context: Context,
     private val buffer: MotionSampleBuffer,
@@ -117,6 +142,25 @@ class MotionStreamer(
         synchronized(lock) {
             status = "Stopped"
             recentSends.clear()
+        }
+    }
+
+    fun sendCalibration(record: CalibrationRecord, host: String, port: Int): Boolean {
+        if (host.isBlank() || port !in 1..65535) return false
+        return try {
+            val packet: ByteArray
+            synchronized(lock) {
+                packet = CalibrationPacketFactory.encode(record, sessionId, controllerId, sequence)
+                sequence++
+            }
+            DatagramSocket().use { calibrationSocket ->
+                wifiNetwork.bind(calibrationSocket)
+                calibrationSocket.send(DatagramPacket(packet, packet.size, InetAddress.getByName(host), port))
+            }
+            true
+        } catch (_: Exception) {
+            synchronized(lock) { networkErrors++ }
+            false
         }
     }
 

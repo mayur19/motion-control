@@ -60,4 +60,79 @@ final class MotionPipelineTests: XCTestCase {
             XCTAssertEqual(packet.count, ProtocolV1.headerSize + 52)
         }
     }
+
+    func testSlowSwingCalibrationAcceptsBothHandsAndIsRepeatable() throws {
+        for hand in CalibrationHand.allCases {
+            let first = try completedCalibration(hand: hand, accelerationBias: SIMD3<Float>(0.02, -0.01, 0.03))
+            let second = try completedCalibration(hand: hand, accelerationBias: SIMD3<Float>(0.03, -0.01, 0.03))
+            XCTAssertEqual(first.hand, hand)
+            XCTAssertLessThan(abs(first.accelerationBias.x - second.accelerationBias.x), 0.02)
+            XCTAssertGreaterThanOrEqual(first.quality, 0.6)
+        }
+    }
+
+    func testCalibrationRejectsInvalidPhoneOrientation() throws {
+        let calibration = SlowSwingCalibration()
+        try calibration.beginNeutral(hand: .right, screenFacingPlayerConfirmed: true)
+        for index in 0...120 {
+            calibration.append(calibrationSample(index: index, orientation: SIMD4<Float>(0, 0, 0, 1)))
+        }
+        XCTAssertThrowsError(try calibration.finishNeutral()) { error in
+            XCTAssertEqual(error as? CalibrationFailure, .invalidOrientation)
+        }
+    }
+
+    func testCalibrationRecordEncodesHandedness() throws {
+        let record = try completedCalibration(hand: .left, accelerationBias: .zero)
+        let packet = try CalibrationPacketFactory.encode(
+            record: record,
+            sessionID: 1,
+            controllerID: 2,
+            sequence: 0
+        )
+        guard case let .calibration(payload) = try ProtocolV1.decode(packet).payload else {
+            return XCTFail("Expected CALIBRATION")
+        }
+        XCTAssertEqual(payload.handedness, CalibrationHand.left.rawValue)
+    }
+
+    private func completedCalibration(
+        hand: CalibrationHand, accelerationBias: SIMD3<Float>
+    ) throws -> CalibrationRecord {
+        let calibration = SlowSwingCalibration()
+        try calibration.beginNeutral(hand: hand, screenFacingPlayerConfirmed: true)
+        let upright = SIMD4<Float>(sin(.pi / 4), 0, 0, cos(.pi / 4))
+        for index in 0...120 {
+            calibration.append(calibrationSample(index: index, orientation: upright, acceleration: accelerationBias))
+        }
+        _ = try calibration.finishNeutral()
+        calibration.beginSlowSwing()
+        for index in 0...120 {
+            let angle = Float.pi / 2 + (Float(index) / 120) * (.pi / 6)
+            let orientation = SIMD4<Float>(sin(angle / 2), 0, 0, cos(angle / 2))
+            calibration.append(calibrationSample(
+                index: index,
+                orientation: orientation,
+                acceleration: accelerationBias,
+                angularVelocity: SIMD3<Float>(1, 0, 0)
+            ))
+        }
+        return try calibration.finishSlowSwing()
+    }
+
+    private func calibrationSample(
+        index: Int,
+        orientation: SIMD4<Float>,
+        acceleration: SIMD3<Float> = .zero,
+        angularVelocity: SIMD3<Float> = .zero
+    ) -> MotionSample {
+        MotionSample(
+            monotonicNanoseconds: 1_000_000_000 + UInt64(index) * 5_000_000,
+            acceleration: acceleration,
+            angularVelocity: angularVelocity,
+            orientation: orientation,
+            accuracy: 3,
+            sensorFlags: 0x07
+        )
+    }
 }

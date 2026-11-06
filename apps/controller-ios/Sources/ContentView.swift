@@ -9,6 +9,8 @@ struct ContentView: View {
     @State private var manualJoinURI = ""
     @State private var showingScanner = false
     @State private var processedLaunchJoin = false
+    @State private var calibrationHand: CalibrationHand = .right
+    @State private var screenFacingConfirmed = false
     @StateObject private var motion = MotionRuntime()
     @StateObject private var pairing = PairingClient()
 
@@ -66,7 +68,7 @@ struct ContentView: View {
                 if newPhase == .active,
                    controllerState == .paused,
                    pairing.assignment != nil {
-                    controllerState = .connected
+                    controllerState = motion.calibrationPhase == .complete ? .connected : .calibration
                 }
                 updateMotionRuntime()
                 pairing.updateStatus(
@@ -163,10 +165,38 @@ struct ContentView: View {
                 .buttonStyle(.bordered)
                 .tint(accent)
             }
+
+            if controllerState == .calibration {
+                calibrationControls
+            }
         }
         .padding(22)
         .frame(maxWidth: .infinity)
         .background(panel, in: RoundedRectangle(cornerRadius: 18))
+    }
+
+    private var calibrationControls: some View {
+        VStack(spacing: 12) {
+            Picker("Hand", selection: $calibrationHand) {
+                ForEach(CalibrationHand.allCases) { hand in Text(hand.title).tag(hand) }
+            }
+            .pickerStyle(.segmented)
+            Toggle("Screen faces me", isOn: $screenFacingConfirmed)
+            Text(motion.calibrationMessage)
+                .font(.caption)
+                .foregroundStyle(motion.calibrationPhase.isFailure ? .orange : .secondary)
+                .multilineTextAlignment(.center)
+            Text("Safety: use only a slow practice swing — never a full-force swing during calibration.")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.orange)
+                .multilineTextAlignment(.center)
+            Button(calibrationActionTitle) { performCalibrationAction() }
+                .buttonStyle(.borderedProminent)
+                .tint(accent)
+                .foregroundStyle(.black)
+                .disabled(calibrationActionDisabled)
+        }
+        .padding(.top, 4)
     }
 
     private var debugPanel: some View {
@@ -288,8 +318,41 @@ struct ContentView: View {
                 sessionID: assignment.sessionID,
                 controllerID: assignment.controllerID
             )
-            controllerState = .connected
+            controllerState = .calibration
             UIApplication.shared.isIdleTimerDisabled = true
+        }
+    }
+
+    private func performCalibrationAction() {
+        switch motion.calibrationPhase {
+        case .idle, .failed:
+            motion.beginNeutral(
+                hand: calibrationHand,
+                screenFacingPlayerConfirmed: screenFacingConfirmed
+            )
+        case .readyForSlowSwing:
+            motion.beginSlowSwing(host: debugHost, port: UInt16(debugPort) ?? 7000) { sent in
+                if sent { controllerState = .connected }
+            }
+        default:
+            break
+        }
+    }
+
+    private var calibrationActionTitle: String {
+        switch motion.calibrationPhase {
+        case .readyForSlowSwing: "Start slow swing"
+        case .capturingNeutral: "Capturing neutral…"
+        case .capturingSlowSwing: "Capturing slow swing…"
+        case .complete: "Calibration complete"
+        default: "Capture neutral pose"
+        }
+    }
+
+    private var calibrationActionDisabled: Bool {
+        switch motion.calibrationPhase {
+        case .capturingNeutral, .capturingSlowSwing, .complete: true
+        default: !screenFacingConfirmed
         }
     }
 
@@ -316,6 +379,13 @@ struct ContentView: View {
 
     private var buildNumber: String {
         Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "unknown"
+    }
+}
+
+private extension CalibrationPhase {
+    var isFailure: Bool {
+        if case .failed = self { return true }
+        return false
     }
 }
 

@@ -262,9 +262,10 @@ static func _decode_payload(message_type: int, reader: Reader) -> Dictionary:
 			var gyro_bias := reader.floats(3)
 			var quality := reader.f32()
 			var calibration_result := reader.u8()
-			if not _all_zero(reader.bytes(3)):
+			var handedness := reader.u8()
+			if not _all_zero(reader.bytes(2)):
 				return _error("NONZERO_RESERVED")
-			if not [1, 2].has(calibration_result):
+			if not [1, 2].has(calibration_result) or not [1, 2].has(handedness):
 				return _error("INVALID_ENUM")
 			var calibration_finite := _finite(neutral + accel_bias + gyro_bias + [quality])
 			if not calibration_finite.ok:
@@ -287,6 +288,7 @@ static func _decode_payload(message_type: int, reader: Reader) -> Dictionary:
 				"gyroscope_bias": gyro_bias,
 				"quality": quality,
 				"result": calibration_result,
+				"handedness": handedness,
 			})
 
 		TYPE_STATUS:
@@ -391,7 +393,8 @@ static func _encode_payload(payload: Dictionary) -> Dictionary:
 			writer.floats(payload.gyroscope_bias)
 			writer.f32(float(payload.quality))
 			writer.u8(int(payload.result))
-			writer.bytes(PackedByteArray([0, 0, 0]))
+			writer.u8(int(payload.handedness))
+			writer.bytes(PackedByteArray([0, 0]))
 		TYPE_STATUS:
 			writer.u64(int(payload.sender_monotonic_ns))
 			writer.u8(int(payload.battery_percent))

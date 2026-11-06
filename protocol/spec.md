@@ -205,10 +205,14 @@ bits 5–7 must be zero.
 | 36 | 12 | `gyro_bias_xyz` | 3 × `f32` | rad/s; finite, each absolute value ≤ 20 |
 | 48 | 4 | `quality` | `f32` | Finite in `[0, 1]` |
 | 52 | 1 | `result` | `u8` | `1` success, `2` failed |
-| 53 | 3 | `reserved` | bytes | All zero |
+| 53 | 1 | `handedness` | `u8` | `1` right, `2` left |
+| 54 | 2 | `reserved` | bytes | All zero |
 
 The same quaternion normalization rule as `MOTION` applies even to a failed
-result so corrupt sensor values cannot enter logs.
+result so corrupt sensor values cannot enter logs. Handedness is selected by
+the player and is never inferred from sensor data. This byte was allocated by
+TMB-027 from the original three-byte reserved tail; packet size and protocol
+version remain unchanged.
 
 ### 4.7 `STATUS` (type 7)
 

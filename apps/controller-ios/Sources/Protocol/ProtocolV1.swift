@@ -92,6 +92,7 @@ enum ProtocolV1 {
         let gyroscopeBias: SIMD3<Float>
         let quality: Float
         let result: UInt8
+        let handedness: UInt8
     }
 
     struct Status: Equatable {
@@ -354,9 +355,12 @@ enum ProtocolV1 {
             let gyroscopeBias = try readVector3(&reader)
             let quality = try reader.readFloat()
             let result = try reader.readUInt8()
-            let reserved = try reader.readData(count: 3)
+            let handedness = try reader.readUInt8()
+            let reserved = try reader.readData(count: 2)
             guard reserved.allSatisfy({ $0 == 0 }) else { throw CodecError.nonzeroReserved }
-            guard [UInt8(1), 2].contains(result) else { throw CodecError.invalidEnum }
+            guard [UInt8(1), 2].contains(result), [UInt8(1), 2].contains(handedness) else {
+                throw CodecError.invalidEnum
+            }
             try validateFinite(
                 vector4Values(orientation) + vector3Values(accelerationBias) +
                     vector3Values(gyroscopeBias) + [quality]
@@ -373,7 +377,8 @@ enum ProtocolV1 {
                 accelerationBias: accelerationBias,
                 gyroscopeBias: gyroscopeBias,
                 quality: quality,
-                result: result
+                result: result,
+                handedness: handedness
             ))
 
         case .status:
@@ -471,7 +476,8 @@ enum ProtocolV1 {
             writer.writeVector3(value.gyroscopeBias)
             writer.writeFloat(value.quality)
             writer.writeUInt8(value.result)
-            writer.writeData(Data(repeating: 0, count: 3))
+            writer.writeUInt8(value.handedness)
+            writer.writeData(Data(repeating: 0, count: 2))
         case let .status(value):
             writer.writeUInt64(value.senderMonotonicNs)
             writer.writeUInt8(value.batteryPercent)

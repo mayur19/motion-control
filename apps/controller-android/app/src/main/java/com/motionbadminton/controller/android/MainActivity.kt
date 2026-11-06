@@ -15,6 +15,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
@@ -23,6 +24,10 @@ import android.graphics.drawable.GradientDrawable
 import com.motionbadminton.controller.android.motion.MotionSampleBuffer
 import com.motionbadminton.controller.android.motion.MotionSampler
 import com.motionbadminton.controller.android.motion.MotionStreamer
+import com.motionbadminton.controller.android.motion.CalibrationException
+import com.motionbadminton.controller.android.motion.CalibrationHand
+import com.motionbadminton.controller.android.motion.CalibrationPhase
+import com.motionbadminton.controller.android.motion.SlowSwingCalibration
 import com.motionbadminton.controller.android.pairing.HostLoss
 import com.motionbadminton.controller.android.pairing.JoinPayload
 import com.motionbadminton.controller.android.pairing.LaunchJoin
@@ -58,12 +63,22 @@ class MainActivity : Activity() {
     private lateinit var motionSampler: MotionSampler
     private lateinit var motionStreamer: MotionStreamer
     private lateinit var pairingClient: PairingClient
+    private lateinit var motionBuffer: MotionSampleBuffer
+    private val calibration = SlowSwingCalibration()
+    private var calibrationHand = CalibrationHand.RIGHT
+    private var calibrationStartedAt = 0L
+    private lateinit var calibrationPanel: View
+    private lateinit var calibrationStatus: TextView
+    private lateinit var calibrationHandButton: Button
+    private lateinit var calibrationConfirmation: CheckBox
+    private lateinit var calibrationAction: Button
     private val refreshHandler = Handler(Looper.getMainLooper())
     private var isForeground = false
     private var sampling = false
     private var streaming = false
     private val refreshMotionDiagnostics = object : Runnable {
         override fun run() {
+            processCalibration()
             renderMotionDiagnostics()
             if (isForeground) refreshHandler.postDelayed(this, 250)
         }
@@ -71,9 +86,9 @@ class MainActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val buffer = MotionSampleBuffer(capacity = 256)
-        motionSampler = MotionSampler(getSystemService(SensorManager::class.java), buffer)
-        motionStreamer = MotionStreamer(this, buffer)
+        motionBuffer = MotionSampleBuffer(capacity = 256)
+        motionSampler = MotionSampler(getSystemService(SensorManager::class.java), motionBuffer)
+        motionStreamer = MotionStreamer(this, motionBuffer)
         pairingClient = PairingClient(this)
         setContentView(buildInterface())
         renderState()
@@ -87,7 +102,9 @@ class MainActivity : Activity() {
         super.onResume()
         isForeground = true
         if (::pairingClient.isInitialized) pairingClient.updateStatus(true, true, 0)
-        val resumedState = controllerState.resumed(paired)
+        val resumedState = if (controllerState == ControllerState.PAUSED && paired) {
+            if (calibration.phase == CalibrationPhase.COMPLETE) ControllerState.CONNECTED else ControllerState.CALIBRATION
+        } else controllerState.resumed(paired)
         if (resumedState != controllerState) {
             controllerState = resumedState
             renderState()
@@ -169,6 +186,41 @@ class MainActivity : Activity() {
             }, matchWrap(top = 4))
         }))
 
+        calibrationPanel = panel(verticalLayout(12).apply {
+            addView(label("CALIBRATION", 13, R.color.text_secondary, true))
+            calibrationStatus = label(
+                "Select your hand, confirm the screen faces you, then capture neutral.",
+                14,
+                R.color.text_secondary,
+            )
+            addView(calibrationStatus)
+            calibrationHandButton = Button(this@MainActivity).apply {
+                text = "Hand: Right"
+                setOnClickListener {
+                    calibrationHand = if (calibrationHand == CalibrationHand.RIGHT) CalibrationHand.LEFT else CalibrationHand.RIGHT
+                    text = "Hand: ${if (calibrationHand == CalibrationHand.RIGHT) "Right" else "Left"}"
+                }
+            }
+            addView(calibrationHandButton)
+            calibrationConfirmation = CheckBox(this@MainActivity).apply {
+                text = "Screen faces me"
+                setOnCheckedChangeListener { _, _ -> renderCalibration() }
+            }
+            addView(calibrationConfirmation)
+            addView(label(
+                "Safety: use only a slow practice swing — never a full-force swing during calibration.",
+                13,
+                R.color.warning,
+                true,
+            ))
+            calibrationAction = Button(this@MainActivity).apply {
+                text = "Capture neutral pose"
+                setOnClickListener { performCalibrationAction() }
+            }
+            addView(calibrationAction)
+        })
+        content.addView(calibrationPanel)
+
         content.addView(panel(verticalLayout(12).apply {
             addView(label("⚒  DEBUG PANEL", 13, R.color.text_secondary, true))
             debugState = addDebugRow("State", "")
@@ -232,6 +284,10 @@ class MainActivity : Activity() {
         stateGuidance.text = controllerState.guidance
         debugState.text = controllerState.displayName
         debugKeepAwake.text = if (controllerState.keepsScreenAwake) "Enabled" else "Disabled"
+        if (::calibrationPanel.isInitialized) {
+            calibrationPanel.visibility = if (controllerState == ControllerState.CALIBRATION) View.VISIBLE else View.GONE
+            renderCalibration()
+        }
         applyKeepAwakePolicy()
         updateMotionRuntime()
         renderMotionDiagnostics()
@@ -307,11 +363,89 @@ class MainActivity : Activity() {
                     debugAssignment.text =
                         "P${result.assignment.player} / ${result.assignment.controllerId.toString(16)}"
                     paired = true
-                    controllerState = ControllerState.CONNECTED
+                    controllerState = ControllerState.CALIBRATION
                     renderState()
                 }
                 is PairingResult.Failed -> showPairingError(result.message)
             }
+        }
+    }
+
+    private fun performCalibrationAction() {
+        try {
+            when (calibration.phase) {
+                CalibrationPhase.IDLE, CalibrationPhase.FAILED -> {
+                    calibration.beginNeutral(calibrationHand, calibrationConfirmation.isChecked)
+                    motionBuffer.clear()
+                    calibrationStartedAt = System.nanoTime()
+                }
+                CalibrationPhase.READY_FOR_SLOW_SWING -> {
+                    calibration.beginSlowSwing()
+                    motionBuffer.clear()
+                    calibrationStartedAt = System.nanoTime()
+                }
+                else -> Unit
+            }
+        } catch (_: CalibrationException) {
+            // renderCalibration presents the specific corrective message.
+        }
+        renderCalibration()
+    }
+
+    private fun processCalibration() {
+        if (controllerState != ControllerState.CALIBRATION) return
+        while (true) calibration.append(motionBuffer.takeOne() ?: break)
+        val elapsed = (System.nanoTime() - calibrationStartedAt).coerceAtLeast(0L)
+        try {
+            when {
+                calibration.phase == CalibrationPhase.CAPTURING_NEUTRAL && elapsed >= 750_000_000L ->
+                    calibration.finishNeutral()
+                calibration.phase == CalibrationPhase.CAPTURING_SLOW_SWING && elapsed >= 1_500_000_000L -> {
+                    val record = calibration.finishSlowSwing()
+                    calibrationStatus.text = "Calibration accepted. Sending to host…"
+                    Thread {
+                        val sent = motionStreamer.sendCalibration(
+                            record,
+                            debugHost.text.toString(),
+                            debugPort.text.toString().toIntOrNull() ?: 7000,
+                        )
+                        runOnUiThread {
+                            if (sent) {
+                                controllerState = ControllerState.CONNECTED
+                                renderState()
+                            } else {
+                                calibrationStatus.text = "Could not send calibration to the host. Reconnect and retry."
+                            }
+                        }
+                    }.start()
+                }
+            }
+        } catch (_: CalibrationException) {
+            // renderCalibration presents the specific corrective message.
+        }
+        renderCalibration()
+    }
+
+    private fun renderCalibration() {
+        if (!::calibrationStatus.isInitialized) return
+        calibrationStatus.text = when (calibration.phase) {
+            CalibrationPhase.IDLE -> "Select your hand, confirm the screen faces you, then capture neutral."
+            CalibrationPhase.CAPTURING_NEUTRAL -> "Hold completely still in the neutral grip…"
+            CalibrationPhase.READY_FOR_SLOW_SWING -> "Neutral accepted. Make one slow practice swing through a comfortable arc."
+            CalibrationPhase.CAPTURING_SLOW_SWING -> "One slow, controlled swing. Do not use full force."
+            CalibrationPhase.COMPLETE -> "Calibration complete."
+            CalibrationPhase.FAILED -> calibration.failure?.userMessage ?: "Calibration failed. Retry."
+        }
+        calibrationAction.text = when (calibration.phase) {
+            CalibrationPhase.READY_FOR_SLOW_SWING -> "Start slow swing"
+            CalibrationPhase.CAPTURING_NEUTRAL -> "Capturing neutral…"
+            CalibrationPhase.CAPTURING_SLOW_SWING -> "Capturing slow swing…"
+            CalibrationPhase.COMPLETE -> "Calibration complete"
+            else -> "Capture neutral pose"
+        }
+        calibrationAction.isEnabled = when (calibration.phase) {
+            CalibrationPhase.CAPTURING_NEUTRAL, CalibrationPhase.CAPTURING_SLOW_SWING, CalibrationPhase.COMPLETE -> false
+            else -> calibrationConfirmation.isChecked
         }
     }
 

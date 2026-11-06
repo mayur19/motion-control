@@ -6,6 +6,9 @@ import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
+import kotlin.math.PI
+import kotlin.math.cos
+import kotlin.math.sin
 
 class MotionPipelineTest {
     private fun sample(timestamp: Long) = MotionSample(
@@ -60,4 +63,69 @@ class MotionPipelineTest {
             assertEquals(source.orientation, motion.orientation)
         }
     }
+
+    @Test
+    fun `slow swing calibration accepts both hands and is repeatable`() {
+        CalibrationHand.entries.forEach { hand ->
+            val first = completedCalibration(hand, listOf(.02f, -.01f, .03f))
+            val second = completedCalibration(hand, listOf(.03f, -.01f, .03f))
+            assertEquals(hand, first.hand)
+            assertTrue(kotlin.math.abs(first.accelerationBias[0] - second.accelerationBias[0]) < .02f)
+            assertTrue(first.quality >= .6f)
+        }
+    }
+
+    @Test
+    fun `calibration rejects invalid phone orientation`() {
+        val calibration = SlowSwingCalibration()
+        calibration.beginNeutral(CalibrationHand.RIGHT, true)
+        (0..120).forEach { calibration.append(calibrationSample(it, listOf(0f, 0f, 0f, 1f))) }
+        try {
+            calibration.finishNeutral()
+            throw AssertionError("invalid orientation was accepted")
+        } catch (error: CalibrationException) {
+            assertEquals(CalibrationFailure.INVALID_ORIENTATION, error.failure)
+        }
+    }
+
+    @Test
+    fun `calibration record encodes handedness`() {
+        val record = completedCalibration(CalibrationHand.LEFT, listOf(0f, 0f, 0f))
+        val packet = CalibrationPacketFactory.encode(record, 1uL, 2u, 0u)
+        val payload = ProtocolV1.decode(packet).payload as ProtocolV1.Calibration
+        assertEquals(CalibrationHand.LEFT.code, payload.handedness)
+    }
+
+    private fun completedCalibration(hand: CalibrationHand, acceleration: List<Float>): CalibrationRecord {
+        val calibration = SlowSwingCalibration()
+        calibration.beginNeutral(hand, true)
+        val upright = listOf(sin(PI / 4).toFloat(), 0f, 0f, cos(PI / 4).toFloat())
+        (0..120).forEach { calibration.append(calibrationSample(it, upright, acceleration)) }
+        calibration.finishNeutral()
+        calibration.beginSlowSwing()
+        (0..120).forEach { index ->
+            val angle = PI / 2 + index.toDouble() / 120 * PI / 6
+            calibration.append(calibrationSample(
+                index,
+                listOf(sin(angle / 2).toFloat(), 0f, 0f, cos(angle / 2).toFloat()),
+                acceleration,
+                listOf(1f, 0f, 0f),
+            ))
+        }
+        return calibration.finishSlowSwing()
+    }
+
+    private fun calibrationSample(
+        index: Int,
+        orientation: List<Float>,
+        acceleration: List<Float> = listOf(0f, 0f, 0f),
+        angularVelocity: List<Float> = listOf(0f, 0f, 0f),
+    ) = MotionSample(
+        monotonicNanoseconds = 1_000_000_000L + index * 5_000_000L,
+        acceleration = acceleration,
+        angularVelocity = angularVelocity,
+        orientation = orientation,
+        accuracy = 3,
+        sensorFlags = 7,
+    )
 }

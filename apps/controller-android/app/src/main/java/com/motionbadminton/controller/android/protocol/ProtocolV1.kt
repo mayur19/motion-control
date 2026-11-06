@@ -118,6 +118,7 @@ object ProtocolV1 {
         val gyroscopeBias: List<Float>,
         val quality: Float,
         val result: Int,
+        val handedness: Int,
     ) : Payload { override val messageType = MessageType.CALIBRATION }
 
     data class Status(
@@ -271,14 +272,15 @@ object ProtocolV1 {
             val gyroscopeBias = reader.floats(3)
             val quality = reader.f32()
             val result = reader.u8()
-            if (reader.bytes(3).any { it.toInt() != 0 }) reject(Rejection.NONZERO_RESERVED)
-            if (result !in 1..2) reject(Rejection.INVALID_ENUM)
+            val handedness = reader.u8()
+            if (reader.bytes(2).any { it.toInt() != 0 }) reject(Rejection.NONZERO_RESERVED)
+            if (result !in 1..2 || handedness !in 1..2) reject(Rejection.INVALID_ENUM)
             finite(orientation + accelerationBias + gyroscopeBias + quality)
             quaternion(orientation)
             if (time == 0uL || accelerationBias.any { abs(it) > 50 } ||
                 gyroscopeBias.any { abs(it) > 20 } || quality !in 0f..1f
             ) reject(Rejection.INVALID_VALUE)
-            Calibration(time, orientation, accelerationBias, gyroscopeBias, quality, result)
+            Calibration(time, orientation, accelerationBias, gyroscopeBias, quality, result, handedness)
         }
         MessageType.STATUS -> {
             val time = reader.u64()
@@ -338,7 +340,7 @@ object ProtocolV1 {
             is Calibration -> {
                 u64(payload.sensorMonotonicNs); floats(payload.neutralOrientation)
                 floats(payload.accelerationBias); floats(payload.gyroscopeBias)
-                f32(payload.quality); u8(payload.result); bytes(ByteArray(3))
+                f32(payload.quality); u8(payload.result); u8(payload.handedness); bytes(ByteArray(2))
             }
             is Status -> {
                 u64(payload.senderMonotonicNs); u8(payload.batteryPercent)
