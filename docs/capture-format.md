@@ -86,4 +86,8 @@ The live host logs the same detector's configuration (`detector_config`) and
 events (`detector_event`) in the session log. The default detector is
 `early_rise` (TMB-032, `docs/swing-detection.md`) after TMB-031 preprocessing;
 `--config` can select the `angular_speed_probe` reference. `--series=FILE`
-also writes normalized vs preprocessed values per sample.
+also writes normalized vs preprocessed values per sample. Each series row
+includes controller and sequence identity, controller sensor time,
+`arrival_monotonic_ns` for take-boundary matching, and normalized and
+preprocessed values. TMB-033 uses this series to estimate trigger-to-peak
+timing; older series exports without arrival time must be regenerated.

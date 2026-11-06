@@ -54,7 +54,8 @@ func _initialize() -> void:
 		return _fail("Series export must hold one line per normalized sample: %d" % series_lines.size())
 	var row: Dictionary = JSON.parse_string(series_lines[10])
 	if not row.has("normalized_angular_speed") or not row.has("preprocessed_angular_speed") \
-			or not row.has("normalized_acceleration") or not row.has("preprocessed_acceleration"):
+			or not row.has("normalized_acceleration") or not row.has("preprocessed_acceleration") \
+			or not row.has("arrival_monotonic_ns"):
 		return _fail("Series row incomplete: %s" % str(row))
 	var default_run := replayer.replay(stopped.directory, Pipeline.DEFAULTS)
 	if not bool(default_run.ok) or str(default_run.detector.detector) != "early_rise" \

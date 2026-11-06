@@ -85,6 +85,7 @@ static func _series_row(sample: Dictionary, prepared: Dictionary) -> Dictionary:
 		"controller_id": int(sample.controller_id),
 		"sequence": int(sample.get("sequence", 0)),
 		"sensor_monotonic_ns": int(sample.sensor_monotonic_ns),
+		"arrival_monotonic_ns": int(sample.arrival_monotonic_ns),
 		"normalized_angular_speed": Vector3(float(omega[0]), float(omega[1]), float(omega[2])).length(),
 		"preprocessed_angular_speed": float(prepared.preprocessed.angular_speed),
 		"preprocessed_angular_accel": float(prepared.preprocessed.angular_accel),
