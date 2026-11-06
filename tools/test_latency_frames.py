@@ -12,6 +12,8 @@ DISPLAY = (110, 30, 30, 30)
 # (frame the marker starts moving, frames until the display changes)
 TAKES = [(60, 12), (300, 15), (540, 19)]
 FRAMES = 760
+SWING_FRAMES = 40   # ~167 ms of continuous marker motion per flick
+LIT_FRAMES = 60     # stimulus lit for 250 ms, so the display rests most of the time
 
 
 def draw_box(frame: bytearray, x: int, y: int, w: int, h: int, value: int) -> None:
@@ -24,10 +26,10 @@ def frame_at(n: int) -> bytes:
     frame = bytearray(WIDTH * HEIGHT)  # black
     marker_x = 15
     for start, delay in TAKES:
-        if start <= n < start + 120:
-            marker_x = 15 + min(10, 2 * (n - start + 1))  # moves right from `start`
+        if start <= n < start + SWING_FRAMES:  # a flick keeps moving past the flash
+            marker_x = 15 + 2 * ((n - start) % 6 + 1)
     draw_box(frame, marker_x, 35, 12, 12, 255)
-    lit = any(start + delay <= n < start + delay + 120 for start, delay in TAKES)
+    lit = any(start + delay <= n < start + delay + LIT_FRAMES for start, delay in TAKES)
     draw_box(frame, *DISPLAY, 255 if lit else 0)
     return bytes(frame)
 
@@ -98,3 +100,28 @@ def test_rejects_roi_outside_frame(video_240):
         capture_output=True, text=True,
     )
     assert result.returncode != 0 and "outside" in result.stderr
+
+
+def test_capture_fps_override_for_retimed_slow_motion(tmp_path):
+    # iPhone Slo-mo originals carry 240 FPS frames in a 30 FPS (8x slow) container.
+    path = tmp_path / "retimed.mkv"
+    make_video(path, 30)
+    result = run(path, "--capture-fps", "240")
+    assert result.returncode == 0, result.stderr
+    assert "WARNING" not in result.stderr
+    assert "container_fps=30.000" in result.stdout and "fps=240.000" in result.stdout
+    rows = [line.split(",") for line in result.stdout.splitlines() if line[:1].isdigit()]
+    assert [round(float(r[3]), 3) for r in rows] == [round(d * 1000 / 240, 3) for _, d in TAKES]
+
+
+def test_rest_level_survives_a_lit_display_at_video_start(tmp_path):
+    global TAKES
+    original = TAKES
+    TAKES = [(-45, 0)] + original  # stimulus lit (and hand moving) as recording starts
+    try:
+        path = tmp_path / "lit-start.mkv"
+        make_video(path, 240)
+    finally:
+        TAKES = original
+    rows = [line.split(",") for line in run(path).stdout.splitlines() if line[:1].isdigit()]
+    assert [(int(r[1]), int(r[2])) for r in rows if r[1]] == [(s, s + d) for s, d in original]

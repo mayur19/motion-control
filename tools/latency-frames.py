@@ -8,8 +8,8 @@ Usage:
 A **review aid** for docs/test-plans/end-to-end-latency.md (TMB-024). It applies
 the plan's frame rule to two regions of interest (ROIs, in source pixels):
   F_display: first frame whose display-ROI brightness leaves its rest level.
-  F_start:   first frame, within the 500 ms before F_display, whose marker ROI
-             differs from the stationary reference frame.
+  F_start:   first frame of the unbroken marker-motion run that is still
+             under way at F_display (searched up to 500 ms back).
 Candidates must still be confirmed by two blinded reviewers as the plan
 requires; --contact-dir writes the frames around each candidate for that.
 Prints CSV rows plus median / nearest-rank p95 / p99 and the measured FPS.
@@ -29,6 +29,7 @@ ANALYSIS_SIZE = 32          # ROIs are downscaled to at most 32x32 for analysis
 REST_FRAMES = 24            # 100 ms at 240 FPS establishes the display rest level
 LOOKBACK_FRAMES = 120       # 500 ms search window before each display change
 CONTACT_BEFORE, CONTACT_AFTER = 4, 3
+MOTION_GAP_FRAMES = 2      # still frames tolerated inside one swing
 
 
 def parse_roi(text: str) -> tuple:
@@ -92,19 +93,35 @@ def display_onsets(levels: list, threshold: float) -> list:
     """Frames where the display leaves its rest level (onsets only, not returns)."""
     if len(levels) <= REST_FRAMES:
         return []
-    rest = statistics.median(levels[:REST_FRAMES])
+    # The display is at rest most of the time, so the whole-video median is the
+    # rest level (the first frames may already show a stimulus).
+    rest = statistics.median(levels)
     active = lambda n: abs(levels[n] - rest) > threshold
     return [n for n in range(REST_FRAMES, len(levels)) if active(n) and not active(n - 1)]
 
 
 def motion_start(markers: list, display: int, floor: int, threshold: float) -> tuple:
-    """Returns (F_start or None, flag) searching back from a display change."""
-    reference = max(floor, display - LOOKBACK_FRAMES)
-    for n in range(reference + 1, display + 1):
-        if difference(markers[n], markers[reference]) > threshold:
-            flag = "moving-at-window-start" if n == reference + 1 else ""
-            return n, flag
-    return None, "no-motion-found"
+    """Returns (F_start or None, flag) for the swing that caused a display change.
+
+    Walks back from F_display while the marker keeps moving frame to frame
+    (tolerating MOTION_GAP_FRAMES still frames, e.g. at a direction change);
+    the first frame of that unbroken motion run is the swing onset."""
+    limit = max(floor + 1, display - LOOKBACK_FRAMES)
+    moving = lambda n: difference(markers[n], markers[n - 1]) > threshold
+    latest = next((n for n in range(display, max(limit, display - MOTION_GAP_FRAMES - 1), -1) if moving(n)), None)
+    if latest is None:
+        return None, "no-motion-at-display"
+    start, still = latest, 0
+    n = latest - 1
+    while n >= limit:
+        if moving(n):
+            start, still = n, 0
+        else:
+            still += 1
+            if still > MOTION_GAP_FRAMES:
+                return start, ""
+        n -= 1
+    return start, "moving-at-window-start"
 
 
 def nearest_rank(values: list, quantile: float) -> float:
@@ -131,11 +148,21 @@ def main() -> None:
     parser.add_argument("--marker-threshold", type=float, default=6.0, help="mean gray-level change")
     parser.add_argument("--display-threshold", type=float, default=25.0, help="mean gray-level change")
     parser.add_argument("--contact-dir", type=pathlib.Path, help="write review frame strips here")
+    parser.add_argument(
+        "--capture-fps", type=float,
+        help="true capture rate when the container is re-timed (iPhone Slo-mo originals store "
+             "240 FPS frames in a 30 FPS, 8x-slow container); verify against host log timing",
+    )
     args = parser.parse_args()
     if not args.video.is_file():
         raise SystemExit(f"video not found: {args.video}")
 
     info = probe(args.video)
+    container_fps = info["fps"]
+    if args.capture_fps is not None:
+        if args.capture_fps <= 0:
+            raise SystemExit("--capture-fps must be positive")
+        info["fps"] = args.capture_fps
     check_roi("marker", args.marker, info)
     check_roi("display", args.display, info)
     if abs(info["fps"] - EXPECTED_FPS) > FPS_TOLERANCE:
@@ -147,7 +174,7 @@ def main() -> None:
     frames = min(len(displays), len(markers))
     onsets = display_onsets([mean(f) for f in displays[:frames]], args.display_threshold)
 
-    print(f"# video={args.video.name} fps={info['fps']:.3f} frames={frames} "
+    print(f"# video={args.video.name} fps={info['fps']:.3f} container_fps={container_fps:.3f} frames={frames} "
           f"marker={args.marker} display={args.display}")
     print("take,F_start,F_display,latency_ms,flag")
     if args.contact_dir:

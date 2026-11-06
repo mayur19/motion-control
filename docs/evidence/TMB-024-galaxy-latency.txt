@@ -1,0 +1,48 @@
+TMB-024 Galaxy end-to-end latency attempt (2026-11-06)
+======================================================
+Controller: Samsung Galaxy M14 5G (SM-M146B), Android 15, build 32104ca.
+Camera: iPhone 17e Slo-mo 1080p at 240 fps. File IMG_9709.mov (not committed;
+590,859,359 bytes, SHA-256 2e58ce0cfd97548cc2f4b5a51f0ad996daaf1a54afae157512be62e8d3ee78ab).
+Host: Mac14,9 (M2 Pro), windowed latency stimulus (--latency-test), threshold
+3.50 rad/s, AWDL disabled (awdl_state inactive logged), Wi-Fi 5 GHz ch 48.
+Host session: session-2026-11-06 16-55-35-41CEF61F73595D9B.jsonl (host still running when written).
+
+Container: HEVC 1920x1080 reports 30 fps, 12,184 frames, 406.1 s. It is an
+iPhone Slo-mo original (full-frame-rate-playback-intent=0): 240 FPS capture in an
+8x-slow container (12,184 / 240 = 50.8 s real time). Analysed with
+--capture-fps 240.
+
+Result: NO VALID CAMERA LATENCY. The plan's frame rule cannot be applied
+------------------------------------------------------------------------
+At this camera angle the phone rotates mostly toward or away from the lens.
+The gyro detects rotation the camera cannot see, so the stimulus flash appears
+before, or 2 frames after, the first VISIBLE marker motion:
+  flash at frame 779:  phone visibly still 770-778; edge motion visible ~784
+                       (TMB-024-galaxy-flash-before-visible-motion-1.jpg)
+  flash at frame 8684: first visible shift 8682, i.e. 2 frames (8 ms) earlier;
+                       shorter than the logged software delay, so the true onset
+                       preceded visible motion
+                       (TMB-024-galaxy-flash-before-visible-motion-2.jpg)
+A visible-onset rule therefore yields only a lower bound (<= 0-8 ms), not the
+latency. The frame-assist tool's first pass also confirmed that the flash's
+room illumination registers as marker "motion" when the marker region
+overlaps lit surfaces.
+
+Logged software-stage latency (raw_latency_stimulus, 103 triggers, all at 3.50 rad/s)
+---------------------------------------------------------------------------
+Phone sensor timestamp -> host render marker (software_sample_to_render_ms):
+  median 19.6 ms, p95 38.9 ms, max 40.5 ms, min 3.6 ms
+  sample -> arrival (phone send + Wi-Fi)   median 10.5, p95 18.7, max 20.1 ms
+  arrival -> threshold (host poll)         median  0.1, p95  0.4, max  0.5 ms
+  threshold -> render marker (frame wait)  median  3.7, p95 20.2, max 20.3 ms
+Not covered: display scan-out and panel response (up to one 120 Hz refresh,
+about 8.3 ms, plus a few ms) and gyro internal filtering (a few ms).
+Engineering estimate of end-to-end latency: median about 30 ms, worst about
+55 ms (PRD target: median < 50 ms, p99 < 80 ms). This is an estimate, not a
+camera measurement.
+
+Method change required for a valid camera measurement
+-----------------------------------------------------
+Hold the phone screen-on, facing the camera, and rotate it in the image plane
+(like a steering wheel) so the first degrees of rotation move a high-contrast
+corner laterally; place the marker region away from surfaces the flash lights.

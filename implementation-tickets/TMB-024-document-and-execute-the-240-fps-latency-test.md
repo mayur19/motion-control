@@ -41,3 +41,14 @@
   measures the video's real FPS and writes review strips (5 synthetic-video
   tests recover known 50.0/62.5/79.167 ms latencies exactly). It does not
   replace the two blinded reviewers. Still deferred: physical execution.
+- 2026-11-06: First physical Galaxy run (iPhone Slo-mo 240 fps). Found and
+  fixed a host defect: the latency stimulus typed gyro input as Vector3 while
+  the decoder delivers an Array, so it never fired on real controller data
+  (`b42c44f`). The camera run produced **no valid latency**: the gyro detected
+  rotation the camera could not see at this angle, so the flash preceded or
+  nearly coincided with visible motion. The plan's visual rule gives only a
+  lower bound. Logged software latency (103 triggers): median 19.6 ms, p95
+  38.9 ms, max 40.5 ms; estimated end-to-end about 30 ms median and about 55 ms
+  worst. The tool gained `--capture-fps` (iPhone 8x-slow containers) and a
+  robust rest level and motion-run onset. The plan now specifies in-plane
+  rotation. See `docs/evidence/TMB-024-galaxy-latency.txt`.

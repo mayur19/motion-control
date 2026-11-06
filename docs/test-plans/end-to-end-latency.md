@@ -49,6 +49,20 @@ file: in Photos choose Share > Options > "All Photos Data", or AirDrop with
 that option, so the 240 FPS frames are not re-timed to 30 FPS playback. Check
 with `ffprobe` that the stream reports about 240 fps before analysis.
 
+## Lesson from the first Galaxy run (2026-11-06)
+
+With the phone twisting toward or away from the lens, the gyro detected
+rotation the camera could not see: the stimulus flashed before, or 2 frames
+after, the first visible motion, so the visual frame rule gave only a lower
+bound (see `docs/evidence/TMB-024-galaxy-latency.txt`). For a valid run:
+
+- Hold the phone **facing the camera** and rotate it **in the image plane**
+  (like a steering wheel), so a high-contrast corner moves sideways from the
+  first degree of rotation.
+- Keep the marker region on that corner, **away from surfaces the flash
+  lights** (the stimulus illuminates the hand and phone).
+- Prefer a full-screen stimulus so the display region is unambiguous.
+
 ## Frame-assist tool
 
 `tools/latency-frames.py` applies the frame rule below to two rectangles you
@@ -64,7 +78,7 @@ python3 -I tools/latency-frames.py swing.MOV \
 Its output is a candidate list, **not** the measurement: both reviewers still
 mark frames independently (blinded to its output and to log timing) and
 resolve disagreements; the tool's candidates become a third, recorded opinion.
-Flagged takes (`moving-at-window-start`, `no-motion-found`) are excluded from
+Flagged takes (`moving-at-window-start`, `no-motion-at-display`) are excluded from
 its statistics and need manual review.
 
 ## Frame rule and calculation
