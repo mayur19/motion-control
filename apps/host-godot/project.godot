@@ -1,0 +1,47 @@
+; Engine configuration file.
+; Edit through Godot where possible; project values are reviewed in source.
+config_version=5
+
+[application]
+
+config/name="Motion Badminton Host"
+config/description="Two-phone motion badminton desktop host"
+config/version="0.1.0-dev"
+run/main_scene="res://main.tscn"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/size/window_width_override=1280
+window/size/window_height_override=720
+window/size/min_width=720
+window/size/min_height=540
+window/stretch/mode="canvas_items"
+
+[physics]
+
+common/physics_ticks_per_second=120
+common/max_physics_steps_per_frame=16
+
+[rendering]
+
+renderer/rendering_method="gl_compatibility"
+renderer/rendering_method.mobile="gl_compatibility"
+textures/default_filters/use_nearest_mipmap_filter=false
+
+[network]
+
+limits/packet_peer_stream/max_buffer_po2=16
+udp/listen_port=7000
+
+[logging]
+
+session/enabled=true
+session/flush_interval_ms=1000
+session/maximum_bytes=10485760
+
+[latency_test]
+
+gyro_threshold_rad_s=3.5
+cooldown_ms=700
