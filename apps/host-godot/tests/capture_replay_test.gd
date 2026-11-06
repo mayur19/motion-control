@@ -7,9 +7,15 @@ const Ingest = preload("res://network/motion_ingest.gd")
 const Pipeline = preload("res://detection/detector_pipeline.gd")
 
 const ENDPOINT := "192.0.2.7:6000"
+## Real session ids are random u64s; both exceed 2^53 (JSON float precision)
+## and the second has the top bit set (negative as a GDScript int).
+const SESSION_A := 0x18A61FF985F6AFD4
+const SESSION_B := -0x2E5B1C0A7F3D9E11
+
+
 class FakeSessions:
 	extends RefCounted
-	var current_session := {"session_id": 3}
+	var current_session := {"session_id": SESSION_A}
 
 
 const CONFIG := {"detector": "angular_speed_probe", "threshold_rad_s": 3.0, "refractory_ms": 400}
@@ -115,7 +121,7 @@ func _capture_started_after_calibration(packets: Array[PackedByteArray]) -> Stri
 	for index in range(1, packets.size()):
 		arrival += 10_000_000
 		if index == packets.size() / 2:
-			sessions.current_session = {"session_id": 4}  # NEW PAIRING CODE mid-swing
+			sessions.current_session = {"session_id": SESSION_B}  # NEW PAIRING CODE mid-swing
 		ingest.ingest_datagram(packets[index], ENDPOINT, arrival)
 	var stopped := capture.stop(arrival)
 	var result := Replayer.new().replay(stopped.directory, CONFIG)
@@ -156,7 +162,7 @@ func _packets() -> Array[PackedByteArray]:
 func _encode(message_type: int, sequence: int, payload: Dictionary) -> PackedByteArray:
 	var encoded := Codec.encode({
 		"header": {"protocol_version": Codec.VERSION, "message_type": message_type, "flags": 0,
-			"session_id": 3, "controller_id": 21, "sequence": sequence},
+			"session_id": SESSION_A, "controller_id": 21, "sequence": sequence},
 		"payload": payload,
 	})
 	return encoded.data

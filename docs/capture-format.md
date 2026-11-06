@@ -24,10 +24,11 @@ and session gates, in arrival order:
 
 ```json
 {"record":"datagram","arrival_monotonic_ns":123,"endpoint":"192.168.1.20:52000",
- "active_session_id":123456789,"bytes_b64":"…"}
+ "active_session_id":"-3340983476051230225","bytes_b64":"…"}
 ```
 
-`active_session_id` is the host's pairing session when the datagram was
+`active_session_id` (a decimal string, because JSON numbers cannot hold a
+64-bit id exactly) is the host's pairing session when the datagram was
 accepted; replay applies the same active-session gate as live (after NEW
 PAIRING CODE, old-session data is not normalized). Datagrams marked
 `"seed": true` come first: the byte-exact `CALIBRATION` datagrams already in

@@ -95,7 +95,8 @@ func _write_datagram(
 		"bytes_b64": Marshalls.raw_to_base64(packet),
 	}
 	if active_session_id != 0:
-		record["active_session_id"] = active_session_id
+		# Decimal string: JSON numbers are doubles and would corrupt a u64 id.
+		record["active_session_id"] = str(active_session_id)
 	if seeded:
 		record["seed"] = true
 	_write(_raw, record)

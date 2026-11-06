@@ -152,6 +152,6 @@ func _read_raw(directory: String) -> Dictionary:
 			"bytes": Marshalls.base64_to_raw(str(record.get("bytes_b64", ""))),
 			"endpoint": str(record.get("endpoint", "")),
 			"arrival_ns": int(record.get("arrival_monotonic_ns", 0)),
-			"active_session_id": int(record.get("active_session_id", 0)),
+			"active_session_id": str(record.get("active_session_id", "0")).to_int(),
 		})
 	return {"ok": true, "header": header, "datagrams": datagrams}
