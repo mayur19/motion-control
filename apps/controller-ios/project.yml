@@ -1,0 +1,55 @@
+name: MotionControllerIOS
+
+options:
+  bundleIdPrefix: com.motionbadminton
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "26.4"
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: ${DEVELOPMENT_TEAM}
+
+targets:
+  MotionControllerIOS:
+    type: application
+    platform: iOS
+    sources:
+      - Sources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.motionbadminton.controller.ios
+        PRODUCT_NAME: MotionControllerIOS
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_KEY_CFBundleDisplayName: Motion Controller
+        INFOPLIST_KEY_NSCameraUsageDescription: Scan the badminton host QR code to join a local game session.
+        INFOPLIST_KEY_NSLocalNetworkUsageDescription: Connect to the badminton host on your local network and stream controller motion.
+        INFOPLIST_KEY_NSMotionUsageDescription: Read phone motion to detect badminton swings during an active session.
+        INFOPLIST_KEY_UILaunchScreen_Generation: YES
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UIRequiredDeviceCapabilities: arm64
+        TARGETED_DEVICE_FAMILY: "1"
+        SUPPORTS_MACCATALYST: NO
+    scheme:
+      testTargets:
+        - MotionControllerIOSTests
+
+  MotionControllerIOSTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - Tests
+      - path: ../../protocol/golden-vectors
+        type: folder
+        buildPhase: resources
+    dependencies:
+      - target: MotionControllerIOS
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.motionbadminton.controller.ios.tests
+        GENERATE_INFOPLIST_FILE: YES
