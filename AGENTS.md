@@ -126,5 +126,7 @@ Open items (not blocking M2 unless noted):
   TMB-022: median >= 99 Hz, no frame > 150 ms, frame p99 < 50 ms.
 
 TMB-028 host calibration is Done (`docs/evidence/TMB-028-host-calibration.txt`).
-Next by plan: TMB-029 capture/replay tools, and onward per
+TMB-029 capture/replay is Done (`docs/evidence/TMB-029-capture-replay.txt`).
+Next by plan: TMB-030 baseline dataset capture (needs both phones and long
+operator sessions; plan it with the owner), and onward per
 `implementation-tickets/README.md`.

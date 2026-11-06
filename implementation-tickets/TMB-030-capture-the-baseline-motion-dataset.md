@@ -1,6 +1,7 @@
 # TMB-030 — Capture the baseline motion dataset
 
-**Status:** Blocked — capture tooling dependency incomplete  
+**Status:** Ready
+
 **Labels:** `detection`, `quality`  
 **Estimate:** 1 day  
 **Dependencies:** TMB-029

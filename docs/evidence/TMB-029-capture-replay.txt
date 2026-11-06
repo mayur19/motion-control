@@ -1,0 +1,49 @@
+TMB-029 labeled motion capture and replay evidence
+Date: 2026-11-06 Asia/Kolkata
+Commits: 8c5279f (capture, labels, shared detector pipeline, replay, F6 panel),
+c3e237e (review fixes: calibration seed, active-session gate, torn labels),
+8994230 (64-bit session id stored as exact string)
+Format: docs/capture-format.md
+
+Automated
+- motion_capture_test: TMB-029_CAPTURE_OK datagrams=3 takes=2 checksum=true
+  labels_separate=true
+- detector_pipeline_test: TMB-029_DETECTOR_PIPELINE_OK events=2
+  deterministic=true normalized_only=true
+- capture_replay_test: TMB-029_REPLAY_OK events=1 live_equal=true
+  repeatable=true relabel=true tamper_refused=true (also: capture started
+  after calibration, session rotation mid-capture, realistic u64 session ids;
+  mutation check: replay without the session gate normalizes 60 samples vs
+  live 29 and fails)
+- capture_panel_test: TMB-029_CAPTURE_PANEL_OK f6_overlay=true take_labels=true
+- calibration_ingest_test: datagram_accepted carries exactly the accepted
+  MOTION/CALIBRATION datagrams; unpaired CALIBRATION excluded
+- tools/test_capture_labels.py (list, correct, invalid values, torn last line,
+  verify). Full host suite 26/26, smoke OK, pytest tools/ 30 passed.
+
+Physical demonstration (iPhone 17e, operator-performed, ~2 min)
+- Capture cap_20261106T143914_16e061f4: 5221 datagrams (5220 MOTION, 1 CALIBRATION),
+  no HELLO/STATUS/control traffic; raw.sha256 verifies.
+- Takes: 1 = P1 iPhone right smash valid (3 slow swings),
+  2 = P1 iPhone right idle valid (~10 s still).
+- Offline replay (phone and network not used), run twice:
+  results byte-identical. 5220 normalized samples, 0 rejections.
+    take 1 smash: 1505 samples, peak 8.51 rad/s, 5 events
+    take 2 idle:  1662 samples, peak 0.16 rad/s, 0 events
+  (events are from the placeholder angular_speed_probe, threshold 3.5 rad/s,
+  refractory 700 ms; not the TMB-032 detector, so the event count is not a
+  swing count.)
+  Result: docs/evidence/TMB-029-replay-result.json
+- Live vs replay: the live session log's detector_config equals the replay
+  detector config, and its 5 detector_event records are identical to the 5
+  replay events (controller, sequence, sensor time, angular speed).
+- Label correction (on a copy of the capture): capture-labels.py correct
+  --take 1 --set intended_shot=clear appended revision 2; raw.jsonl SHA-256
+  unchanged and raw.sha256 still verifies; replay shows take 1 as clear rev 2
+  with events identical to the uncorrected replay.
+
+Defects found by the physical run (fixed test-first)
+- First capture cap_20261106T143432_8de45fcc replayed with 0 normalized
+  samples: Godot JSON wrote 64-bit active_session_id values as doubles, so
+  replay's session gate rejected everything. Fixed in 8994230; that capture
+  is kept unmodified (its recorded session ids are lossy).

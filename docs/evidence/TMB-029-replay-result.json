@@ -1,0 +1,102 @@
+{
+  "capture_format": 1,
+  "capture_id": "cap_20261106T143914_16e061f4",
+  "detector": {
+    "config": {
+      "detector": "angular_speed_probe",
+      "refractory_ms": 700,
+      "threshold_rad_s": 3.5
+    },
+    "detector": "angular_speed_probe",
+    "version": 1
+  },
+  "events": [
+    {
+      "angular_speed_rad_s": 3.59145283699036,
+      "arrival_monotonic_ns": 116072177000,
+      "controller_id": 822689503,
+      "detector": "angular_speed_probe",
+      "sensor_monotonic_ns": 29147749494375,
+      "sequence": 846
+    },
+    {
+      "angular_speed_rad_s": 3.53704428672791,
+      "arrival_monotonic_ns": 119925512000,
+      "controller_id": 822689503,
+      "detector": "angular_speed_probe",
+      "sensor_monotonic_ns": 29151616161667,
+      "sequence": 1233
+    },
+    {
+      "angular_speed_rad_s": 3.60512399673462,
+      "arrival_monotonic_ns": 121073070000,
+      "controller_id": 822689503,
+      "detector": "angular_speed_probe",
+      "sensor_monotonic_ns": 29152765171667,
+      "sequence": 1348
+    },
+    {
+      "angular_speed_rad_s": 3.61385679244995,
+      "arrival_monotonic_ns": 123468473000,
+      "controller_id": 822689503,
+      "detector": "angular_speed_probe",
+      "sensor_monotonic_ns": 29155163108542,
+      "sequence": 1588
+    },
+    {
+      "angular_speed_rad_s": 3.71133923530579,
+      "arrival_monotonic_ns": 124218860000,
+      "controller_id": 822689503,
+      "detector": "angular_speed_probe",
+      "sensor_monotonic_ns": 29155912464000,
+      "sequence": 1663
+    }
+  ],
+  "ok": true,
+  "raw_sha256": "f054079dc9cfb0d23b696ac743657f29d3ba31c8fce176b38d9d1fc525eff79c",
+  "raw_verified": true,
+  "result_format": 1,
+  "takes": [
+    {
+      "end_arrival_ns": 129675134000,
+      "event_count": 5,
+      "first_event_after_start_ms": 1438.134,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "smash",
+        "phone": "iPhone",
+        "player": 1,
+        "valid": true
+      },
+      "normalized_samples": 1505,
+      "peak_angular_speed_rad_s": 8.51310539245605,
+      "start_arrival_ns": 114634043000,
+      "take_id": 1
+    },
+    {
+      "end_arrival_ns": 157217239000,
+      "event_count": 0,
+      "first_event_after_start_ms": -1.0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "idle",
+        "phone": "iPhone",
+        "player": 1,
+        "valid": true
+      },
+      "normalized_samples": 1662,
+      "peak_angular_speed_rad_s": 0.156772881746292,
+      "start_arrival_ns": 140614358000,
+      "take_id": 2
+    }
+  ],
+  "totals": {
+    "datagrams": 5221,
+    "events": 5,
+    "normalized_samples": 5220,
+    "rejections": {},
+    "takes": 2
+  }
+}
