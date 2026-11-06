@@ -1,6 +1,7 @@
 # TMB-024 — Document and execute the 240 FPS latency test
 
-**Status:** Deferred — physical phones and 240 FPS camera required  
+**Status:** Accepted — closed with owner-approved stage-attributed evidence
+
 **Labels:** `quality`, `observability`  
 **Estimate:** 1 day  
 **Dependencies:** TMB-023
@@ -52,3 +53,10 @@
   worst. The tool gained `--capture-fps` (iPhone 8x-slow containers) and a
   robust rest level and motion-run onset. The plan now specifies in-plane
   rotation. See `docs/evidence/TMB-024-galaxy-latency.txt`.
+- 2026-11-06: Second Galaxy run (`IMG_9712.MOV`) corrected the camera angle and
+  captured 27 display transitions matched to a 41-trigger host-log run. The
+  owner accepted raw-threshold-to-visible latency as the feasibility boundary:
+  software median 30.1 ms and p99/max 54.1 ms; conservative visible bounds
+  median 47.6 ms and p99/max 71.6 ms. The owner then performed a same-setup
+  iPhone parity check and accepted it as final evidence. Gate A waived the
+  separate 30-take-per-phone requirement; see the Gate A decision record.

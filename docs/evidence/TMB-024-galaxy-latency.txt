@@ -46,3 +46,37 @@ Method change required for a valid camera measurement
 Hold the phone screen-on, facing the camera, and rotate it in the image plane
 (like a steering wheel) so the first degrees of rotation move a high-contrast
 corner laterally; place the marker region away from surfaces the flash lights.
+
+
+Second run and accepted stage-attributed result (2026-11-06)
+============================================================
+Video: /Users/napkin/Downloads/IMG_9712.MOV, 726,722,125 bytes.
+SHA-256: 3e3bba41605ba6e04664bd7ffd954ade81012aca6923fcf441a628e26522fd74.
+Container: H.264 1920x1080, 11,521 frames at 30 fps in an 8x-slow iPhone
+Slo-mo container; analysed as 240 fps capture.
+Grip/framing: phone bottom held on the right; opposite edge visible; phone and
+full-screen host stimulus continuously framed.
+
+Host session: 41CEF61F73595D9B. The selected second-run range contains 41
+raw_latency_stimulus events. Canonical compact-JSON event-subset SHA-256:
+c0cbc223f409ccfc8a55dee904467a34e430c58daf9a20f0ca61b0cce5bc0f58.
+
+Adjusted sensor sample -> host render marker, 41 triggers:
+  median 30.1 ms, p95 42.6 ms, p99/max 54.1 ms, min 6.6 ms.
+
+Twenty-seven display transitions correlate to host events 8-34 by their unique
+inter-event timing. Render-marker/video phase spread is 11.95 ms, consistent
+with display scan-out plus 240 fps camera quantization and with no unexplained
+long display stall. Using a conservative 17.5 ms allowance for one 120 Hz
+refresh, panel response and one camera interval gives all-trigger bounds:
+  median threshold-to-visible <= 47.6 ms
+  p99/max threshold-to-visible <= 71.6 ms
+PRD targets: median < 50 ms and p99 < 80 ms.
+
+The accepted start boundary is the first logged sample crossing 3.5 rad/s.
+Visible first motion is not used because deliberate gradual acceleration folds
+gesture/detector behavior into the transport/render measurement. The project
+owner accepted this stage-attributed method, immediately observed equivalent
+iPhone behavior on the same physical setup and declared Gate A a final GO.
+No separate retained iPhone percentile artifact exists; that is an explicit
+owner-approved evidence exception.

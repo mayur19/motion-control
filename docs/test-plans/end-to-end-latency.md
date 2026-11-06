@@ -1,6 +1,7 @@
 # 240 FPS end-to-end input latency test
 
-**Status:** Ready to execute; physical phone and 240 FPS camera required  
+**Status:** Gate A accepted via stage-attributed alternative; direct method retained for future tests
+
 **Tickets:** TMB-023, TMB-024
 
 ## Fixed setup
@@ -124,5 +125,21 @@ a display transition, flag that take and include the chosen boundary rule.
 | iPhone | _pending_ | | | | | |
 | Pixel | _pending_ | | | | | |
 
-Raw video/log paths and SHA-256 checksums: _pending_.  
-Final result: **PENDING PHYSICAL EXECUTION**
+Direct-method raw video/log paths and SHA-256 checksums: _pending_.
+Direct motion-onset result: **INCOMPLETE — Gate A uses the accepted alternative below.**
+
+## Gate A accepted alternative (2026-11-06)
+
+The project owner accepted raw gyro-threshold-to-visible response as the Gate A
+feasibility boundary after repeated recordings showed that gradual visible
+motion onset measures gesture acceleration as well as system response. The
+Galaxy run combined 41 logged threshold-to-render samples with 27 correlated
+240 FPS display transitions. A conservative display/camera allowance produced
+upper bounds of 47.6 ms median and 71.6 ms p99/max. A same-setup iPhone physical
+parity check was accepted by the owner in lieu of a separate retained
+percentile set. See `docs/test-plans/gate-a-decision.md` for the final decision,
+artifact hashes, evidence exception and consequences.
+
+The procedure above remains the preferred direct test for future detector and
+release-candidate validation; its pending worksheet does not override the
+owner-approved Gate A evidence exception.
