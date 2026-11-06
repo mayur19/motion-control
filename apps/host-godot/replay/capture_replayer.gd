@@ -13,7 +13,9 @@ const Pipeline = preload("res://detection/detector_pipeline.gd")
 const RESULT_FORMAT := 1
 
 
-func replay(directory: String, detector_config: Dictionary) -> Dictionary:
+## `series_path` (optional) receives one JSON line per preprocessed sample with
+## normalized and preprocessed values side by side (TMB-031 before/after).
+func replay(directory: String, detector_config: Dictionary, series_path := "") -> Dictionary:
 	var verified := _verify_checksum(directory)
 	if not bool(verified.ok):
 		return verified
@@ -29,6 +31,14 @@ func replay(directory: String, detector_config: Dictionary) -> Dictionary:
 	var events: Array[Dictionary] = []
 	var speeds: Array[Dictionary] = []
 	pipeline.event_detected.connect(func(event: Dictionary): events.append(event))
+	var series: FileAccess = null
+	if not series_path.is_empty():
+		series = FileAccess.open(series_path, FileAccess.WRITE)
+		if series == null:
+			return {"ok": false, "error": "cannot write series %s" % series_path}
+		pipeline.sample_preprocessed.connect(func(sample: Dictionary, prepared: Dictionary):
+			series.store_line(JSON.stringify(_series_row(sample, prepared)))
+		)
 	pipeline.bind_ingest(ingest)
 	ingest.normalized_sample_received.connect(func(sample: Dictionary):
 		var omega: Array = sample.normalized.angular_velocity
@@ -43,6 +53,8 @@ func replay(directory: String, detector_config: Dictionary) -> Dictionary:
 		)
 	var rejections: Dictionary = ingest.snapshot().rejections
 	ingest.free()
+	if series != null:
+		series.close()
 
 	var takes: Array[Dictionary] = []
 	for take in effective_takes(directory):
@@ -64,6 +76,21 @@ func replay(directory: String, detector_config: Dictionary) -> Dictionary:
 		},
 		"takes": takes,
 		"events": events,
+	}
+
+
+static func _series_row(sample: Dictionary, prepared: Dictionary) -> Dictionary:
+	var omega: Array = sample.normalized.angular_velocity
+	return {
+		"controller_id": int(sample.controller_id),
+		"sequence": int(sample.get("sequence", 0)),
+		"sensor_monotonic_ns": int(sample.sensor_monotonic_ns),
+		"normalized_angular_speed": Vector3(float(omega[0]), float(omega[1]), float(omega[2])).length(),
+		"preprocessed_angular_speed": float(prepared.preprocessed.angular_speed),
+		"preprocessed_angular_accel": float(prepared.preprocessed.angular_accel),
+		"normalized_acceleration": sample.normalized.acceleration,
+		"preprocessed_acceleration": prepared.preprocessed.acceleration,
+		"gap_reset": bool(prepared.preprocessed.gap_reset),
 	}
 
 

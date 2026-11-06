@@ -19,6 +19,15 @@ func _initialize() -> void:
 			or float(description.config.threshold_rad_s) != 3.0 or int(description.config.refractory_ms) != 300:
 		return _fail("describe() must report detector, version and full config: %s" % str(description))
 
+	if str(description.get("preprocessing", {}).get("name", "")) != "one_pole_lowpass":
+		return _fail("describe() must include the preprocessing stage: %s" % str(description))
+	var tuned := Pipeline.new()
+	if not bool(tuned.configure({"detector": "angular_speed_probe", "preprocessing": {"cutoff_hz": 30.0}}).ok) \
+			or float(tuned.describe().preprocessing.config.cutoff_hz) != 30.0:
+		return _fail("Preprocessing config not applied: %s" % str(tuned.describe()))
+	if bool(tuned.configure({"preprocessing": {"cutoff_hz": -2.0}}).ok):
+		return _fail("Invalid preprocessing config accepted")
+
 	var events := _run(pipeline)
 	# Speeds cross 3 rad/s at 100 ms and again at 300 ms (inside refractory),
 	# then at 600 ms (after refractory) => two events.
@@ -70,7 +79,7 @@ func _samples() -> Array[Dictionary]:
 			"sensor_monotonic_ns": index * 100_000_000,
 			"arrival_monotonic_ns": index * 100_000_000 + 5_000_000,
 			"angular_velocity": [0.0, 0.0, 0.0],
-			"normalized": {"angular_velocity": [speeds[index], 0.0, 0.0]},
+			"normalized": {"angular_velocity": [speeds[index], 0.0, 0.0], "acceleration": [0.0, 0.0, 0.0]},
 		})
 	return result
 

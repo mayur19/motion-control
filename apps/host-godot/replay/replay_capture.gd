@@ -3,6 +3,7 @@ extends SceneTree
 ## Offline replay CLI (TMB-029). No phone or network needed:
 ##   godot --headless --path apps/host-godot --script res://replay/replay_capture.gd -- \
 ##     --capture=<capture dir> --output=<result.json> [--config=<detector config .json>]
+##     [--series=<per-sample normalized vs preprocessed .jsonl>]
 ## Exits 0 and prints TMB-029_REPLAY_RESULT on success; exits 2 on any error.
 
 const Replayer = preload("res://replay/capture_replayer.gd")
@@ -23,7 +24,7 @@ func _initialize() -> void:
 		if typeof(parsed) != TYPE_DICTIONARY:
 			return _exit_error("config is not a JSON object: %s" % str(options.config))
 		config = parsed
-	var result := Replayer.new().replay(str(options.capture), config)
+	var result := Replayer.new().replay(str(options.capture), config, str(options.get("series", "")))
 	if not bool(result.get("ok", false)):
 		return _exit_error(str(result.get("error", "replay failed")))
 	var output := FileAccess.open(str(options.output), FileAccess.WRITE)

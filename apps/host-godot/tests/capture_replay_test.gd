@@ -47,6 +47,15 @@ func _initialize() -> void:
 		return _fail("Fixture swing produced no live events")
 
 	var replayer := Replayer.new()
+	var series_path: String = str(stopped.directory).get_base_dir().path_join("series.jsonl")
+	var with_series := replayer.replay(stopped.directory, CONFIG, series_path)
+	var series_lines := FileAccess.get_file_as_string(series_path).split("\n", false)
+	if not bool(with_series.ok) or series_lines.size() != int(with_series.totals.normalized_samples):
+		return _fail("Series export must hold one line per normalized sample: %d" % series_lines.size())
+	var row: Dictionary = JSON.parse_string(series_lines[10])
+	if not row.has("normalized_angular_speed") or not row.has("preprocessed_angular_speed") \
+			or not row.has("normalized_acceleration") or not row.has("preprocessed_acceleration"):
+		return _fail("Series row incomplete: %s" % str(row))
 	var first := replayer.replay(stopped.directory, CONFIG)
 	var second := replayer.replay(stopped.directory, CONFIG)
 	if not bool(first.ok):

@@ -1,6 +1,7 @@
 # TMB-031 — Implement motion preprocessing
 
-**Status:** Blocked — calibration/dataset dependencies incomplete  
+**Status:** Review — implemented and measured; cutoff re-check against TMB-030 data pending
+
 **Labels:** `detection`, `quality`  
 **Estimate:** 1 day  
 **Dependencies:** TMB-028, TMB-030
@@ -24,4 +25,22 @@
 - Before/after plots
 - Filter latency measurement
 
+### Implementation record
+
+- Owner decision (2026-11-06): start TMB-031 before TMB-030's dataset exists.
+  Implementation and deterministic tests use synthetic fixtures and the
+  TMB-029 demonstration capture; any data-dependent choice (filter cutoff)
+  must be re-checked against the TMB-030 tune split before TMB-033.- Implemented `detection/motion_preprocessor.gd` inside `DetectorPipeline`:
+  rate-aware one-pole low-pass (25 Hz), drops duplicate/out-of-order and
+  non-finite samples, and reseeds after gaps > 50 ms. Step 1 (bias removal and
+  common axes) is TMB-028's normalizer.
+- Measured delay: 2.6 ms (100 Hz) and 4.6 ms (250 Hz) threshold-crossing and
+  ramp lag; added to the PRD latency budget; documented in
+  `docs/motion-preprocessing.md`.
+- Evidence: replaying the TMB-029 iPhone capture twice gave identical
+  preprocessed series (5220 samples), all finite; before/after plots in
+  `docs/evidence/TMB-031-before-after-*-iphone.png`; `tests/motion_preprocessor_test.gd`
+  covers gaps, duplicates, non-finite input and irregular intervals.
+- Remaining before Done: re-check the cutoff on the TMB-030 tune split,
+  especially Galaxy data.
 

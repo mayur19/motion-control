@@ -66,6 +66,7 @@ The budget below is a planning estimate. Real measurements replace it after the 
 | --- | --- |
 | Sensor sampling | 5–10 |
 | Phone processing and network | 5–15 |
+| Motion preprocessing filter (measured, TMB-031) | 2.6 (100 Hz) – 4.6 (250 Hz) |
 | Game processing at 144 fps | About 7 |
 | Display response | 10–15 |
 | **Total** | **27–47** |
