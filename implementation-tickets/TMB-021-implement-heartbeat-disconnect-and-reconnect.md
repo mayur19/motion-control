@@ -135,3 +135,8 @@
   - Android: debug-panel values get a weighted, wrapping width instead of
     clipping. 23/23 unit tests PASS; not yet installed or checked on the
     Galaxy (not connected).
+- 2026-11-06: Pairing-input hardening (`32104ca`) is installed on the iPhone
+  (22/22 physical XCTest). The Galaxy no longer has the current build: the
+  debug-panel wrap fix and the duplicate-parameter/debug-only join_uri
+  hardening are unit-tested only (26/26) and pending installation and an
+  on-device check when the phone is available again.
