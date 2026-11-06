@@ -40,4 +40,7 @@
   raw SHA-256 list (Markdown/JSON).
 - The two TMB-029 demonstration captures are marked `exclude`.
 - Known gap before any capture: only one player is available.
+- Owner decision (2026-11-06): commit to the full target (per phone 4 swing +
+  4 non-swing sessions of <= 6 minutes, spread over days). The reduced-volume
+  option was declined.
 
