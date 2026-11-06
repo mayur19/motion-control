@@ -118,3 +118,28 @@ PASS (worst: accel 0.040 m/s², gyro 0.056 rad/s, tilt 2.3°).
 
 Not yet done
 - Galaxy (Android) physical calibration run, both hands.
+
+Physical Galaxy run (operator-performed, Samsung Galaxy M14 5G, Android 15,
+APK built from 88a0fbc, Wi-Fi host, single short session; values from the
+host session-log `calibration` events)
+- Invalid orientation (phone flat, screen up): rejected; calibration did not
+  continue (operator report: all steps passed).
+- Four accepted calibrations, each followed by Connected:
+    run   shaft-from-vertical  screen-tilt  accel bias (m/s²)          gyro bias (rad/s)          quality
+    R1    16.4°                16.3°        (0.018, 0.098, 0.024)      (-0.002, -0.024, 0.013)    0.890
+    R2    17.2°                16.7°        (0.024, 0.073, 0.020)      (0.021, -0.027, 0.010)     0.953
+    L1    20.4°                20.4°        (0.008, 0.097, 0.034)      (0.019, -0.025, -0.004)    0.959
+    L2    19.2°                18.8°        (-0.008, 0.088, 0.077)     (0.024, -0.023, 0.043)     0.866
+- Repeatability vs physical limits (0.05 m/s², 0.10 rad/s, 5°):
+    right: accel |diff| (0.006, 0.024, 0.004); gyro (0.023, 0.003, 0.002);
+           tilt 0.7°  -> PASS
+    left:  accel |diff| (0.016, 0.009, 0.043); gyro (0.006, 0.002, 0.046);
+           tilt 1.6°  -> PASS
+- Rejoin: Wi-Fi off/on -> heartbeat timeout, then pairing reason=reconnect
+  (same player), identical resent `calibration` (left, L2) and Connected,
+  without recalibration.
+
+Conclusion: all TMB-027 acceptance criteria have evidence for both phones
+and both hands (common-frame data, repeatability within the owner's
+physical limits, invalid orientation rejected, no-full-force instruction in
+both UIs). TMB-027 Done; TMB-028 Ready.

@@ -1,6 +1,7 @@
 # TMB-028 — Implement host calibration application and verification
 
-**Status:** Blocked — calibration dependency chain incomplete  
+**Status:** Ready
+
 **Labels:** `detection`, `host`, `quality`  
 **Estimate:** 1 day  
 **Dependencies:** TMB-027

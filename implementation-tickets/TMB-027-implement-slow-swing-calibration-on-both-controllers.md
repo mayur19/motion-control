@@ -1,6 +1,6 @@
 # TMB-027 — Implement slow-swing calibration on both controllers
 
-**Status:** Review — iPhone physically verified; Galaxy run pending
+**Status:** Done — physically verified on iPhone and Galaxy, both hands
 
 **Labels:** `detection`, `controller-ios`, `controller-android`, `safety`  
 **Estimate:** 1.5 days  
@@ -50,5 +50,8 @@
 - Owner decision (2026-11-06): physical repeatability limits per axis are
   0.05 m/s² accel bias, 0.10 rad/s gyro bias and 5° neutral tilt
   (`docs/racket-coordinate-system.md` §6). iPhone passes them.
-- Remaining gap before Done: Galaxy physical run (both hands), checked
-  against the same limits. Details in `docs/evidence/TMB-027-calibration.txt`.
+- Galaxy (2026-11-06): invalid orientation rejected; both hands calibrated
+  twice and within the physical limits (worst 0.043 m/s², 0.046 rad/s,
+  1.6°); Wi-Fi rejoin resent calibration and resumed Connected. All
+  acceptance criteria have evidence; details in
+  `docs/evidence/TMB-027-calibration.txt`.
