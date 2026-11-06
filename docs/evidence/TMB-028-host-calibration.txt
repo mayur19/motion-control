@@ -36,7 +36,8 @@ Physical (iPhone 17e, operator-performed short session, host run with
   controller, endpoint, message type, size, sequence, session, sensor time,
   validation); normalized values appear only in normalized_sample records.
 
+Live F5 overlay: operator confirmed it appears after the a84d785 fix.
+
 Not verified physically
-- The live F5 overlay after the a84d785 fix (operator confirmation pending).
 - Galaxy normalized capture (covered by the cross-platform fixture and the
   TMB-027 Galaxy calibration run).

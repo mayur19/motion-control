@@ -1,6 +1,6 @@
 # TMB-028 — Implement host calibration application and verification
 
-**Status:** Review — evidence recorded; live F5 overlay confirmation pending
+**Status:** Done — automated and physical iPhone evidence recorded
 
 **Labels:** `detection`, `host`, `quality`  
 **Estimate:** 1 day  
@@ -54,4 +54,6 @@
   (3192 normalized samples; vector lengths preserved to 4e-7). The first F5
   attempt showed nothing because the plot was laid out below the 720 px
   window; fixed in `a84d785` as a bottom overlay.
+- Operator confirmed (2026-11-06) that the F5 raw-vs-normalized overlay
+  appears in the live host window after `a84d785`.
 

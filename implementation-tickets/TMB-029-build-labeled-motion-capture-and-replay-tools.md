@@ -1,6 +1,7 @@
 # TMB-029 — Build labeled motion capture and replay tools
 
-**Status:** Blocked — calibration dependency chain incomplete  
+**Status:** Ready
+
 **Labels:** `detection`, `observability`, `quality`  
 **Estimate:** 1.5 days  
 **Dependencies:** TMB-012, TMB-028
