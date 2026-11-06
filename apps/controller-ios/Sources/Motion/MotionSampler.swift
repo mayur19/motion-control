@@ -72,7 +72,7 @@ final class MotionSampler: ObservableObject, @unchecked Sendable {
     // executor from start(), which otherwise traps on physical devices.
     private nonisolated func startUpdates() {
         manager.startDeviceMotionUpdates(
-            using: .xArbitraryZVertical,
+            using: Self.referenceFrame,
             to: callbackQueue
         ) { [weak self] motion, error in
             guard let self else { return }
@@ -112,7 +112,7 @@ final class MotionSampler: ObservableObject, @unchecked Sendable {
                 Float(motion.attitude.quaternion.z),
                 Float(motion.attitude.quaternion.w)
             )),
-            accuracy: Self.protocolAccuracy(motion.magneticField.accuracy),
+            accuracy: Self.protocolAccuracy(motion.magneticField.accuracy, referenceFrame: Self.referenceFrame),
             sensorFlags: 0x07
         )
         guard buffer.offer(sample) else { return }
@@ -138,8 +138,20 @@ final class MotionSampler: ObservableObject, @unchecked Sendable {
         )
     }
 
-    private static func protocolAccuracy(_ accuracy: CMMagneticFieldCalibrationAccuracy) -> UInt8 {
-        switch accuracy {
+    /// Attitude without the magnetometer (gyro + accelerometer fusion only).
+    nonisolated static let referenceFrame: CMAttitudeReferenceFrame = .xArbitraryZVertical
+
+    /// Maps Core Motion accuracy to protocol `accuracy`. Magnetic calibration
+    /// accuracy only describes magnetometer-based frames; in other frames it
+    /// stays `.uncalibrated`, so report `255` (unknown), not `0` (unreliable).
+    nonisolated static func protocolAccuracy(
+        _ accuracy: CMMagneticFieldCalibrationAccuracy,
+        referenceFrame: CMAttitudeReferenceFrame
+    ) -> UInt8 {
+        guard referenceFrame == .xMagneticNorthZVertical || referenceFrame == .xTrueNorthZVertical else {
+            return 255
+        }
+        return switch accuracy {
         case .uncalibrated: 0
         case .low: 1
         case .medium: 2
