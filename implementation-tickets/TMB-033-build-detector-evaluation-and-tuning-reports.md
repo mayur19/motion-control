@@ -1,6 +1,6 @@
 # TMB-033 — Build detector evaluation and tuning reports
 
-**Status:** Blocked — detector dependency incomplete  
+**Status:** In Progress — tooling under dependency exception; dataset evaluation pending
 **Labels:** `detection`, `observability`, `quality`  
 **Estimate:** 1 day  
 **Dependencies:** TMB-032
@@ -23,5 +23,26 @@
 
 - Versioned detector evaluation report
 - Detector configuration used for evaluation
+
+### Implementation record
+
+- Owner decision (2026-11-06): start the evaluation/tuning tooling while
+  TMB-030 is incomplete and TMB-032 remains in Review. Synthetic fixtures may
+  verify the reporting workflow now; detector tuning, held-out evaluation and
+  the acceptance thresholds remain pending real TMB-030 sessions.
+- Implemented `tools/detector-evaluation.py` and
+  `docs/detector-evaluation.md`. The tool runs the existing Godot replay (or
+  consumes saved replay JSON/series), verifies raw checksums and effective
+  label revisions, evaluates tune or held-out separately, embeds the exact
+  `DetectorPipeline.describe()` value, and reports per-take and aggregate
+  count-based TP/FN/FP, recall, precision, non-swing false triggers per 10
+  minutes, trigger-to-following-peak estimates and phone/player/hand/shot/speed
+  subgroups. Invalid takes and exclude-split sessions are listed, not counted.
+- Held-out execution requires `--confirm-heldout`; the documented workflow is
+  to freeze the tune-selected configuration, evaluate held-out once and
+  archive the versioned JSON/Markdown reports without retuning on them.
+- Verification so far is synthetic only. Real TMB-030 tuning, the one-time
+  held-out report, the live idle/handling acceptance check and any detector
+  threshold changes remain pending dataset completion.
 
 
