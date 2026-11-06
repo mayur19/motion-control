@@ -1,6 +1,6 @@
 # TMB-026 — Define the common racket coordinate system
 
-**Status:** Blocked — Gate A has no `GO` decision  
+**Status:** Ready — Gate A provisional `GO` (2026-11-06); the work is revisited if Gate A is revoked  
 **Labels:** `detection`, `protocol`, `architecture`  
 **Estimate:** 0.5 day  
 **Dependencies:** TMB-025 (`GO`)
