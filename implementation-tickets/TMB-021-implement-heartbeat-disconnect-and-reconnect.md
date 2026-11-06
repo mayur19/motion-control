@@ -140,3 +140,6 @@
   debug-panel wrap fix and the duplicate-parameter/debug-only join_uri
   hardening are unit-tested only (26/26) and pending installation and an
   on-device check when the phone is available again.
+- 2026-11-06: Physical iPhone smoke check on the hardened build (`32104ca`):
+  camera QR pairing as P1, Connected, median 100.0 accepted Hz over 34 s; host
+  closed cleanly. The host logged `awdl_state: active` at start with AWDL on.
