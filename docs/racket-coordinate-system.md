@@ -53,7 +53,7 @@ controllers transmit them unchanged. Physical check: an upright portrait
 iPhone reports Core Motion pitch +90°, quaternion `(sin 45°, 0, 0, cos 45°)`,
 which rotates `+Y_D` onto vertical `+Z`. (TMB-026 originally inverted the iOS
 quaternion; TMB-027's first physical calibration showed this rejected every
-correct grip, and the inversion was removed.) The iOS adapter at the native
+correct grip, and the inversion was removed; see ADR-011.) The iOS adapter at the native
 sensor boundary is therefore a pass-through; all protocol consumers use the
 device-to-reference convention below.
 

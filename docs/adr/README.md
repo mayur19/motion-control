@@ -16,6 +16,7 @@ old record instead of rewriting its history.
 | [ADR-008](ADR-008-raw-motion-and-event-logs.md) | Store raw motion and derived events in test logs | Accepted |
 | [ADR-009](ADR-009-platform-expansion-after-game-feel.md) | Keep browser/TV delivery behind the game-feel gate | Accepted |
 | [ADR-010](ADR-010-carry-handedness-in-calibration.md) | Carry explicit handedness in the calibration packet | Accepted |
+| [ADR-011](ADR-011-core-motion-attitude-is-device-to-reference.md) | Treat Core Motion attitude as device-to-reference (no iOS inversion) | Accepted |
 
 Each record uses the same Context, Decision, Consequences, Status and Date
 fields. See the [architecture plan](../../Two-Phone%20Motion%20Badminton%20Architecture%20and%20Delivery%20Plan.md)
