@@ -36,7 +36,8 @@ func _run() -> void:
 	panel.toggle_capture(100)
 	if not panel.is_capturing():
 		return _fail("Capture did not start")
-	panel.set_labels({"player": 2, "phone": "Galaxy", "handedness": "left", "intended_shot": "drop", "valid": false})
+	panel.set_labels({"player": 2, "phone": "Galaxy", "handedness": "left", "intended_shot": "drop",
+		"valid": false, "speed": "gentle", "swing_count": 5})
 	panel.toggle_take(200)
 	ingest.datagram_accepted.emit(PackedByteArray([1, 2]), "192.0.2.1:1", 250, 0)
 	panel.toggle_take(300)
@@ -45,6 +46,8 @@ func _run() -> void:
 		return _fail("Capture must record only datagrams while running: %s" % str(stopped))
 	var labels := FileAccess.get_file_as_string(str(stopped.directory).path_join("labels.jsonl")).split("\n", false)
 	var take: Dictionary = JSON.parse_string(labels[-1])
+	if str(take.speed) != "gentle" or int(take.swing_count) != 5:
+		return _fail("Panel speed/swing count not recorded: %s" % str(take))
 	if int(take.player) != 2 or str(take.intended_shot) != "drop" or bool(take.valid) \
 			or int(take.start_arrival_ns) != 200 or int(take.end_arrival_ns) != 300:
 		return _fail("Take labels from the panel are wrong: %s" % str(take))

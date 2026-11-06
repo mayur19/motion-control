@@ -8,7 +8,7 @@ extends PanelContainer
 const Capture = preload("res://capture/motion_capture.gd")
 const PHONES := ["iPhone", "Galaxy"]
 const WIDTH := 300.0
-const HEIGHT := 360.0
+const HEIGHT := 430.0
 const MARGIN := 16.0
 const COLOR_PANEL := Color("1a2636")
 const COLOR_TEXT := Color("edf5ff")
@@ -26,6 +26,8 @@ var _phone: OptionButton
 var _hand: OptionButton
 var _shot: OptionButton
 var _valid: CheckBox
+var _speed: OptionButton
+var _swings: SpinBox
 var _status_text := "Not capturing"
 
 
@@ -70,6 +72,8 @@ func set_labels(labels: Dictionary) -> void:
 	_select(_hand, str(labels.get("handedness", "right")))
 	_select(_shot, str(labels.get("intended_shot", "smash")))
 	_valid.button_pressed = bool(labels.get("valid", true))
+	_select(_speed, str(labels.get("speed", "none")))
+	_swings.value = int(labels.get("swing_count", 0))
 
 
 func current_labels() -> Dictionary:
@@ -79,6 +83,8 @@ func current_labels() -> Dictionary:
 		"handedness": _hand.get_item_text(_hand.selected),
 		"intended_shot": _shot.get_item_text(_shot.selected),
 		"valid": _valid.button_pressed,
+		"speed": _speed.get_item_text(_speed.selected),
+		"swing_count": int(_swings.value),
 	}
 
 
@@ -140,6 +146,17 @@ func _build() -> void:
 	_phone = _options(box, "Phone", PHONES)
 	_hand = _options(box, "Hand", Capture.HANDEDNESS)
 	_shot = _options(box, "Intended shot", Capture.SHOTS)
+	_speed = _options(box, "Speed", Capture.SPEEDS)
+	var swings_row := HBoxContainer.new()
+	var swings_caption := _label("Swings in take")
+	swings_caption.custom_minimum_size = Vector2(110, 0)
+	swings_row.add_child(swings_caption)
+	_swings = SpinBox.new()
+	_swings.min_value = 0
+	_swings.max_value = Capture.MAX_SWINGS_PER_TAKE
+	_swings.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	swings_row.add_child(_swings)
+	box.add_child(swings_row)
 	_valid = CheckBox.new()
 	_valid.text = "Valid take"
 	_valid.button_pressed = true

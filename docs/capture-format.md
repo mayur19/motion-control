@@ -54,6 +54,9 @@ monotonic clock (same clock as take boundaries).
 - `handedness`: `right` or `left`.
 - `intended_shot`: `smash`, `clear`, `drop`, `lift`, `other_swing`, or a
   non-swing take: `idle`, `handling`, `walking`.
+- `speed` (optional, default `none`): `gentle`, `normal` or `fast` for swing
+  takes. `swing_count` (optional, default 0): swings performed in the take,
+  0–50; dataset volume counts come from this field.
 - `valid`: `false` marks an unsafe, ambiguous or incorrectly performed take;
   it is kept, never deleted.
 - `labels.jsonl` is not covered by `raw.sha256`; it is expected to change.

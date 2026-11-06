@@ -15,6 +15,9 @@ const LABELS_FILE := "labels.jsonl"
 const HANDEDNESS := ["right", "left"]
 const SHOTS := ["smash", "clear", "drop", "lift", "other_swing", "idle", "handling", "walking"]
 const PLAYERS := [1, 2]
+## Optional (default `none` / 0): swing speed and swings performed in the take.
+const SPEEDS := ["none", "gentle", "normal", "fast"]
+const MAX_SWINGS_PER_TAKE := 50
 
 var _raw: FileAccess
 var _labels: FileAccess
@@ -156,6 +159,12 @@ static func validate_labels(labels: Dictionary) -> String:
 		return "intended_shot must be one of %s" % ", ".join(SHOTS)
 	if typeof(labels.get("valid")) != TYPE_BOOL:
 		return "valid must be true or false"
+	if not SPEEDS.has(str(labels.get("speed", "none"))):
+		return "speed must be one of %s" % ", ".join(SPEEDS)
+	var swings: Variant = labels.get("swing_count", 0)
+	if typeof(swings) not in [TYPE_INT, TYPE_FLOAT] or int(swings) != swings \
+			or int(swings) < 0 or int(swings) > MAX_SWINGS_PER_TAKE:
+		return "swing_count must be a whole number from 0 to %d" % MAX_SWINGS_PER_TAKE
 	return ""
 
 
@@ -166,6 +175,8 @@ static func _label_fields(labels: Dictionary) -> Dictionary:
 		"handedness": str(labels.handedness),
 		"intended_shot": str(labels.intended_shot),
 		"valid": bool(labels.valid),
+		"speed": str(labels.get("speed", "none")),
+		"swing_count": int(labels.get("swing_count", 0)),
 	}
 
 

@@ -110,6 +110,8 @@ func _summarize_take(take: Dictionary, speeds: Array[Dictionary], events: Array[
 			"handedness": str(take.get("handedness", "")),
 			"intended_shot": str(take.get("intended_shot", "")),
 			"valid": bool(take.get("valid", false)),
+			"speed": str(take.get("speed", "none")),
+			"swing_count": int(take.get("swing_count", 0)),
 		},
 		"start_arrival_ns": start,
 		"end_arrival_ns": finish,

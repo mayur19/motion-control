@@ -82,3 +82,12 @@ def test_correct_after_torn_last_line_is_not_lost(tmp_path: pathlib.Path) -> Non
     result = run("correct", str(capture), "--take", "1", "--set", "intended_shot=lift")
     assert result.returncode == 0, result.stderr
     assert "take 1 rev 2" in run("list", str(capture)).stdout
+
+
+def test_correct_speed_and_swing_count(tmp_path: pathlib.Path) -> None:
+    capture = make_capture(tmp_path)
+    ok = run("correct", str(capture), "--take", "1", "--set", "speed=fast", "--set", "swing_count=6")
+    assert ok.returncode == 0, ok.stderr
+    assert "speed=fast swings=6" in run("list", str(capture)).stdout
+    for bad in ("speed=warp", "swing_count=-1", "swing_count=51", "swing_count=2.5"):
+        assert run("correct", str(capture), "--take", "1", "--set", bad).returncode == 2, bad

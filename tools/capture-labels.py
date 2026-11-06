@@ -19,7 +19,9 @@ import sys
 
 SHOTS = ("smash", "clear", "drop", "lift", "other_swing", "idle", "handling", "walking")
 PHONE = re.compile(r"^[A-Za-z0-9 _-]{1,32}$")
-EDITABLE = ("player", "phone", "handedness", "intended_shot", "valid")
+SPEEDS = ("none", "gentle", "normal", "fast")
+MAX_SWINGS_PER_TAKE = 50
+EDITABLE = ("player", "phone", "handedness", "intended_shot", "valid", "speed", "swing_count")
 
 
 class LabelError(ValueError):
@@ -60,6 +62,14 @@ def parse_value(field: str, value: str) -> object:
         if value not in SHOTS:
             raise LabelError(f"intended_shot must be one of {', '.join(SHOTS)}")
         return value
+    if field == "speed":
+        if value not in SPEEDS:
+            raise LabelError(f"speed must be one of {', '.join(SPEEDS)}")
+        return value
+    if field == "swing_count":
+        if not value.isdigit() or int(value) > MAX_SWINGS_PER_TAKE:
+            raise LabelError(f"swing_count must be a whole number from 0 to {MAX_SWINGS_PER_TAKE}")
+        return int(value)
     if value not in ("true", "false"):
         raise LabelError("valid must be true or false")
     return value == "true"
@@ -108,6 +118,7 @@ def main(argv: list[str]) -> int:
         for take_id, take in takes.items():
             print(f"take {take_id} rev {take.get('revision')}: P{take.get('player')} {take.get('phone')} "
                   f"{take.get('handedness')} {take.get('intended_shot')} "
+                  f"speed={take.get('speed', 'none')} swings={take.get('swing_count', 0)} "
                   f"{'valid' if take.get('valid') else 'INVALID'}")
         return 0
     if args.take not in takes:

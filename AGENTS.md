@@ -127,6 +127,9 @@ Open items (not blocking M2 unless noted):
 
 TMB-028 host calibration is Done (`docs/evidence/TMB-028-host-calibration.txt`).
 TMB-029 capture/replay is Done (`docs/evidence/TMB-029-capture-replay.txt`).
-Next by plan: TMB-030 baseline dataset capture (needs both phones and long
-operator sessions; plan it with the owner), and onward per
+TMB-030 baseline dataset: In Progress. Plan in
+`docs/test-plans/tmb-030-dataset-capture-plan.md`; captures + `dataset-splits.json`
+live in the host user-data `captures/` folder; report with
+`python3 -I tools/dataset-inventory.py <captures dir> --markdown out.md`.
+Then onward per
 `implementation-tickets/README.md`.
