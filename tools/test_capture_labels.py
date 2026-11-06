@@ -73,3 +73,12 @@ def test_verify_reports_checksum(tmp_path: pathlib.Path) -> None:
         handle.write('{"record":"datagram"}\n')
     result = run("verify", str(capture))
     assert result.returncode == 1 and "mismatch" in result.stdout
+
+
+def test_correct_after_torn_last_line_is_not_lost(tmp_path: pathlib.Path) -> None:
+    capture = make_capture(tmp_path)
+    with (capture / "labels.jsonl").open("a", encoding="utf-8") as handle:
+        handle.write('{"record": "take", "take_id": 2, "revi')  # host killed mid-write
+    result = run("correct", str(capture), "--take", "1", "--set", "intended_shot=lift")
+    assert result.returncode == 0, result.stderr
+    assert "take 1 rev 2" in run("list", str(capture)).stdout

@@ -13,7 +13,9 @@ signal calibration_state_changed(controller_id: int, state: String, reason: Stri
 ## Byte-exact MOTION/CALIBRATION datagrams that passed pairing/endpoint gates,
 ## for TMB-029 capture. Never carries HELLO (pairing secret) or other control
 ## traffic, so captures can be replayed without storing secrets.
-signal datagram_accepted(packet: PackedByteArray, endpoint: String, arrival_ns: int)
+## `active_session_id` is the host's pairing session when accepted (0 if none),
+## so replay can apply the same active-session gate as live.
+signal datagram_accepted(packet: PackedByteArray, endpoint: String, arrival_ns: int, active_session_id: int)
 signal message_received(message: Dictionary, source_ip: String, source_port: int, arrival_ns: int)
 
 const Codec = preload("res://protocol/protocol_v1.gd")
@@ -38,6 +40,9 @@ var _paused_motion_packets := 0
 var _normalizer := Normalizer.new()
 ## Any object exposing `current_session.session_id` (SessionManager in the host).
 var _sessions: Object
+var _active_session_id := 0
+## controller_id -> last accepted CALIBRATION {packet, endpoint, arrival_ns, session_id}
+var _calibration_datagrams: Dictionary = {}
 
 
 func start(port: int, bind_address := "0.0.0.0") -> Error:
@@ -147,9 +152,26 @@ func snapshot() -> Dictionary:
 	}
 
 
+## Byte-exact CALIBRATION datagrams currently in force (active session only),
+## so a capture started after calibration can still be replayed (TMB-029).
+func calibration_seed() -> Array[Dictionary]:
+	var result: Array[Dictionary] = []
+	var ids := _calibration_datagrams.keys()
+	ids.sort()
+	for controller_id in ids:
+		var entry: Dictionary = _calibration_datagrams[controller_id]
+		if _active_session_id == 0 or int(entry.session_id) == _active_session_id:
+			var seeded := entry.duplicate()
+			seeded["active_session_id"] = _active_session_id
+			result.append(seeded)
+	return result
+
+
 ## Processes one datagram exactly as the UDP poll loop does. Offline replay
 ## (TMB-029) uses this so recorded and live traffic share one code path.
-func ingest_datagram(packet: PackedByteArray, endpoint: String, arrival_ns: int) -> void:
+func ingest_datagram(packet: PackedByteArray, endpoint: String, arrival_ns: int, active_session_id := 0) -> void:
+	if _sessions == null and active_session_id != 0:
+		_active_session_id = active_session_id
 	var separator := endpoint.rfind(":")
 	var source_ip := endpoint.substr(0, separator) if separator >= 0 else endpoint
 	var source_port := int(endpoint.substr(separator + 1)) if separator >= 0 else 0
@@ -197,7 +219,9 @@ func _process_packet(
 	})
 	message_received.emit(decoded, source_ip, source_port, arrival_ns)
 	if _sessions != null:
-		_normalizer.set_active_session(int(_sessions.current_session.get("session_id", 0)))
+		_active_session_id = int(_sessions.current_session.get("session_id", 0))
+	if _active_session_id != 0:
+		_normalizer.set_active_session(_active_session_id)
 	if decoded.header.message_type == Codec.TYPE_CALIBRATION:
 		var calibration_controller_id: int = decoded.header.controller_id
 		var calibration_ip := endpoint.substr(0, endpoint.rfind(":"))
@@ -208,7 +232,7 @@ func _process_packet(
 			_rejections["CALIBRATION_NOT_PAIRED"] = int(_rejections.get("CALIBRATION_NOT_PAIRED", 0)) + 1
 			packet_rejected.emit("CALIBRATION_NOT_PAIRED")
 			return
-		datagram_accepted.emit(packet, endpoint, arrival_ns)
+		datagram_accepted.emit(packet, endpoint, arrival_ns, _active_session_id)
 		if int(decoded.payload.result) == 1:
 			var calibration := {
 				"handedness": "right" if int(decoded.payload.handedness) == 1 else "left",
@@ -222,6 +246,10 @@ func _process_packet(
 				calibration_controller_id, int(decoded.header.session_id), calibration
 			)
 			if str(accepted.state) == Normalizer.CALIBRATED:
+				_calibration_datagrams[calibration_controller_id] = {
+					"packet": packet, "endpoint": endpoint, "arrival_ns": arrival_ns,
+					"session_id": int(decoded.header.session_id),
+				}
 				calibration_received.emit(calibration_controller_id, calibration.duplicate(true))
 			if bool(accepted.changed):
 				calibration_state_changed.emit(
@@ -238,7 +266,7 @@ func _process_packet(
 	):
 		_paused_motion_packets += 1
 		return
-	datagram_accepted.emit(packet, endpoint, arrival_ns)
+	datagram_accepted.emit(packet, endpoint, arrival_ns, _active_session_id)
 	var metrics := _metrics_for(controller_id, endpoint)
 	if int(metrics.received) > 0 and str(metrics.endpoint) != endpoint:
 		_begin_new_stream(metrics)

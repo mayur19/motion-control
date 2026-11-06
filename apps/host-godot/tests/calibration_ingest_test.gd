@@ -35,7 +35,7 @@ func _initialize() -> void:
 	ingest.sample_received.connect(func(value: Dictionary): _sample = value)
 	ingest.normalized_sample_received.connect(func(value: Dictionary): _normalized_samples.append(value))
 	ingest.datagram_accepted.connect(
-		func(packet: PackedByteArray, _endpoint: String, _arrival: int): _accepted_datagrams.append(packet[3])
+		func(packet: PackedByteArray, _endpoint: String, _arrival: int, _session: int): _accepted_datagrams.append(packet[3])
 	)
 	ingest.calibration_state_changed.connect(
 		func(_id: int, state: String, _reason: String): _calibration_states.append(state)

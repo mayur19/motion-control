@@ -17,6 +17,7 @@ const COLOR_RECORDING := Color("ef6a70")
 @export var capture_root := "user://captures"
 
 var _capture := Capture.new()
+var _ingest: MotionIngest
 var _status: Label
 var _capture_button: Button
 var _take_button: Button
@@ -50,6 +51,7 @@ func place_as_overlay() -> void:
 
 
 func bind_ingest(ingest: MotionIngest) -> void:
+	_ingest = ingest
 	if not ingest.datagram_accepted.is_connected(_capture.record_datagram):
 		ingest.datagram_accepted.connect(_capture.record_datagram)
 
@@ -90,7 +92,8 @@ func toggle_capture(now_ns := -1) -> Dictionary:
 		)
 		_refresh()
 		return stopped
-	var started := _capture.start(capture_root, {"source": "host capture panel"})
+	var seed: Array[Dictionary] = _ingest.calibration_seed() if _ingest != null else []
+	var started := _capture.start(capture_root, {"source": "host capture panel"}, seed)
 	_set_status("Recording %s" % _capture.capture_id() if started == OK else "Start failed: %s" % error_string(started))
 	_refresh()
 	return {"ok": started == OK}

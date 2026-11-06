@@ -23,8 +23,16 @@ Every further line is one datagram that passed the host's pairing, endpoint
 and session gates, in arrival order:
 
 ```json
-{"record":"datagram","arrival_monotonic_ns":123,"endpoint":"192.168.1.20:52000","bytes_b64":"…"}
+{"record":"datagram","arrival_monotonic_ns":123,"endpoint":"192.168.1.20:52000",
+ "active_session_id":123456789,"bytes_b64":"…"}
 ```
+
+`active_session_id` is the host's pairing session when the datagram was
+accepted; replay applies the same active-session gate as live (after NEW
+PAIRING CODE, old-session data is not normalized). Datagrams marked
+`"seed": true` come first: the byte-exact `CALIBRATION` datagrams already in
+force when the capture started, so a capture started after pairing still
+replays with calibration applied.
 
 Only protocol v1 `MOTION` and `CALIBRATION` datagrams are recorded
 (`MotionIngest.datagram_accepted`). `HELLO` (which carries the pairing
@@ -47,6 +55,8 @@ monotonic clock (same clock as take boundaries).
   non-swing take: `idle`, `handling`, `walking`.
 - `valid`: `false` marks an unsafe, ambiguous or incorrectly performed take;
   it is kept, never deleted.
+- `labels.jsonl` is not covered by `raw.sha256`; it is expected to change.
+  Readers skip a torn last line, and corrections start on a fresh line.
 - The effective label of a take is its highest `revision`. Correct labels with
   `python3 -I tools/capture-labels.py correct <dir> --take N --set intended_shot=clear`,
   which appends a new revision and never touches `raw.jsonl`.

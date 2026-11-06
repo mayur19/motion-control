@@ -38,7 +38,9 @@ func replay(directory: String, detector_config: Dictionary) -> Dictionary:
 		})
 	)
 	for datagram in raw.datagrams:
-		ingest.ingest_datagram(datagram.bytes, str(datagram.endpoint), int(datagram.arrival_ns))
+		ingest.ingest_datagram(
+			datagram.bytes, str(datagram.endpoint), int(datagram.arrival_ns), int(datagram.active_session_id)
+		)
 	var rejections: Dictionary = ingest.snapshot().rejections
 	ingest.free()
 
@@ -75,7 +77,7 @@ static func effective_takes(directory: String) -> Array[Dictionary]:
 			if typeof(record) != TYPE_DICTIONARY or str(record.get("record", "")) != "take":
 				continue
 			var take_id := int(record.get("take_id", 0))
-			if not latest.has(take_id) or int(record.get("revision", 0)) >= int(latest[take_id].revision):
+			if not latest.has(take_id) or int(record.get("revision", 0)) >= int(latest[take_id].get("revision", 0)):
 				latest[take_id] = record
 	var ids := latest.keys()
 	ids.sort()
@@ -150,5 +152,6 @@ func _read_raw(directory: String) -> Dictionary:
 			"bytes": Marshalls.base64_to_raw(str(record.get("bytes_b64", ""))),
 			"endpoint": str(record.get("endpoint", "")),
 			"arrival_ns": int(record.get("arrival_monotonic_ns", 0)),
+			"active_session_id": int(record.get("active_session_id", 0)),
 		})
 	return {"ok": true, "header": header, "datagrams": datagrams}

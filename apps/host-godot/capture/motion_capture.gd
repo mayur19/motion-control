@@ -41,7 +41,9 @@ func open_take() -> Dictionary:
 	return _open_take.duplicate(true)
 
 
-func start(root_directory: String, metadata := {}) -> Error:
+## `seed` holds calibration datagrams already in force (MotionIngest.calibration_seed())
+## so captures started after pairing still replay with calibration applied.
+func start(root_directory: String, metadata := {}, seed: Array[Dictionary] = []) -> Error:
 	if is_recording():
 		return ERR_ALREADY_IN_USE
 	_capture_id = "cap_%s_%08x" % [
@@ -70,19 +72,33 @@ func start(root_directory: String, metadata := {}) -> Error:
 	_next_take_id = 1
 	_open_take = {}
 	_datagrams = 0
+	for entry in seed:
+		_write_datagram(entry.packet, str(entry.endpoint), int(entry.arrival_ns),
+			int(entry.get("active_session_id", 0)), true)
 	return OK
 
 
-func record_datagram(packet: PackedByteArray, endpoint: String, arrival_ns: int) -> void:
+func record_datagram(packet: PackedByteArray, endpoint: String, arrival_ns: int, active_session_id := 0) -> void:
 	if not is_recording():
 		return
-	_write(_raw, {
+	_write_datagram(packet, endpoint, arrival_ns, active_session_id, false)
+	_datagrams += 1
+
+
+func _write_datagram(
+	packet: PackedByteArray, endpoint: String, arrival_ns: int, active_session_id: int, seeded: bool
+) -> void:
+	var record := {
 		"record": "datagram",
 		"arrival_monotonic_ns": arrival_ns,
 		"endpoint": endpoint,
 		"bytes_b64": Marshalls.raw_to_base64(packet),
-	})
-	_datagrams += 1
+	}
+	if active_session_id != 0:
+		record["active_session_id"] = active_session_id
+	if seeded:
+		record["seed"] = true
+	_write(_raw, record)
 
 
 ## Starts a labeled take at `now_ns` (host arrival clock), closing any open one.

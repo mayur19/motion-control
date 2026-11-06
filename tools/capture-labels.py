@@ -118,8 +118,10 @@ def main(argv: list[str]) -> int:
     except LabelError as error:
         print(f"Rejected: {error}", file=sys.stderr)
         return 2
-    with (args.capture / "labels.jsonl").open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(record) + "\n")
+    labels = args.capture / "labels.jsonl"
+    torn = labels.stat().st_size > 0 and not labels.read_bytes().endswith(b"\n")
+    with labels.open("a", encoding="utf-8") as handle:
+        handle.write(("\n" if torn else "") + json.dumps(record) + "\n")
     print(f"take {args.take} rev {record['revision']} written")
     return 0
 

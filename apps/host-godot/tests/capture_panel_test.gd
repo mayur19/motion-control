@@ -32,13 +32,13 @@ func _run() -> void:
 	if not panel.visible or rect.position.x < 0 or rect.end.x > 1280.5 or rect.position.y < 0 or rect.end.y > 720.5:
 		return _fail("F6 overlay not fully on screen: %s" % str(rect))
 
-	ingest.datagram_accepted.emit(PackedByteArray([0]), "192.0.2.1:1", 10)
+	ingest.datagram_accepted.emit(PackedByteArray([0]), "192.0.2.1:1", 10, 0)
 	panel.toggle_capture(100)
 	if not panel.is_capturing():
 		return _fail("Capture did not start")
 	panel.set_labels({"player": 2, "phone": "Galaxy", "handedness": "left", "intended_shot": "drop", "valid": false})
 	panel.toggle_take(200)
-	ingest.datagram_accepted.emit(PackedByteArray([1, 2]), "192.0.2.1:1", 250)
+	ingest.datagram_accepted.emit(PackedByteArray([1, 2]), "192.0.2.1:1", 250, 0)
 	panel.toggle_take(300)
 	var stopped := panel.toggle_capture(400)
 	if panel.is_capturing() or not bool(stopped.get("ok", false)) or int(stopped.datagrams) != 1:

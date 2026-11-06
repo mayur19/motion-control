@@ -7,6 +7,11 @@ const Ingest = preload("res://network/motion_ingest.gd")
 const Pipeline = preload("res://detection/detector_pipeline.gd")
 
 const ENDPOINT := "192.0.2.7:6000"
+class FakeSessions:
+	extends RefCounted
+	var current_session := {"session_id": 3}
+
+
 const CONFIG := {"detector": "angular_speed_probe", "threshold_rad_s": 3.0, "refractory_ms": 400}
 
 
@@ -79,8 +84,51 @@ func _initialize() -> void:
 	if bool(tampered.ok) or not str(tampered.error).contains("checksum"):
 		return _fail("Tampered capture was not refused: %s" % str(tampered))
 
+	var late := await _capture_started_after_calibration(packets)
+	if not late.is_empty():
+		return _fail(late)
+
 	print("TMB-029_REPLAY_OK events=%d live_equal=true repeatable=true relabel=true tamper_refused=true" % live_events.size())
 	quit(0)
+
+
+## Normal flow: phones calibrate, then the operator starts the capture; the
+## session later rotates while a stale-session packet still arrives.
+func _capture_started_after_calibration(packets: Array[PackedByteArray]) -> String:
+	var ingest := Ingest.new()
+	root.add_child(ingest)
+	var sessions := FakeSessions.new()
+	ingest.set_session_manager(sessions)
+	var live := Pipeline.new()
+	live.configure(CONFIG)
+	live.bind_ingest(ingest)
+	var live_events: Array[Dictionary] = []
+	live.event_detected.connect(func(event: Dictionary): live_events.append(event))
+	var live_normalized := [0]
+	ingest.normalized_sample_received.connect(func(_sample: Dictionary): live_normalized[0] += 1)
+	var arrival := 5_000_000_000
+	ingest.ingest_datagram(packets[0], ENDPOINT, arrival)  # calibration, before capture
+	var capture := Capture.new()
+	if capture.start(_root_dir(), {}, ingest.calibration_seed()) != OK:
+		return "late capture start failed"
+	ingest.datagram_accepted.connect(capture.record_datagram)
+	for index in range(1, packets.size()):
+		arrival += 10_000_000
+		if index == packets.size() / 2:
+			sessions.current_session = {"session_id": 4}  # NEW PAIRING CODE mid-swing
+		ingest.ingest_datagram(packets[index], ENDPOINT, arrival)
+	var stopped := capture.stop(arrival)
+	var result := Replayer.new().replay(stopped.directory, CONFIG)
+	if not bool(result.ok):
+		return "late replay failed: %s" % str(result)
+	if int(result.totals.normalized_samples) == 0:
+		return "Capture started after calibration replayed with no normalized samples"
+	if int(result.totals.normalized_samples) != int(live_normalized[0]):
+		return "Replay normalized %d samples, live %d (session gate differs)" % [
+			int(result.totals.normalized_samples), int(live_normalized[0])]
+	if JSON.stringify(result.events) != JSON.stringify(live_events):
+		return "Late-start/rotation replay differs from live: %s vs %s" % [str(result.events), str(live_events)]
+	return ""
 
 
 func _packets() -> Array[PackedByteArray]:
