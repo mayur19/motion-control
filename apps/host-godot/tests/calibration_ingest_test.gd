@@ -2,6 +2,7 @@ extends SceneTree
 
 const Codec = preload("res://protocol/protocol_v1.gd")
 const Ingest = preload("res://network/motion_ingest.gd")
+const LoggerScript = preload("res://logging/session_logger.gd")
 
 var _calibration_events := 0
 var _sample: Dictionary = {}
@@ -12,6 +13,14 @@ func _initialize() -> void:
 	root.add_child(ingest)
 	ingest.calibration_received.connect(func(_id: int, _value: Dictionary): _calibration_events += 1)
 	ingest.sample_received.connect(func(value: Dictionary): _sample = value)
+	var log_path := _output_path()
+	var logger := LoggerScript.new()
+	logger.flush_interval_ms = 25
+	root.add_child(logger)
+	if logger.start("calibration-session", {"test": "TMB-027"}, log_path) != OK:
+		_fail("Logger start failed")
+		return
+	logger.attach(ingest)
 
 	var calibration := _packet(Codec.TYPE_CALIBRATION, 0, {
 		"message_type": Codec.TYPE_CALIBRATION,
@@ -54,7 +63,23 @@ func _initialize() -> void:
 		_fail("Left-hand angular velocity normalization differed: %s" % str(_sample.angular_velocity))
 		return
 
-	print("TMB-027_CALIBRATION_INGEST_OK handedness=left common_frame=true")
+	logger.close()
+	var logged := _calibration_event(log_path)
+	if logged.is_empty():
+		_fail("Session log has no calibration event")
+		return
+	if (
+		int(logged.get("controller_id", 0)) != 7
+		or str(logged.get("handedness", "")) != "left"
+		or not _near(logged.get("neutral_orientation", []), [0.0, 0.0, 0.0, 1.0])
+		or not _near(logged.get("acceleration_bias", []), [0.1, 0.2, 0.3])
+		or not _near(logged.get("gyroscope_bias", []), [0.01, 0.02, 0.03])
+		or absf(float(logged.get("quality", 0.0)) - 0.9) > 0.0001
+	):
+		_fail("Calibration event fields differed: %s" % str(logged))
+		return
+
+	print("TMB-027_CALIBRATION_INGEST_OK handedness=left common_frame=true logged=true")
 	quit(0)
 
 
@@ -72,7 +97,24 @@ func _packet(message_type: int, sequence: int, payload: Dictionary) -> Dictionar
 	})
 
 
-func _near(actual: Array, expected: Array) -> bool:
+func _output_path() -> String:
+	for argument in OS.get_cmdline_user_args():
+		if argument.begins_with("--output="):
+			return argument.trim_prefix("--output=")
+	return OS.get_user_data_dir().path_join("calibration_ingest_test.jsonl")
+
+
+func _calibration_event(path: String) -> Dictionary:
+	for line in FileAccess.get_file_as_string(path).split("\n", false):
+		var record: Variant = JSON.parse_string(line)
+		if typeof(record) == TYPE_DICTIONARY and record.get("event", "") == "calibration":
+			return record
+	return {}
+
+
+func _near(actual: Variant, expected: Array) -> bool:
+	if typeof(actual) != TYPE_ARRAY or actual.size() != expected.size():
+		return false
 	for index in expected.size():
 		if absf(float(actual[index]) - float(expected[index])) > 0.0001:
 			return false

@@ -75,6 +75,35 @@ func start(session_id: String, metadata := {}, path_override := "") -> Error:
 func attach(ingest: MotionIngest) -> void:
 	if not ingest.packet_observed.is_connected(log_packet):
 		ingest.packet_observed.connect(log_packet)
+	if not ingest.calibration_received.is_connected(log_calibration):
+		ingest.calibration_received.connect(log_calibration)
+
+
+## Records each accepted CALIBRATION so physical runs can check repeatability.
+## Fields are allow-listed; vectors are written as plain numeric arrays.
+func log_calibration(controller_id: int, calibration: Dictionary) -> void:
+	log_event("calibration", {
+		"controller_id": controller_id,
+		"handedness": str(calibration.get("handedness", "")),
+		"neutral_orientation": _number_array(calibration.get("neutral_orientation", [])),
+		"acceleration_bias": _number_array(calibration.get("acceleration_bias", [])),
+		"gyroscope_bias": _number_array(calibration.get("gyroscope_bias", [])),
+		"quality": float(calibration.get("quality", 0.0)),
+		"sensor_monotonic_ns": int(calibration.get("sensor_monotonic_ns", 0)),
+	})
+
+
+static func _number_array(value: Variant) -> Array:
+	var result: Array = []
+	match typeof(value):
+		TYPE_ARRAY, TYPE_PACKED_FLOAT32_ARRAY, TYPE_PACKED_FLOAT64_ARRAY:
+			for component in value:
+				result.append(float(component))
+		TYPE_VECTOR3:
+			result = [value.x, value.y, value.z]
+		TYPE_QUATERNION:
+			result = [value.x, value.y, value.z, value.w]
+	return result
 
 
 func log_packet(packet_record: Dictionary) -> void:

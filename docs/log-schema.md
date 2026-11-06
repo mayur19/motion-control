@@ -62,6 +62,12 @@ The `awdl_state` event records the macOS AWDL interface state (`active`,
 Wi-Fi host, controller input is expected to show periodic ~100 ms delays (see
 `docs/development.md`).
 
+The `calibration` event records each accepted controller `CALIBRATION`:
+`controller_id`, `handedness` (`right` or `left`), `neutral_orientation`
+(x, y, z, w), `acceleration_bias`, `gyroscope_bias`, `quality` and the native
+`sensor_monotonic_ns`. It lets physical runs check calibration repeatability;
+the raw packet records are unchanged.
+
 The once-per-second `soak_metrics` event records controller-reported sensor Hz,
 accepted motion Hz, cumulative loss/duplicate/reorder totals, jitter, clock
 RTT/offset/drift, sample-age and host-frame-time distributions (each with
