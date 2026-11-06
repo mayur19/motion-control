@@ -51,4 +51,9 @@
   the held-out S4/N4: count swings aloud, do exactly the planned number, and
   set Speed and Swings in take before END TAKE.
 - Inventory after S1: iPhone 34/100 swings, 1.3/20 non-swing minutes.
+- 2026-11-06 iPhone N1 (non-swing, tune) captured: idle 1.85 min, handling
+  1.26 min, walking 1.02 min at 100 Hz. Handling and walking peaked at 8.1
+  and 8.4 rad/s, well above the provisional 3 rad/s onset, so they are useful
+  hard negatives for TMB-033.
+- Inventory after N1: iPhone 34/100 swings, 5.4/20 non-swing minutes.
 
