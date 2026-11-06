@@ -1,0 +1,38 @@
+# TMB-023 — Build the raw-input latency stimulus
+
+**Status:** Done  
+**Labels:** `observability`, `host`, `quality`  
+**Estimate:** 1 day  
+**Dependencies:** TMB-020, TMB-022
+
+### Implementation steps
+
+1. Add a deliberately simple gyro threshold independent of the final swing detector.
+2. On crossing, change a large screen region to a high-contrast color on the next available frame.
+3. Emit a synchronized log event containing sample, arrival, threshold and simulation/render marker times.
+4. Add a cooldown so one physical swing creates one visual stimulus.
+5. Allow threshold adjustment without rebuilding.
+
+### Acceptance criteria
+
+- A controlled swing produces one unambiguous visual response.
+- The threshold path contains no batching, animation delay or gameplay logic.
+- The log identifies every processing stage available in software.
+
+### Evidence
+
+- [Automated stimulus and logging evidence](../docs/evidence/TMB-023-raw-latency.txt)
+- [240 FPS test procedure and stimulus operation](../docs/test-plans/end-to-end-latency.md)
+- Physical test-mode video and matching event log
+
+### Implementation log
+
+- 2026-11-06: Added an isolated angular-speed threshold path, full-screen
+  high-contrast response, per-controller cooldown and runtime threshold controls.
+- 2026-11-06: Added stage timestamps for sample, arrival, threshold, simulation
+  marker and next-frame render marker plus a deterministic burst/cooldown/
+  threshold test. The path has no animation, batching or gameplay dependency.
+- The required physical swing video is deferred until a phone and high-speed
+  camera are available; the implementation and log contract are complete.
+
+
