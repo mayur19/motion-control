@@ -1,6 +1,6 @@
 # TMB-027 — Implement slow-swing calibration on both controllers
 
-**Status:** Review — implementation and automated evidence complete
+**Status:** Review — iPhone physically verified; Galaxy run and repeatability-tolerance decision pending
 
 **Labels:** `detection`, `controller-ios`, `controller-android`, `safety`  
 **Estimate:** 1.5 days  
@@ -39,5 +39,13 @@
   host visualization and invalid-controller pause behavior remain TMB-028.
 - Automated results and commands are recorded in
   `docs/evidence/TMB-027-calibration.txt`.
-
-
+- Physical iPhone run (2026-11-06) found and fixed three defects: iOS
+  accuracy always 0, inverted Core Motion quaternion (TMB-026 adapter), and a
+  rejoin dead-end on calibrated phones. Rejoin now resends calibration; both
+  controllers have Recalibrate; the host logs a `calibration` event.
+- iPhone: invalid orientation rejected; right and left hand each calibrated
+  twice; neutral tilt repeats within 2.3°. Accel-bias repeat reached
+  0.040 m/s² (right) and 0.027 m/s² (left), above the documented synthetic
+  0.02 m/s² tolerance; a physical tolerance needs an owner decision.
+- Remaining gaps before Done: Galaxy physical run (both hands) and that
+  tolerance decision. Details in `docs/evidence/TMB-027-calibration.txt`.

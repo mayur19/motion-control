@@ -54,3 +54,62 @@ Checkpoint caveat
 - No physical-phone calibration was requested or performed in this checkpoint;
   automated evidence uses identical synthetic sensor cases for both native
   implementations and both hands.
+
+Follow-up session (Claude Code), 2026-11-06 evening
+Commits: 85f501d (host `calibration` log event), 09f2e35 (resend calibration
+on rejoin + Recalibrate), 79c5627 (iOS accuracy 255 for non-magnetic frame),
+414c0da (stop inverting Core Motion quaternion), 8b2f3e9 (iOS swing-failure
+measurements).
+
+Automated re-verification at HEAD
+- iOS simulator: 34 tests, 0 failures (was 27).
+- Android: testDebugUnitTest 32 tests, 0 failures; assembleDebug OK.
+- Godot: all 19 tests/*_test.gd pass, including
+  TMB-027_CALIBRATION_INGEST_OK handedness=left common_frame=true logged=true;
+  --smoke-test TMB-004_HOST_SMOKE_OK.
+- ruby protocol/golden-vectors/generate.rb --check: TMB-008_FIXTURES_OK
+  positives=8 negatives=7. pytest tools/: 21 passed.
+
+Defects found only by the physical iPhone run (all fixed test-first)
+1. iOS sent accuracy 0 for every sample (.xArbitraryZVertical leaves
+   magneticField.accuracy uncalibrated), so neutral capture always failed
+   "Motion sensors are not ready". Now reports 255 (unknown).
+2. The TMB-026 iOS adapter inverted the Core Motion attitude quaternion, so
+   an upright phone read as pointing down and always failed "Hold the phone
+   upright...". Core Motion is already device-to-reference; adapter is now a
+   pass-through (docs/racket-coordinate-system.md corrected).
+3. Regression from TMB-027: any rejoin of a calibrated phone entered a
+   disabled "Calibration complete" screen and never streamed again. Rejoin
+   now resends the stored CALIBRATION and resumes Connected.
+
+Physical iPhone run (operator-performed, iPhone 17e, build 414c0da, Wi-Fi
+host, single short session; values from the host session-log
+`calibration` events)
+- Invalid orientation (phone flat, screen up): rejected with "Hold the phone
+  upright in portrait with its top edge pointing up." (operator report).
+- Four accepted calibrations, each followed by Connected:
+    run   shaft-from-vertical  screen-tilt  accel bias (m/s²)          gyro bias (rad/s)          quality
+    R1    13.5°                13.4°        (0.044, -0.006, -0.010)    (0.007, 0.013, 0.002)      0.902
+    R2    15.8°                15.6°        (0.057,  0.006,  0.030)    (0.004, -0.010, 0.001)     0.941
+    L1    18.6°                18.5°        (0.059,  0.002,  0.015)    (-0.013, -0.022, 0.006)    0.883
+    L2    16.5°                16.4°        (0.046,  0.029,  0.037)    (0.044, -0.043, 0.006)     0.775
+- Repeatability, same hand:
+    right: neutral tilt within 2.3°; accel-bias |diff| (0.013, 0.012, 0.040);
+           gyro-bias |diff| (0.002, 0.022, 0.001)
+    left:  neutral tilt within 2.1°; accel-bias |diff| (0.013, 0.027, 0.022);
+           gyro-bias |diff| (0.056, 0.021, 0.000)
+  Neutral yaw differs between runs as expected (arbitrary yaw origin; the
+  host uses q_rel relative to neutral).
+  RESULT vs documented tolerance: the 0.02 m/s² accel-bias tolerance in
+  docs/racket-coordinate-system.md §6 is exceeded physically on one axis for
+  the right hand (0.040) and two axes for the left (0.027, 0.022). That value
+  was specified for a synthetic 0.01 m/s² perturbation; a physical tolerance
+  is an owner decision.
+- Rejoin: Wi-Fi off via Control Centre paused the app, host heartbeat timed
+  out, then on Wi-Fi return the host logged pairing reason=reconnect, an
+  identical resent `calibration` event (left, L2 values) and Connected about
+  0.5 s later, with no recalibration requested.
+
+Not yet done
+- Galaxy (Android) physical calibration run, both hands.
+- Owner decision on a physical repeatability tolerance.
