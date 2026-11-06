@@ -66,7 +66,9 @@ func _sample(sequence: int, gyro: Vector3) -> Dictionary:
 		"sensor_monotonic_ns": now - 2_000_000,
 		"adjusted_host_monotonic_ns": now - 2_000_000,
 		"arrival_monotonic_ns": now - 1_000_000,
-		"angular_velocity": gyro,
+		# Same shape as protocol_v1.gd's decoder (floats(3) -> Array), so the
+		# test exercises what real controllers deliver, not a hand-made Vector3.
+		"angular_velocity": [gyro.x, gyro.y, gyro.z],
 	}
 
 

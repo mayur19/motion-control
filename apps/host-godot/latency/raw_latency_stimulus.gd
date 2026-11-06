@@ -60,8 +60,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 func _on_sample_received(sample: Dictionary) -> void:
 	if not armed or _pending:
 		return
-	var angular_velocity: Vector3 = sample.angular_velocity
-	var magnitude := angular_velocity.length()
+	var magnitude := _magnitude(sample.get("angular_velocity", []))
 	if magnitude < threshold_rad_s:
 		return
 	var controller_id := int(sample.controller_id)
@@ -126,3 +125,13 @@ func _update_label() -> void:
 		if armed
 		else ""
 	)
+
+
+## Gyro magnitude in rad/s. The protocol decoder delivers angular velocity as a
+## 3-element Array; accept a Vector3 too. Malformed input yields 0 (no trigger).
+static func _magnitude(value) -> float:
+	if value is Vector3:
+		return value.length()
+	if value is Array and value.size() == 3:
+		return Vector3(float(value[0]), float(value[1]), float(value[2])).length()
+	return 0.0
