@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Motion Controller</string>
+    <string name="camera_permission_explanation">Scan the badminton host QR code to join a local game session.</string>
+    <string name="network_permission_explanation">Connect to the badminton host on your local network and stream controller motion.</string>
+    <string name="wake_lock_explanation">Keep the screen awake only while calibration or active play is in progress.</string>
+</resources>
