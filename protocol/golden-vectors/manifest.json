@@ -1,0 +1,252 @@
+{
+  "manifest_version": 1,
+  "protocol_version": 1,
+  "byte_order": "big-endian",
+  "header_size": 28,
+  "maximum_datagram_size": 256,
+  "float_tolerance": 1.0e-05,
+  "session_id_hex": "0102030405060708",
+  "positives": [
+    {
+      "file": "positive/hello.bin",
+      "sha256": "be3a28ec58bb609b66a1a6bd91dc1eef49b31f8c1e23ef15e65c3dde85e9d5c4",
+      "message_type": 1,
+      "message_name": "HELLO",
+      "expected": {
+        "header": {
+          "protocol_version": 1,
+          "flags": 1,
+          "session_id_hex": "0102030405060708",
+          "controller_id": 0,
+          "sequence": 1
+        },
+        "payload": {
+          "pairing_secret_hex": "00112233445566778899aabbccddeeff",
+          "platform": 1,
+          "capabilities": 15,
+          "max_sample_hz": 200,
+          "device_model": "iPhone 17e",
+          "app_version": "0.1.0",
+          "os_version": "iOS 26.4"
+        }
+      }
+    },
+    {
+      "file": "positive/welcome.bin",
+      "sha256": "bb0b2f438e77da8f42f0ec905b7e6bb1f8677b91fda3ee7d0c23fa15521da1e7",
+      "message_type": 2,
+      "message_name": "WELCOME",
+      "expected": {
+        "header": {
+          "protocol_version": 1,
+          "flags": 0,
+          "session_id_hex": "0102030405060708",
+          "controller_id": 168496141,
+          "sequence": 2
+        },
+        "payload": {
+          "player": 1,
+          "session_state": 1,
+          "heartbeat_interval_ms": 500,
+          "disconnect_timeout_ms": 2000,
+          "reorder_window_packets": 8,
+          "host_monotonic_ns": "9876543210",
+          "session_expires_unix_s": "1800000000"
+        }
+      }
+    },
+    {
+      "file": "positive/ping.bin",
+      "sha256": "dad83b26e13dee27c90678f86d184ce1e51f05bfaa8f96c1a5979257d573913c",
+      "message_type": 3,
+      "message_name": "PING",
+      "expected": {
+        "header": {
+          "protocol_version": 1,
+          "flags": 1,
+          "session_id_hex": "0102030405060708",
+          "controller_id": 168496141,
+          "sequence": 3
+        },
+        "payload": {
+          "ping_id": 7,
+          "sender_monotonic_ns": "1000000000"
+        }
+      }
+    },
+    {
+      "file": "positive/pong.bin",
+      "sha256": "71cc3cc86f9772a79c8ab89cfe7da17e73e9d934956470ea4085f1e2acb48b27",
+      "message_type": 4,
+      "message_name": "PONG",
+      "expected": {
+        "header": {
+          "protocol_version": 1,
+          "flags": 0,
+          "session_id_hex": "0102030405060708",
+          "controller_id": 168496141,
+          "sequence": 4
+        },
+        "payload": {
+          "ping_id": 7,
+          "echo_sender_monotonic_ns": "1000000000",
+          "receiver_receive_monotonic_ns": "2000000000",
+          "receiver_send_monotonic_ns": "2001000000"
+        }
+      }
+    },
+    {
+      "file": "positive/motion.bin",
+      "sha256": "331c2ef341c1fbd8a579c11f35d31f503d01d3de595c4d2cb01afe5b37e1ff87",
+      "message_type": 5,
+      "message_name": "MOTION",
+      "expected": {
+        "header": {
+          "protocol_version": 1,
+          "flags": 0,
+          "session_id_hex": "0102030405060708",
+          "controller_id": 168496141,
+          "sequence": 42
+        },
+        "payload": {
+          "sensor_monotonic_ns": "123456789",
+          "acceleration_m_s2": [
+            1.0,
+            0.0,
+            -9.80665
+          ],
+          "angular_velocity_rad_s": [
+            0.1,
+            -0.2,
+            3.5
+          ],
+          "orientation_xyzw": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "accuracy": 3,
+          "sensor_flags": 7
+        }
+      }
+    },
+    {
+      "file": "positive/calibration.bin",
+      "sha256": "603b4dfefb2a7770fccd4e917e0f16f8fb89c1ce3346c7dd1aea3a0aa927ad2c",
+      "message_type": 6,
+      "message_name": "CALIBRATION",
+      "expected": {
+        "header": {
+          "protocol_version": 1,
+          "flags": 0,
+          "session_id_hex": "0102030405060708",
+          "controller_id": 168496141,
+          "sequence": 43
+        },
+        "payload": {
+          "sensor_monotonic_ns": "123500000",
+          "neutral_orientation_xyzw": [
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "accel_bias_xyz": [
+            0.1,
+            -0.1,
+            0.05
+          ],
+          "gyro_bias_xyz": [
+            0.01,
+            -0.02,
+            0.03
+          ],
+          "quality": 0.95,
+          "result": 1
+        }
+      }
+    },
+    {
+      "file": "positive/status.bin",
+      "sha256": "8d785b19a8f8d501a7fb750b24d1417596d5d237ac86a2e9029c5ab2fd7b6398",
+      "message_type": 7,
+      "message_name": "STATUS",
+      "expected": {
+        "header": {
+          "protocol_version": 1,
+          "flags": 0,
+          "session_id_hex": "0102030405060708",
+          "controller_id": 168496141,
+          "sequence": 44
+        },
+        "payload": {
+          "sender_monotonic_ns": "999000000",
+          "battery_percent": 85,
+          "sensor_state": 2,
+          "app_state": 0,
+          "pause_reason": 0,
+          "actual_sample_hz": 200,
+          "last_motion_sequence": 42
+        }
+      }
+    },
+    {
+      "file": "positive/goodbye.bin",
+      "sha256": "d721a29acaa764cb005eded4e9b0bce8b0d57f8011e2159ccc70a51adf9d9b6b",
+      "message_type": 8,
+      "message_name": "GOODBYE",
+      "expected": {
+        "header": {
+          "protocol_version": 1,
+          "flags": 0,
+          "session_id_hex": "0102030405060708",
+          "controller_id": 168496141,
+          "sequence": 45
+        },
+        "payload": {
+          "reason": 1,
+          "last_sequence": 99,
+          "sender_monotonic_ns": "123999999"
+        }
+      }
+    }
+  ],
+  "negatives": [
+    {
+      "file": "negative/truncated-header.bin",
+      "sha256": "8229ac638ff99793e017e4a033d82c47a8dd22314849c15ee9ba4cb6d5f16a19",
+      "expected_rejection": "TOO_SHORT"
+    },
+    {
+      "file": "negative/wrong-version.bin",
+      "sha256": "5e3a7a9846cf2120064c7ae75b834ddd14c044b8d1584d8c914189dcfe5b897f",
+      "expected_rejection": "UNSUPPORTED_VERSION"
+    },
+    {
+      "file": "negative/invalid-enum.bin",
+      "sha256": "c2fcbfcd6a35e7a7d1bcd540051212d35bdd34da1adcbe60c067a3f081ca421f",
+      "expected_rejection": "INVALID_ENUM"
+    },
+    {
+      "file": "negative/invalid-length.bin",
+      "sha256": "d224263454a95e13ef36db214faecc7433c82c1db33dcbd2389a90385e406e45",
+      "expected_rejection": "INVALID_PAYLOAD_LENGTH"
+    },
+    {
+      "file": "negative/non-finite-float.bin",
+      "sha256": "a24c5212ddceff39f11a8c7b7369d7fc90019a278fc1fee3289c74b57ee23c2f",
+      "expected_rejection": "NON_FINITE_FLOAT"
+    },
+    {
+      "file": "negative/invalid-quaternion.bin",
+      "sha256": "0685902e6b7d76800691b665e10f711e50f24e26b527c948345be788ca22ac21",
+      "expected_rejection": "INVALID_QUATERNION"
+    },
+    {
+      "file": "negative/nonzero-reserved.bin",
+      "sha256": "4227851276ccf64deaae095036af0ffc588d3c61f8782ac721cc5da69d27a78c",
+      "expected_rejection": "NONZERO_RESERVED"
+    }
+  ]
+}
