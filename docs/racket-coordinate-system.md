@@ -127,9 +127,24 @@ rotation, implementations canonicalize the result to a non-negative `w`. When
 positive. This removes sign jumps from logs and fixtures.
 
 The host applies these equations to raw `MOTION` samples after protocol,
-session and age validation. A controller may apply the identical transform
-before transmission only when it sets sensor flag bit 4 (`calibration
-applied`); Release 1 uses the host path so detector behavior stays replayable.
+session and age validation (TMB-028, `motion/calibration_normalizer.gd`):
+
+- `CALIBRATION` is accepted only from a paired controller's paired IP while it
+  is Reconnecting, Connected or Degraded, and only for the host's active
+  pairing session. Rotating the session (NEW PAIRING CODE) drops all stored
+  calibrations.
+- Raw sample axes are never overwritten; common-frame values are attached as
+  `normalized`, and only those samples are emitted on
+  `MotionIngest.normalized_sample_received`, the sole detector input.
+- Samples without a calibration for the current session stay raw and never
+  reach detection.
+- A calibration or sample that yields an invalid transform pauses the
+  controller for detection (`calibration_state` event with the reason) until
+  a new valid `CALIBRATION` arrives.
+
+Release 1 uses this host path so detector behavior stays replayable. Sensor
+flag bit 4 (`calibration applied`) is reserved for a future controller-side
+transform; the Release 1 host pauses a controller that sets it.
 
 ## 5. Neutral-capture acceptance range
 

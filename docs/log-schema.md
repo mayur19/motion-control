@@ -68,6 +68,24 @@ The `calibration` event records each accepted controller `CALIBRATION`:
 `sensor_monotonic_ns`. It lets physical runs check calibration repeatability;
 the raw packet records are unchanged.
 
+The `calibration_state` event records each host calibration-gate change for a
+controller: `controller_id`, `state` (`calibrated` or `paused`) and `reason`
+(for example `INVALID_QUATERNION`). A paused controller sends nothing to swing
+detection until it delivers a new valid `CALIBRATION`.
+
+## Normalized sample record
+
+Opt-in with `--log-normalized-motion` (or the
+`logging/session/normalized_motion` project setting). Each calibrated motion
+sample adds a `normalized_sample` record with `controller_id`, `sequence`,
+`sensor_monotonic_ns`, `arrival_monotonic_ns`, the raw native-frame
+`raw_acceleration`, `raw_angular_velocity` and `raw_orientation`, and the
+common-racket-frame `normalized_acceleration`, `normalized_angular_velocity`
+and `normalized_orientation`. Packet records are unchanged. At about 100 Hz
+per phone this adds roughly 3 MB per phone-minute, so raise
+`--session-log-max-mb` for longer captures. `tools/plot-normalization.py`
+plots raw against normalized axes from these records.
+
 The once-per-second `soak_metrics` event records controller-reported sensor Hz,
 accepted motion Hz, cumulative loss/duplicate/reorder totals, jitter, clock
 RTT/offset/drift, sample-age and host-frame-time distributions (each with

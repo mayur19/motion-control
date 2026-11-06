@@ -6,10 +6,14 @@ signal packet_rejected(reason: String)
 signal packet_observed(record: Dictionary)
 signal sample_received(sample: Dictionary)
 signal calibration_received(controller_id: int, calibration: Dictionary)
+## Calibrated common-racket-frame samples only; the swing detector consumes
+## this signal, never `sample_received`, so invalid calibration cannot reach it.
+signal normalized_sample_received(sample: Dictionary)
+signal calibration_state_changed(controller_id: int, state: String, reason: String)
 signal message_received(message: Dictionary, source_ip: String, source_port: int, arrival_ns: int)
 
 const Codec = preload("res://protocol/protocol_v1.gd")
-const RacketFrameTransform = preload("res://motion/racket_frame.gd")
+const Normalizer = preload("res://motion/calibration_normalizer.gd")
 const MAX_PACKETS_PER_FRAME := 512
 const MAX_POLL_MICROSECONDS := 2000
 const RECENT_SEQUENCE_CAPACITY := 512
@@ -27,7 +31,9 @@ var _max_poll_microseconds := 0
 var _clock_service: HostClockService
 var _connection_manager: ControllerConnectionManager
 var _paused_motion_packets := 0
-var _calibrations: Dictionary = {}
+var _normalizer := Normalizer.new()
+## Any object exposing `current_session.session_id` (SessionManager in the host).
+var _sessions: Object
 
 
 func start(port: int, bind_address := "0.0.0.0") -> Error:
@@ -52,6 +58,10 @@ func is_running() -> bool:
 
 func set_clock_service(clock_service: HostClockService) -> void:
 	_clock_service = clock_service
+
+
+func set_session_manager(sessions: Object) -> void:
+	_sessions = sessions
 
 
 func set_connection_manager(connection_manager: ControllerConnectionManager) -> void:
@@ -173,8 +183,18 @@ func _process_packet(
 		"sensor_monotonic_ns": decoded.payload.get("sensor_monotonic_ns", 0),
 	})
 	message_received.emit(decoded, source_ip, source_port, arrival_ns)
+	if _sessions != null:
+		_normalizer.set_active_session(int(_sessions.current_session.get("session_id", 0)))
 	if decoded.header.message_type == Codec.TYPE_CALIBRATION:
 		var calibration_controller_id: int = decoded.header.controller_id
+		var calibration_ip := endpoint.substr(0, endpoint.rfind(":"))
+		if (
+			_connection_manager != null
+			and not _connection_manager.accepts_calibration(calibration_controller_id, calibration_ip)
+		):
+			_rejections["CALIBRATION_NOT_PAIRED"] = int(_rejections.get("CALIBRATION_NOT_PAIRED", 0)) + 1
+			packet_rejected.emit("CALIBRATION_NOT_PAIRED")
+			return
 		if int(decoded.payload.result) == 1:
 			var calibration := {
 				"handedness": "right" if int(decoded.payload.handedness) == 1 else "left",
@@ -184,8 +204,15 @@ func _process_packet(
 				"quality": decoded.payload.quality,
 				"sensor_monotonic_ns": decoded.payload.sensor_monotonic_ns,
 			}
-			_calibrations[calibration_controller_id] = calibration
-			calibration_received.emit(calibration_controller_id, calibration.duplicate(true))
+			var accepted := _normalizer.accept_calibration(
+				calibration_controller_id, int(decoded.header.session_id), calibration
+			)
+			if str(accepted.state) == Normalizer.CALIBRATED:
+				calibration_received.emit(calibration_controller_id, calibration.duplicate(true))
+			if bool(accepted.changed):
+				calibration_state_changed.emit(
+					calibration_controller_id, str(accepted.state), str(accepted.reason)
+				)
 		return
 	if decoded.header.message_type != Codec.TYPE_MOTION:
 		return
@@ -222,15 +249,13 @@ func _process_packet(
 		"sensor_flags": decoded.payload.sensor_flags,
 		"packet_size": packet.size(),
 	}
-	if _calibrations.has(controller_id) and (int(decoded.payload.sensor_flags) & 0x10) == 0:
-		var transformed := RacketFrameTransform.transform_sample(sample, _calibrations[controller_id])
-		if not transformed.ok:
-			packet_rejected.emit("INVALID_CALIBRATION_TRANSFORM")
-			return
-		sample.acceleration = transformed.acceleration
-		sample.angular_velocity = transformed.angular_velocity
-		sample.orientation = transformed.orientation
-		sample["common_racket_frame"] = true
+	# Raw axes stay untouched; common-frame values live under `normalized`.
+	var normalization := _normalizer.normalize(sample)
+	sample["calibration_state"] = str(normalization.status)
+	if normalization.has("normalized"):
+		sample["normalized"] = normalization.normalized
+	if bool(normalization.changed):
+		calibration_state_changed.emit(controller_id, str(normalization.status), str(normalization.reason))
 	if _clock_service != null:
 		var adjusted := _clock_service.controller_to_host(controller_id, int(decoded.payload.sensor_monotonic_ns))
 		sample["clock_synchronized"] = bool(adjusted.initialized)
@@ -242,6 +267,8 @@ func _process_packet(
 		)
 	_sample_queue.append(sample)
 	sample_received.emit(sample)
+	if sample.has("normalized"):
+		normalized_sample_received.emit(sample)
 	metrics_updated.emit(controller_id, _public_metrics(metrics))
 
 

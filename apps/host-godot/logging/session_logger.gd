@@ -9,6 +9,9 @@ const SCHEMA_VERSION := 1
 @export var maximum_bytes := 10 * 1024 * 1024
 @export var flush_interval_ms := 1000
 @export var log_directory := "user://logs"
+## Opt-in (ADR-008): one `normalized_sample` record per calibrated sample with
+## raw and common-frame axes side by side. Packet records never change.
+@export var log_normalized_samples := false
 
 var _file: FileAccess
 var _path := ""
@@ -77,6 +80,35 @@ func attach(ingest: MotionIngest) -> void:
 		ingest.packet_observed.connect(log_packet)
 	if not ingest.calibration_received.is_connected(log_calibration):
 		ingest.calibration_received.connect(log_calibration)
+	if not ingest.calibration_state_changed.is_connected(log_calibration_state):
+		ingest.calibration_state_changed.connect(log_calibration_state)
+	if not ingest.normalized_sample_received.is_connected(log_normalized_sample):
+		ingest.normalized_sample_received.connect(log_normalized_sample)
+
+
+func log_calibration_state(controller_id: int, state: String, reason: String) -> void:
+	log_event("calibration_state", {"controller_id": controller_id, "state": state, "reason": reason})
+
+
+func log_normalized_sample(sample: Dictionary) -> void:
+	if not log_normalized_samples or not is_open() or not sample.has("normalized"):
+		return
+	var normalized: Dictionary = sample.normalized
+	_write({
+		"record_type": "normalized_sample",
+		"schema_version": SCHEMA_VERSION,
+		"session_id": _session_id,
+		"controller_id": int(sample.get("controller_id", 0)),
+		"sequence": int(sample.get("sequence", 0)),
+		"sensor_monotonic_ns": int(sample.get("sensor_monotonic_ns", 0)),
+		"arrival_monotonic_ns": int(sample.get("arrival_monotonic_ns", 0)),
+		"raw_acceleration": _number_array(sample.get("acceleration", [])),
+		"raw_angular_velocity": _number_array(sample.get("angular_velocity", [])),
+		"raw_orientation": _number_array(sample.get("orientation", [])),
+		"normalized_acceleration": _number_array(normalized.get("acceleration", [])),
+		"normalized_angular_velocity": _number_array(normalized.get("angular_velocity", [])),
+		"normalized_orientation": _number_array(normalized.get("orientation", [])),
+	})
 
 
 ## Records each accepted CALIBRATION so physical runs can check repeatability.

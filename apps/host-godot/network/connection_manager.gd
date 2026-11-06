@@ -41,6 +41,19 @@ func should_accept_motion(controller_id: int, endpoint: String = "") -> bool:
 	return str(controller.motion_endpoint) == endpoint
 
 
+## CALIBRATION is control-plane traffic: accept it from a paired controller's
+## paired IP while it is live or rejoining (a rejoin resends calibration before
+## the clock gate reopens motion), never while Paused or Disconnected.
+func accepts_calibration(controller_id: int, source_ip: String) -> bool:
+	if not _controllers.has(controller_id):
+		return false
+	var controller: Dictionary = _controllers[controller_id]
+	return (
+		source_ip == str(controller.source_ip)
+		and ["Reconnecting", "Connected", "Degraded"].has(str(controller.state))
+	)
+
+
 func state_for(controller_id: int) -> Dictionary:
 	if not _controllers.has(controller_id):
 		return {"state": "Disconnected", "reason": "not paired", "accepting_motion": false}

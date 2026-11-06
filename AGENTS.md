@@ -48,7 +48,8 @@ for t in apps/host-godot/tests/*_test.gd; do
 done
 godot --headless --path apps/host-godot -- --smoke-test        # TMB-004_HOST_SMOKE_OK
 godot --path apps/host-godot -- --print-session --session-log-max-mb=128   # visible host
-#   options: --reconnect-window-s=N (5-60, default 30), --latency-test (F4 toggles stimulus)
+#   options: --reconnect-window-s=N (5-60, default 30), --latency-test (F4 toggles stimulus),
+#            --log-normalized-motion (raw vs normalized records; F5 shows the live plot)
 
 # iOS (simulator)
 cd apps/controller-ios && xcodegen generate && xcodebuild -project MotionControllerIOS.xcodeproj \
@@ -120,5 +121,5 @@ Open items (not blocking M2 unless noted):
 - The PRD's thresholds for rate and frame stall were set by the owner for
   TMB-022: median >= 99 Hz, no frame > 150 ms, frame p99 < 50 ms.
 
-Next by plan: TMB-028 host calibration (Ready), TMB-029
+Next by plan: TMB-028 host calibration (implemented, physical plot pending), TMB-029
 capture/replay tools, and onward per `implementation-tickets/README.md`.

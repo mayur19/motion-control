@@ -1,6 +1,6 @@
 # TMB-028 — Implement host calibration application and verification
 
-**Status:** Ready
+**Status:** In Progress — implementation complete; physical plot evidence pending
 
 **Labels:** `detection`, `host`, `quality`  
 **Estimate:** 1 day  
@@ -25,4 +25,28 @@
 - Calibration fixture test output
 - Raw versus normalized plots
 
+### Implementation record
+
+- `motion/calibration_normalizer.gd` gates detection input: calibration is
+  stored per controller for the host's active session only (dropped on
+  session rotation), accepted only from the paired controller's IP, and an
+  invalid calibration or transform pauses the controller until a new valid
+  `CALIBRATION` arrives.
+- `MotionIngest` keeps raw sample axes unchanged, attaches common-frame
+  values as `normalized`, and emits `normalized_sample_received` only for
+  calibrated samples; that signal is the sole detector input.
+- Logging: packet records are unchanged; new `calibration_state` events and
+  opt-in `normalized_sample` records (`--log-normalized-motion`) hold raw and
+  normalized axes side by side (`docs/log-schema.md`).
+- Debug: F5 shows a live raw-vs-normalized gyro plot; `tools/plot-normalization.py`
+  renders raw vs normalized PNGs from a session log.
+- Tests: `calibration_normalizer_test` (session scoping, pause/resume,
+  invalid calibration), `calibration_ingest_test` (raw unchanged, detector
+  stream, spoofed/unpaired CALIBRATION ignored, rotation),
+  `calibration_normalization_fixture_test` (iOS/Android yaw origins, tilts,
+  biases, both hands -> same axes, max error 0.000006; mutation-checked),
+  `normalization_plot_test`, and `tools/test_plot_normalization.py`.
+- Known limits: the controller is not told when the host pauses it (no
+  protocol message); duplicate/reordered sequences still reach the
+  normalized stream and are left to the detector (TMB-030+) to de-duplicate.
 

@@ -3,6 +3,7 @@ extends Control
 const MotionIngestNode = preload("res://network/motion_ingest.gd")
 const SessionLoggerNode = preload("res://logging/session_logger.gd")
 const DiagnosticsHUDNode = preload("res://ui/diagnostics_hud.gd")
+const NormalizationPlotNode = preload("res://ui/normalization_plot.gd")
 const SessionManagerNode = preload("res://session/session_manager.gd")
 const QrCodeGeneratorNode = preload("res://addons/greaby_qrcode/qr_code.gd")
 const PairingServerNode = preload("res://session/pairing_server.gd")
@@ -24,6 +25,7 @@ const COLOR_ACCENT := Color("54d6a7")
 var motion_ingest: MotionIngest
 var session_logger: SessionLogger
 var diagnostics_hud: DiagnosticsHUD
+var normalization_plot: NormalizationPlot
 var session_manager: HostSessionManager
 var qr_generator: QrCode
 var session_address_label: Label
@@ -98,6 +100,8 @@ func _start_motion_ingest() -> void:
 		push_warning("UDP ingest could not bind port %d: %s" % [port, error_string(error)])
 		return
 	diagnostics_hud.bind_ingest(motion_ingest)
+	normalization_plot.bind_ingest(motion_ingest)
+	motion_ingest.set_session_manager(session_manager)
 	pairing_server = PairingServerNode.new()
 	add_child(pairing_server)
 	pairing_server.attach(motion_ingest, session_manager)
@@ -177,6 +181,9 @@ func _start_session_logger(port: int) -> void:
 	session_logger.maximum_bytes = int(
 		ProjectSettings.get_setting("logging/session/maximum_bytes", 10 * 1024 * 1024)
 	)
+	session_logger.log_normalized_samples = bool(
+		ProjectSettings.get_setting("logging/session/normalized_motion", false)
+	) or OS.get_cmdline_user_args().has("--log-normalized-motion")
 	for argument in OS.get_cmdline_user_args():
 		if argument.begins_with("--session-log-max-mb="):
 			var megabytes := clampi(
@@ -260,6 +267,8 @@ func _build_interface() -> void:
 
 	diagnostics_hud = DiagnosticsHUDNode.new()
 	content.add_child(diagnostics_hud)
+	normalization_plot = NormalizationPlotNode.new()
+	content.add_child(normalization_plot)
 
 	var footer := _label(
 		"Fixed simulation: %d Hz  •  Local session  •  Engineering shell" %
