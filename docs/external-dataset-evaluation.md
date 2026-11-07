@@ -1,9 +1,10 @@
 # External dataset evaluation (TMB-033 applicability spike)
 
-**Status:** Stage 1 (repository-only applicability review) done 2026-11-07.
-The owner has confirmed internal, non-commercial use (2026-11-07). Stage 2
-(sample inspection) waits only for the owner's download approval. No external
-data has been downloaded, inspected or committed.
+**Status:** Stage 1 (repository-only applicability review) and Stage 2
+(one-file sample inspection, Section 6.1) done 2026-11-07. The owner confirmed
+internal, non-commercial use and approved the download. The archive is stored
+outside Git. Only aggregate metadata findings are recorded here; no source
+data or derived per-stroke values are committed.
 
 **Scope:** an off-domain robustness check for the TMB-032 `early_rise`
 detector. It is supplementary evidence. It is not a replacement for TMB-030,
@@ -220,6 +221,54 @@ real file, recorded in the TMB-033 log, and checked against the paper:
 
 Until these are known, nothing from BADS_CLL may enter `DetectorPipeline`.
 
+### 6.1 Stage 2 findings (2026-11-07, one section file)
+
+Archive: `BADS_CLL_OPENACCESS_V1.zip`, 1,470,215,036 bytes, SHA-256
+`17ed260ac0fe4653e168e96d250663830f168d5a108f2f13f0563dce64e1c29a`.
+It was downloaded from the README's Google Drive link to a local folder
+outside the repository. **The README's "14 GB" is wrong:** the zip is 1.47 GB
+and expands to 1.85 GB in 1,040 entries, of which 848 are GIFs (1.38 GB) and
+96 are JSON files (0.47 GB). That matches 96 sections and 848 strokes. Files
+inside are dated 2025-06 (GIFs) and 2025-09 (JSON).
+
+Inspected file: one section, `Man_High_ForehandKill_Play6_1_1.json` (10
+strokes, one player, smash). It was extracted read-only to a separate folder.
+The findings below are measured on that one file. The other 95 may differ,
+and the adapter must re-check every file.
+
+Format differences from the README: keys are lowercase (`info`, `label`,
+`data`), `info` has an extra `device` field (`"1"`), accelerometer axes are
+named `Gx/Gy/Gz`, gyroscope axes `angularSpeedX/Y/Z`, and `actionEval` is the
+list of 7 individual ratings, not one score.
+
+| # | Item | Finding | Confidence |
+| --- | --- | --- | --- |
+| 1 | Timestamps | Integer **milliseconds** on one clock shared by all streams and by `startTimestamp`/`endTimestamp`. The values are a relative session clock (the first stroke starts at about 25 s), not epoch or boot time. Audio timestamps are float ms in 0.0625 ms steps (16 kHz). | Measured |
+| 2 | Rate and jitter | Median interval 10 ms (100 Hz). Intervals range from 1 to 53 ms (p95 15–17 ms). 192–199 samples per 2000 ms window instead of 200. Integer-ms timestamps quantize jitter to 1 ms. Streams are not sample-aligned with each other. | Measured |
+| 3 | Units | Gyroscope **rad/s**: quiet minimum about 0.13, smash peaks around 50 in magnitude (deg/s would make a smash implausibly slow). Accelerometer **m/s² including gravity** (Android `TYPE_ACCELEROMETER`), shown by the clip level in row 9. | Strong inference |
+| 4 | Coordinates | Android sensor axes of the watch body. Which wrist orientation and where the crown faces are not in the data; they are only in the paper's Fig. 6a, which has not been reviewed. The meaning of `device` (and of the folder-name suffix) is unconfirmed. | **Open** |
+| 5 | Calibration and filtering | `GYROSCOPE` equals `GYROSCOPE_UNCALIBRATED` minus drift (about 0.02 rad/s), so it is the platform-bias-corrected stream. No grip or frame calibration exists. Irregular integer timestamps show the stream was **not resampled or interpolated**; whether a platform low-pass filter was applied cannot be seen. | Measured / inferred |
+| 6 | Segments | Each stroke is exactly a **2000 ms window** [`startTimestamp`, `endTimestamp`]. Streams are clipped to it, and data between strokes is not published (strokes are 15–30 s apart). The gyro magnitude peak falls 0.92–1.06 s into the window (first 4 strokes), so there is about 1 s of pre-peak history, enough for a 40 ms rise window. | Measured |
+| 7 | Missing and duplicates | No duplicate or reversed timestamps. Up to 4% of samples per window are missing, and the largest gap (53 ms) exceeds the preprocessor's 50 ms `max_gap_ms`. About 4.5% of consecutive gyro values (7% for accel X) repeat exactly despite different timestamps, which suggests held values. | Measured |
+| 8 | Archive identity | Recorded above. | Done |
+| 9 | **Saturation (new)** | Accelerometer clips at **±78.41 m/s² (8 g)**: 70 samples of one axis in 10 strokes. Gyro X clips at **+40.03 rad/s** (17 samples). Peak values, impact acceleration and the time of the true peak are therefore unreliable in fast strokes. | Measured |
+
+Consequences:
+
+- The onset/rise part of a stroke (single-digit to roughly 30 rad/s) sits
+  below the gyro clip level. Peak speed, and any peak-referenced timing such
+  as TMB-033's trigger-to-following-peak estimate, is biased in saturated
+  strokes. An adapter must flag saturated samples and strokes.
+- Each stroke window contains about 1 s of real pre-peak history, so
+  backswing presence and rise-to-peak time can be measured. Section 5 still
+  holds: there is no continuous stream, so false triggers per 10 minutes
+  cannot be measured.
+- Gaps over 50 ms will make the product preprocessor reset its filter. An
+  external mode must report how many windows that affects instead of hiding
+  it.
+- The domain gap (forearm against racket, real impact against air swing) is
+  unchanged by anything in the sample.
+
 ## 7. Other public datasets (later candidates, not detector inputs)
 
 None of these can validate TMB-032 trigger thresholds. Their licenses have
@@ -235,40 +284,51 @@ not been reviewed.
 
 ## 8. Recommendation
 
-**Proceed with a minimal sample inspection (Stage 2) once the owner approves
-the download.** Do not build an adapter or an evaluation mode until that
-inspection answers Section 6.
+**Proceed, narrowly: build a read-only, tests-first descriptive adapter. Do
+not build an external detector-evaluation mode yet.**
 
-History: Stage 1 originally recommended deferring until the intended use was
-known. On 2026-11-07 the owner confirmed internal, non-commercial use, which
-resolves the license blocker. The technical limits below are unchanged.
+History: Stage 1 recommended deferring until the intended use was known. On
+2026-11-07 the owner confirmed internal, non-commercial use and approved the
+download. The Stage 2 sample (Section 6.1) resolved timestamps, rate, units,
+calibration status and segment boundaries well enough for descriptive work.
+
+What the adapter may do (Stage 2 plan, unchanged):
+
+- parse the JSON read-only, with the actual key names found in Section 6.1;
+- keep original values and units; reject unknown keys, non-integer or
+  non-increasing timestamps and missing accelerometer or gyroscope streams;
+- flag saturation (accel ±78.41 m/s², gyro about 40 rad/s per axis), gaps
+  over 50 ms and held values;
+- report placement-robust descriptive distributions per stroke type, player
+  and experience: angular-speed magnitude onset, rise rate, rise-to-peak time
+  and backswing presence. Peak statistics are reported with their saturation
+  share;
+- use a hand-authored synthetic fixture in pytest, never copied dataset
+  content.
+
+What stays out until a further owner decision:
+
+- feeding BADS_CLL samples through `CalibrationNormalizer` or
+  `DetectorPipeline` with fabricated calibration;
+- any axis mapping to the common racket frame (watch orientation is still
+  open, and the forearm is not the racket anyway);
+- changing detector thresholds because of external results.
 
 License position:
 
 - NC: satisfied by the owner's internal-only decision.
-- ND and the README's "do not modify": keep source files unmodified (the
-  adapter is read-only) and never commit or share derived material. Per-stroke
-  values, converted files and raw-signal plots stay outside Git. Only
-  aggregate descriptive statistics may appear in internal reports, with the
+- ND and the README's "do not modify": source files stay unmodified (the
+  adapter is read-only), and derived material is never committed or shared.
+  Per-stroke values, converted files and raw-signal plots stay outside Git.
+  Internal reports may contain aggregate descriptive statistics, with the
   paper cited.
 
-Technical limits, which bound what Stage 2 can show:
+Technical limits that still apply:
 
-- Wrist-worn forearm motion with real shuttle impact, compared with an air
-  swing of a phone that is the racket: thresholds cannot transfer, and no
-  defensible axis mapping exists.
-- Units, timestamps, frame, calibration status and segment boundaries are
-  undocumented (Section 6).
-- Valid-strokes-only data cannot measure false triggers per 10 minutes, the
-  harder TMB-033 criterion, and recall on pre-segmented strokes is weak
-  evidence.
-- The best realistic payoff is narrow: descriptive forearm-rotation
-  morphology (backswing presence, rise-to-peak time) across 12 players. Owner
-  data from TMB-030 S4/N4 and Galaxy sessions answers the product question
-  directly and keeps priority.
-
-Stage 2 steps after download approval: download the archive into a new
-directory outside the repository, record its name, size and SHA-256, extract
-only one section `.json`, answer Section 6 in the TMB-033 log, and decide
-again before writing an adapter. Reject the dataset as a detector input if
-Section 6 shows processed or unrecoverable units or timestamps.
+- Forearm motion with real shuttle impact, compared with an air swing of a
+  phone that is the racket: thresholds cannot transfer.
+- Saturation corrupts peaks in fast strokes.
+- Valid-strokes-only, windowed data cannot measure false triggers per 10
+  minutes, and recall on pre-segmented strokes is weak evidence.
+- Owner data from TMB-030 S4/N4 and the Galaxy sessions answers the product
+  question directly and keeps priority over this work.

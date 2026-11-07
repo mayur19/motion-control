@@ -98,5 +98,24 @@
   from defer to **proceed with a minimal Stage 2 sample inspection** once the
   owner approves the 14 GB download. The technical limits are unchanged: no
   threshold transfer, and no false-triggers-per-10-minutes evidence.
+- External spike, Stage 2 (2026-11-07, owner-approved download): the archive
+  `BADS_CLL_OPENACCESS_V1.zip` is 1.47 GB, not the README's 14 GB. SHA-256
+  `17ed260ac0fe4653e168e96d250663830f168d5a108f2f13f0563dce64e1c29a`. It holds
+  96 JSON files and 848 GIFs and is stored outside Git. Inspected one section
+  file (10 smash strokes):
+  - timestamps are integer ms on a relative clock shared by all streams;
+  - IMU runs at a median 10 ms interval (1–53 ms) and is not resampled;
+  - the gyroscope is in rad/s and platform bias-corrected; the accelerometer
+    is in m/s² including gravity;
+  - each stroke is a 2000 ms window with the peak about 1 s in, and data
+    between strokes is not published;
+  - the accelerometer saturates at ±8 g and gyro X at about 40 rad/s.
+  Watch orientation on the wrist and the meaning of the `device` field remain
+  open. Details: `docs/external-dataset-evaluation.md` Section 6.1.
+- Recommendation now: a read-only, tests-first descriptive adapter
+  (angular-speed onset, rise-to-peak time and backswing presence, with
+  saturation and gap flags). No `DetectorPipeline` input, racket-frame
+  mapping or threshold change from external data. These findings are about
+  dataset format only, not detector performance.
 
 
