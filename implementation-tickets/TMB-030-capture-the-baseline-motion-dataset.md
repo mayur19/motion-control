@@ -68,4 +68,13 @@
   information, not held-out or acceptance evidence.
 - Inventory after S2: iPhone 62/100 swings, 6.51/20 non-swing minutes
   (normal 34, gentle 28; all currently right-handed and player 1).
+- 2026-11-07 iPhone N2 (non-swing, tune) captured: idle 1.78 minutes,
+  handling 1.24 minutes and walking 2.02 minutes (5.04 minutes total). An
+  earlier aborted attempt containing only a six-second idle take is retained
+  with split `exclude`, per the owner's direction; it is not counted.
+- Default-pipeline replay succeeded for N2 and produced 10 idle, 17 handling
+  and 64 walking triggers. These are useful hard negatives demonstrating the
+  provisional detector's over-triggering, not held-out or acceptance results.
+- Inventory after N2: iPhone 62/100 swings, 11.55/20 non-swing minutes
+  (idle 3.63, handling 4.89, walking 3.03; all tune split).
 
