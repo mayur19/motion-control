@@ -1,0 +1,13 @@
+{
+  "detector": "early_rise",
+  "onset_speed_rad_s": 9.5,
+  "min_rise_rad_s2": 20.0,
+  "rise_window_ms": 40,
+  "rearm_speed_rad_s": 1.5,
+  "refractory_ms": 700,
+  "max_shaft_fraction": 1.0,
+  "preprocessing": {
+    "cutoff_hz": 25.0,
+    "max_gap_ms": 50.0
+  }
+}

@@ -1,6 +1,6 @@
 # TMB-032 — Implement the early-swing detector
 
-**Status:** Review — implemented with provisional thresholds; tuning/backswing handling need TMB-030 data
+**Status:** Review — iPhone tune defaults selected; cross-device/held-out and backswing handling pending
 
 **Labels:** `detection`, `quality`  
 **Estimate:** 1.5 days  
@@ -45,6 +45,11 @@
   on two real swings); about 2 µs per sample; live and replay events identical.
   The real capture also showed one missed slow swing; see
   `docs/swing-detection.md`.
-- Remaining: tune thresholds and decide backswing handling on TMB-030 data
-  (TMB-033).
+- TMB-033 iPhone tune selection (2026-11-07): change defaults from 3.0 to
+  9.5 rad/s onset and from 350 to 700 ms refractory; keep rise 20 rad/s²,
+  40 ms window, re-arm 1.5 rad/s, shaft gate off and preprocessing at 25 Hz.
+  On S1–S3/N1–N3 this produced count-based 95.6% recall, 96.6% precision and
+  0.51 non-swing triggers per 10 minutes. See the versioned TMB-033 report.
+- Remaining: Galaxy and left-hand/player tune coverage, one-time held-out
+  evaluation, live idle/handling verification, and the backswing question.
 

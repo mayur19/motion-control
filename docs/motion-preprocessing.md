@@ -66,5 +66,8 @@ gyro. The filter mainly matters for Android's rawer, faster stream. Plots:
 
 ## Open items
 
-- Re-check `f_c` against the TMB-030 tune split, and against Galaxy data in
-  particular, before TMB-033 evaluation (owner-approved dependency exception).
+- The TMB-033 iPhone tune selection retained `f_c = 25 Hz`; its 2.6 ms iPhone
+  lag remains small relative to the selected detector's 89.9 ms median
+  trigger-to-following-peak lead, and the detector met aggregate tune targets
+  without changing preprocessing. Re-check the cutoff against Galaxy's rawer,
+  250 Hz data before final evaluation.

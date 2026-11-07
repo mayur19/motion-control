@@ -8,16 +8,17 @@ extends RefCounted
 ## the test is sample-rate independent). After a trigger the controller is
 ## disarmed until speed falls below `rearm_speed_rad_s` (hysteresis) and the
 ## `refractory_ms` window has passed, giving at most one trigger per swing.
-## Thresholds are provisional until tuned on TMB-030 data (TMB-033).
+## Defaults are the iPhone tune-split selection from TMB-033. They remain
+## provisional until Galaxy, left-hand/player and held-out data are evaluated.
 
 const NAME := "early_rise"
 const VERSION := 1
 const DEFAULTS := {
-	"onset_speed_rad_s": 3.0,
+	"onset_speed_rad_s": 9.5,
 	"min_rise_rad_s2": 20.0,
 	"rise_window_ms": 40,
 	"rearm_speed_rad_s": 1.5,
-	"refractory_ms": 350,
+	"refractory_ms": 700,
 	## Optional directional gate; 1.0 disables it. Real swings ranged from 14%
 	## to 96% shaft rotation in the TMB-029 capture, so it is off by default.
 	"max_shaft_fraction": 1.0,

@@ -1,0 +1,942 @@
+{
+  "aggregate": {
+    "detector_events": 89,
+    "expected_swings": 90,
+    "false_negatives": 4,
+    "false_positives": 3,
+    "false_triggers_per_10_minutes": 0.50555,
+    "non_swing_minutes": 19.780419,
+    "precision": 0.9662921348314607,
+    "recall": 0.9555555555555556,
+    "trigger_peak_timing_ms": {
+      "count": 89,
+      "maximum": 519.484,
+      "mean": 132.681,
+      "median": 89.914,
+      "minimum": 0.0
+    },
+    "true_positives": 86
+  },
+  "breakdowns": {
+    "hand": {
+      "right": {
+        "detector_events": 89,
+        "expected_swings": 90,
+        "false_negatives": 4,
+        "false_positives": 3,
+        "false_triggers_per_10_minutes": 0.50555,
+        "non_swing_minutes": 19.780419,
+        "precision": 0.9662921348314607,
+        "recall": 0.9555555555555556,
+        "trigger_peak_timing_ms": {
+          "count": 89,
+          "maximum": 519.484,
+          "mean": 132.681,
+          "median": 89.914,
+          "minimum": 0.0
+        },
+        "true_positives": 86
+      }
+    },
+    "phone": {
+      "iPhone": {
+        "detector_events": 89,
+        "expected_swings": 90,
+        "false_negatives": 4,
+        "false_positives": 3,
+        "false_triggers_per_10_minutes": 0.50555,
+        "non_swing_minutes": 19.780419,
+        "precision": 0.9662921348314607,
+        "recall": 0.9555555555555556,
+        "trigger_peak_timing_ms": {
+          "count": 89,
+          "maximum": 519.484,
+          "mean": 132.681,
+          "median": 89.914,
+          "minimum": 0.0
+        },
+        "true_positives": 86
+      }
+    },
+    "player": {
+      "1": {
+        "detector_events": 89,
+        "expected_swings": 90,
+        "false_negatives": 4,
+        "false_positives": 3,
+        "false_triggers_per_10_minutes": 0.50555,
+        "non_swing_minutes": 19.780419,
+        "precision": 0.9662921348314607,
+        "recall": 0.9555555555555556,
+        "trigger_peak_timing_ms": {
+          "count": 89,
+          "maximum": 519.484,
+          "mean": 132.681,
+          "median": 89.914,
+          "minimum": 0.0
+        },
+        "true_positives": 86
+      }
+    },
+    "shot": {
+      "clear": {
+        "detector_events": 22,
+        "expected_swings": 22,
+        "false_negatives": 1,
+        "false_positives": 1,
+        "false_triggers_per_10_minutes": null,
+        "non_swing_minutes": 0.0,
+        "precision": 0.9545454545454546,
+        "recall": 0.9545454545454546,
+        "trigger_peak_timing_ms": {
+          "count": 22,
+          "maximum": 339.661,
+          "mean": 163.931,
+          "median": 104.9,
+          "minimum": 59.94
+        },
+        "true_positives": 21
+      },
+      "drop": {
+        "detector_events": 23,
+        "expected_swings": 22,
+        "false_negatives": 0,
+        "false_positives": 1,
+        "false_triggers_per_10_minutes": null,
+        "non_swing_minutes": 0.0,
+        "precision": 0.9565217391304348,
+        "recall": 1.0,
+        "trigger_peak_timing_ms": {
+          "count": 23,
+          "maximum": 219.78,
+          "mean": 80.357,
+          "median": 69.93,
+          "minimum": 39.962
+        },
+        "true_positives": 22
+      },
+      "handling": {
+        "detector_events": 1,
+        "expected_swings": 0,
+        "false_negatives": 0,
+        "false_positives": 1,
+        "false_triggers_per_10_minutes": 1.133867,
+        "non_swing_minutes": 8.819376,
+        "precision": 0.0,
+        "recall": null,
+        "trigger_peak_timing_ms": {
+          "count": 1,
+          "maximum": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "minimum": 0.0
+        },
+        "true_positives": 0
+      },
+      "idle": {
+        "detector_events": 0,
+        "expected_swings": 0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "false_triggers_per_10_minutes": 0.0,
+        "non_swing_minutes": 5.830182,
+        "precision": null,
+        "recall": null,
+        "trigger_peak_timing_ms": {
+          "count": 0,
+          "maximum": null,
+          "mean": null,
+          "median": null,
+          "minimum": null
+        },
+        "true_positives": 0
+      },
+      "lift": {
+        "detector_events": 19,
+        "expected_swings": 21,
+        "false_negatives": 2,
+        "false_positives": 0,
+        "false_triggers_per_10_minutes": null,
+        "non_swing_minutes": 0.0,
+        "precision": 1.0,
+        "recall": 0.9047619047619048,
+        "trigger_peak_timing_ms": {
+          "count": 19,
+          "maximum": 319.693,
+          "mean": 127.246,
+          "median": 99.905,
+          "minimum": 0.0
+        },
+        "true_positives": 19
+      },
+      "smash": {
+        "detector_events": 24,
+        "expected_swings": 25,
+        "false_negatives": 1,
+        "false_positives": 0,
+        "false_triggers_per_10_minutes": null,
+        "non_swing_minutes": 0.0,
+        "precision": 1.0,
+        "recall": 0.96,
+        "trigger_peak_timing_ms": {
+          "count": 24,
+          "maximum": 519.484,
+          "mean": 164.008,
+          "median": 119.888,
+          "minimum": 39.963
+        },
+        "true_positives": 24
+      },
+      "walking": {
+        "detector_events": 0,
+        "expected_swings": 0,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "false_triggers_per_10_minutes": 0.0,
+        "non_swing_minutes": 5.13086,
+        "precision": null,
+        "recall": null,
+        "trigger_peak_timing_ms": {
+          "count": 0,
+          "maximum": null,
+          "mean": null,
+          "median": null,
+          "minimum": null
+        },
+        "true_positives": 0
+      }
+    },
+    "speed": {
+      "fast": {
+        "detector_events": 28,
+        "expected_swings": 28,
+        "false_negatives": 1,
+        "false_positives": 1,
+        "false_triggers_per_10_minutes": null,
+        "non_swing_minutes": 0.0,
+        "precision": 0.9642857142857143,
+        "recall": 0.9642857142857143,
+        "trigger_peak_timing_ms": {
+          "count": 28,
+          "maximum": 519.484,
+          "mean": 212.29,
+          "median": 224.775,
+          "minimum": 59.94
+        },
+        "true_positives": 27
+      },
+      "gentle": {
+        "detector_events": 28,
+        "expected_swings": 28,
+        "false_negatives": 0,
+        "false_positives": 0,
+        "false_triggers_per_10_minutes": null,
+        "non_swing_minutes": 0.0,
+        "precision": 1.0,
+        "recall": 1.0,
+        "trigger_peak_timing_ms": {
+          "count": 28,
+          "maximum": 99.905,
+          "mean": 53.165,
+          "median": 54.95,
+          "minimum": 0.0
+        },
+        "true_positives": 28
+      },
+      "none": {
+        "detector_events": 1,
+        "expected_swings": 0,
+        "false_negatives": 0,
+        "false_positives": 1,
+        "false_triggers_per_10_minutes": 0.50555,
+        "non_swing_minutes": 19.780419,
+        "precision": 0.0,
+        "recall": null,
+        "trigger_peak_timing_ms": {
+          "count": 1,
+          "maximum": 0.0,
+          "mean": 0.0,
+          "median": 0.0,
+          "minimum": 0.0
+        },
+        "true_positives": 0
+      },
+      "normal": {
+        "detector_events": 32,
+        "expected_swings": 34,
+        "false_negatives": 3,
+        "false_positives": 1,
+        "false_triggers_per_10_minutes": null,
+        "non_swing_minutes": 0.0,
+        "precision": 0.96875,
+        "recall": 0.9117647058823529,
+        "trigger_peak_timing_ms": {
+          "count": 32,
+          "maximum": 299.714,
+          "mean": 136.745,
+          "median": 119.886,
+          "minimum": 49.952
+        },
+        "true_positives": 31
+      }
+    }
+  },
+  "captures": [
+    "cap_20261106T153652_4e77e74b",
+    "cap_20261106T155237_bce07b0d",
+    "cap_20261107T043308_6e5dab2c",
+    "cap_20261107T044259_1ca96db6",
+    "cap_20261107T045405_f44c8d90",
+    "cap_20261107T050502_12dffc93"
+  ],
+  "detector": {
+    "config": {
+      "max_shaft_fraction": 1.0,
+      "min_rise_rad_s2": 20.0,
+      "onset_speed_rad_s": 9.5,
+      "rearm_speed_rad_s": 1.5,
+      "refractory_ms": 700,
+      "rise_window_ms": 40
+    },
+    "detector": "early_rise",
+    "preprocessing": {
+      "config": {
+        "cutoff_hz": 25.0,
+        "max_gap_ms": 50
+      },
+      "name": "one_pole_lowpass",
+      "version": 1
+    },
+    "version": 1
+  },
+  "evaluation_format": 1,
+  "excluded": {
+    "exclude_sessions": [
+      "cap_20261106T143432_8de45fcc",
+      "cap_20261106T143914_16e061f4",
+      "cap_20261107T044053_402c4bb4",
+      "cap_20261107T050142_4eaf2c13",
+      "cap_20261107T050227_86bdc366"
+    ],
+    "invalid_takes": []
+  },
+  "matching_rule": {
+    "description": "TP=min(expected swings, triggers); FN=max(expected-triggers, 0); FP=max(triggers-expected, 0). Every trigger in a non-swing take is an FP.",
+    "limitation": "Swing labels contain counts, not per-swing timestamps; individual triggers cannot be matched to specific swings, and a miss plus an extra trigger can cancel in the count.",
+    "name": "count_based_per_take"
+  },
+  "split": "tune",
+  "takes": [
+    {
+      "capture_id": "cap_20261106T153652_4e77e74b",
+      "detector_events": 10,
+      "duration_minutes": 0.651955,
+      "expected_swings": 11,
+      "false_negatives": 1,
+      "false_positives": 0,
+      "label_revision": 2,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "smash",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "normal",
+        "swing_count": 11,
+        "valid": true
+      },
+      "take_id": 1,
+      "trigger_peak_timing_ms": [
+        99.904,
+        109.894,
+        179.828,
+        89.914,
+        239.771,
+        219.793,
+        269.748,
+        119.888,
+        119.887,
+        199.811
+      ],
+      "true_positives": 10
+    },
+    {
+      "capture_id": "cap_20261106T153652_4e77e74b",
+      "detector_events": 7,
+      "duration_minutes": 0.459356,
+      "expected_swings": 8,
+      "false_negatives": 1,
+      "false_positives": 0,
+      "label_revision": 2,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "clear",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "normal",
+        "swing_count": 8,
+        "valid": true
+      },
+      "take_id": 2,
+      "trigger_peak_timing_ms": [
+        59.943,
+        299.714,
+        289.723,
+        119.886,
+        99.905,
+        109.894,
+        99.904
+      ],
+      "true_positives": 7
+    },
+    {
+      "capture_id": "cap_20261106T153652_4e77e74b",
+      "detector_events": 9,
+      "duration_minutes": 0.469096,
+      "expected_swings": 8,
+      "false_negatives": 0,
+      "false_positives": 1,
+      "label_revision": 2,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "drop",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "normal",
+        "swing_count": 8,
+        "valid": true
+      },
+      "take_id": 3,
+      "trigger_peak_timing_ms": [
+        59.943,
+        59.943,
+        59.943,
+        119.886,
+        129.877,
+        119.886,
+        49.952,
+        79.924,
+        59.943
+      ],
+      "true_positives": 8
+    },
+    {
+      "capture_id": "cap_20261106T153652_4e77e74b",
+      "detector_events": 6,
+      "duration_minutes": 0.459373,
+      "expected_swings": 7,
+      "false_negatives": 1,
+      "false_positives": 0,
+      "label_revision": 2,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "lift",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "normal",
+        "swing_count": 7,
+        "valid": true
+      },
+      "take_id": 4,
+      "trigger_peak_timing_ms": [
+        159.847,
+        159.847,
+        189.818,
+        189.818,
+        49.952,
+        159.846
+      ],
+      "true_positives": 6
+    },
+    {
+      "capture_id": "cap_20261106T153652_4e77e74b",
+      "detector_events": 0,
+      "duration_minutes": 1.279134,
+      "expected_swings": 0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "handling",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "none",
+        "swing_count": 0,
+        "valid": true
+      },
+      "take_id": 5,
+      "trigger_peak_timing_ms": [],
+      "true_positives": 0
+    },
+    {
+      "capture_id": "cap_20261106T155237_bce07b0d",
+      "detector_events": 0,
+      "duration_minutes": 1.84928,
+      "expected_swings": 0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "idle",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "none",
+        "swing_count": 0,
+        "valid": true
+      },
+      "take_id": 1,
+      "trigger_peak_timing_ms": [],
+      "true_positives": 0
+    },
+    {
+      "capture_id": "cap_20261106T155237_bce07b0d",
+      "detector_events": 0,
+      "duration_minutes": 1.25622,
+      "expected_swings": 0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "handling",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "none",
+        "swing_count": 0,
+        "valid": true
+      },
+      "take_id": 2,
+      "trigger_peak_timing_ms": [],
+      "true_positives": 0
+    },
+    {
+      "capture_id": "cap_20261106T155237_bce07b0d",
+      "detector_events": 0,
+      "duration_minutes": 1.015262,
+      "expected_swings": 0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "walking",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "none",
+        "swing_count": 0,
+        "valid": true
+      },
+      "take_id": 3,
+      "trigger_peak_timing_ms": [],
+      "true_positives": 0
+    },
+    {
+      "capture_id": "cap_20261107T043308_6e5dab2c",
+      "detector_events": 7,
+      "duration_minutes": 0.393733,
+      "expected_swings": 7,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 2,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "smash",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "gentle",
+        "swing_count": 7,
+        "valid": true
+      },
+      "take_id": 1,
+      "trigger_peak_timing_ms": [
+        49.955,
+        49.955,
+        59.945,
+        39.964,
+        49.954,
+        39.963,
+        39.963
+      ],
+      "true_positives": 7
+    },
+    {
+      "capture_id": "cap_20261107T043308_6e5dab2c",
+      "detector_events": 7,
+      "duration_minutes": 0.33818,
+      "expected_swings": 7,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 2,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "clear",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "gentle",
+        "swing_count": 7,
+        "valid": true
+      },
+      "take_id": 2,
+      "trigger_peak_timing_ms": [
+        59.945,
+        59.944,
+        69.935,
+        79.926,
+        69.935,
+        69.935,
+        79.925
+      ],
+      "true_positives": 7
+    },
+    {
+      "capture_id": "cap_20261107T043308_6e5dab2c",
+      "detector_events": 7,
+      "duration_minutes": 0.389587,
+      "expected_swings": 7,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 2,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "drop",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "gentle",
+        "swing_count": 7,
+        "valid": true
+      },
+      "take_id": 3,
+      "trigger_peak_timing_ms": [
+        59.944,
+        39.962,
+        49.953,
+        59.944,
+        59.944,
+        39.963,
+        79.925
+      ],
+      "true_positives": 7
+    },
+    {
+      "capture_id": "cap_20261107T043308_6e5dab2c",
+      "detector_events": 7,
+      "duration_minutes": 0.350692,
+      "expected_swings": 7,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 2,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "lift",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "gentle",
+        "swing_count": 7,
+        "valid": true
+      },
+      "take_id": 4,
+      "trigger_peak_timing_ms": [
+        29.971,
+        69.934,
+        99.905,
+        29.971,
+        0.0,
+        39.962,
+        9.99
+      ],
+      "true_positives": 7
+    },
+    {
+      "capture_id": "cap_20261107T043308_6e5dab2c",
+      "detector_events": 0,
+      "duration_minutes": 1.11251,
+      "expected_swings": 0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "handling",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "none",
+        "swing_count": 0,
+        "valid": true
+      },
+      "take_id": 5,
+      "trigger_peak_timing_ms": [],
+      "true_positives": 0
+    },
+    {
+      "capture_id": "cap_20261107T044259_1ca96db6",
+      "detector_events": 0,
+      "duration_minutes": 1.776037,
+      "expected_swings": 0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "idle",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "none",
+        "swing_count": 0,
+        "valid": true
+      },
+      "take_id": 1,
+      "trigger_peak_timing_ms": [],
+      "true_positives": 0
+    },
+    {
+      "capture_id": "cap_20261107T044259_1ca96db6",
+      "detector_events": 0,
+      "duration_minutes": 1.242371,
+      "expected_swings": 0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "handling",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "none",
+        "swing_count": 0,
+        "valid": true
+      },
+      "take_id": 2,
+      "trigger_peak_timing_ms": [],
+      "true_positives": 0
+    },
+    {
+      "capture_id": "cap_20261107T044259_1ca96db6",
+      "detector_events": 0,
+      "duration_minutes": 2.019089,
+      "expected_swings": 0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "walking",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "none",
+        "swing_count": 0,
+        "valid": true
+      },
+      "take_id": 3,
+      "trigger_peak_timing_ms": [],
+      "true_positives": 0
+    },
+    {
+      "capture_id": "cap_20261107T045405_f44c8d90",
+      "detector_events": 7,
+      "duration_minutes": 0.672229,
+      "expected_swings": 7,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "smash",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "fast",
+        "swing_count": 7,
+        "valid": true
+      },
+      "take_id": 1,
+      "trigger_peak_timing_ms": [
+        79.921,
+        229.772,
+        229.772,
+        509.495,
+        519.484,
+        199.801,
+        189.812
+      ],
+      "true_positives": 7
+    },
+    {
+      "capture_id": "cap_20261107T045405_f44c8d90",
+      "detector_events": 8,
+      "duration_minutes": 0.468733,
+      "expected_swings": 7,
+      "false_negatives": 0,
+      "false_positives": 1,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "clear",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "fast",
+        "swing_count": 7,
+        "valid": true
+      },
+      "take_id": 2,
+      "trigger_peak_timing_ms": [
+        269.731,
+        319.682,
+        299.701,
+        259.741,
+        229.771,
+        59.94,
+        339.661,
+        259.741
+      ],
+      "true_positives": 7
+    },
+    {
+      "capture_id": "cap_20261107T045405_f44c8d90",
+      "detector_events": 7,
+      "duration_minutes": 0.359741,
+      "expected_swings": 7,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "drop",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "fast",
+        "swing_count": 7,
+        "valid": true
+      },
+      "take_id": 3,
+      "trigger_peak_timing_ms": [
+        219.78,
+        79.921,
+        79.92,
+        79.92,
+        119.88,
+        69.93,
+        69.93
+      ],
+      "true_positives": 7
+    },
+    {
+      "capture_id": "cap_20261107T045405_f44c8d90",
+      "detector_events": 6,
+      "duration_minutes": 0.684375,
+      "expected_swings": 7,
+      "false_negatives": 1,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "lift",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "fast",
+        "swing_count": 7,
+        "valid": true
+      },
+      "take_id": 4,
+      "trigger_peak_timing_ms": [
+        59.94,
+        299.712,
+        289.721,
+        159.846,
+        319.693,
+        99.904
+      ],
+      "true_positives": 6
+    },
+    {
+      "capture_id": "cap_20261107T045405_f44c8d90",
+      "detector_events": 1,
+      "duration_minutes": 1.454851,
+      "expected_swings": 0,
+      "false_negatives": 0,
+      "false_positives": 1,
+      "label_revision": 2,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "handling",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "none",
+        "swing_count": 0,
+        "valid": true
+      },
+      "take_id": 5,
+      "trigger_peak_timing_ms": [
+        0.0
+      ],
+      "true_positives": 0
+    },
+    {
+      "capture_id": "cap_20261107T050502_12dffc93",
+      "detector_events": 0,
+      "duration_minutes": 2.204866,
+      "expected_swings": 0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "idle",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "none",
+        "swing_count": 0,
+        "valid": true
+      },
+      "take_id": 1,
+      "trigger_peak_timing_ms": [],
+      "true_positives": 0
+    },
+    {
+      "capture_id": "cap_20261107T050502_12dffc93",
+      "detector_events": 0,
+      "duration_minutes": 2.47429,
+      "expected_swings": 0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "handling",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "none",
+        "swing_count": 0,
+        "valid": true
+      },
+      "take_id": 2,
+      "trigger_peak_timing_ms": [],
+      "true_positives": 0
+    },
+    {
+      "capture_id": "cap_20261107T050502_12dffc93",
+      "detector_events": 0,
+      "duration_minutes": 2.096508,
+      "expected_swings": 0,
+      "false_negatives": 0,
+      "false_positives": 0,
+      "label_revision": 1,
+      "labels": {
+        "handedness": "right",
+        "intended_shot": "walking",
+        "phone": "iPhone",
+        "player": 1,
+        "speed": "none",
+        "swing_count": 0,
+        "valid": true
+      },
+      "take_id": 3,
+      "trigger_peak_timing_ms": [],
+      "true_positives": 0
+    }
+  ],
+  "trigger_peak_method": {
+    "description": "For each trigger, select the maximum preprocessed angular speed after that trigger, before the next trigger from the same controller, take end, or 1000 ms.",
+    "limitation": "This is an event-to-signal estimate, not ground-truth swing timing. Extra triggers, backswing peaks and missing per-swing timestamps can associate the wrong peak; lag after an already-passed physical peak is not observable with this rule.",
+    "sign": "Positive milliseconds mean the trigger leads the following peak."
+  }
+}

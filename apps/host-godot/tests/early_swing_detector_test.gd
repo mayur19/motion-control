@@ -2,6 +2,7 @@ extends SceneTree
 
 const Detector = preload("res://detection/early_swing_detector.gd")
 const Preprocessor = preload("res://detection/motion_preprocessor.gd")
+const TEST_CONFIG := {"onset_speed_rad_s": 3.0, "refractory_ms": 350}
 
 
 func _initialize() -> void:
@@ -52,7 +53,7 @@ func _initialize() -> void:
 	# A new phone/stream reuses the controller id with a lower sensor clock.
 	var swap_pre := Preprocessor.new()
 	var swap_detector := Detector.new()
-	swap_detector.configure({})
+	swap_detector.configure(TEST_CONFIG)
 	var swap_events: Array[Dictionary] = []
 	for base_ns in [50_000_000_000, 2_000_000_000]:
 		var swing := _profile_swing(8.0, 0.3)
@@ -82,7 +83,9 @@ func _initialize() -> void:
 func _run(profile: Callable, rate_hz: float, config := {}, axis := Vector3(1, 0, 0), gap_at_s := -1.0) -> Dictionary:
 	var pre := Preprocessor.new()
 	var detector := Detector.new()
-	detector.configure(config)
+	var detector_config: Dictionary = TEST_CONFIG.duplicate(true)
+	detector_config.merge(config, true)
+	detector.configure(detector_config)
 	var events: Array[Dictionary] = []
 	var peak_ns := 0
 	var peak := -1.0

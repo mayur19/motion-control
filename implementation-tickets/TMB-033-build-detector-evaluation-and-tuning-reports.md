@@ -49,8 +49,25 @@
   (155.56 per 10 minutes): idle 0, handling 58, walking 26. This is a
   tune-only diagnostic, not held-out or acceptance evidence; count matching
   cannot establish true recall when the detector over-triggers.
-- Real tuning across the completed TMB-030 tune split, the one-time held-out
-  report, the live idle/handling acceptance check and any detector threshold
-  changes remain pending dataset completion.
+- iPhone tune selection (2026-11-07): compared the original defaults with
+  onset 8.5, 9.0 and 9.5 rad/s, refractory 700/800 ms, and rise 15/20 rad/s².
+  The lower rise gate had no effect. Selected onset 9.5, refractory 700 and
+  retained rise 20 because it met both aggregate tune targets with the fewest
+  false triggers: TP 86 / FN 4 / FP 3, recall 95.6%, precision 96.6%, and
+  0.51 non-swing triggers per 10 minutes over 19.78 minutes. The original
+  defaults produced 502 events and 146.1 non-swing triggers per 10 minutes.
+- Subgroups remain explicit: gentle was 28/28; fast was 27/28 with one
+  over-trigger; lift recall was 90.5%; and normal was 31/34, but S1 normal
+  counts were operator estimates. Data currently covers only iPhone,
+  right-hand and player 1, so this is a provisional device-specific tune
+  result rather than acceptance evidence.
+- Saved exact input configuration and resolved reports:
+  `docs/evidence/TMB-033-iphone-tuned-config-v1.json`,
+  `docs/evidence/TMB-033-iphone-tune-v1.json` and `.md`. Updated live/replay
+  defaults to the selected onset/refractory values; both still use the same
+  `DetectorPipeline` configuration.
+- Remaining: Galaxy and left-hand/player tune coverage, the one-time S4/N4
+  held-out report, and the live idle/handling acceptance check. Do not retune
+  on held-out results.
 
 

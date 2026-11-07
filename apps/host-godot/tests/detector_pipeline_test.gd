@@ -8,6 +8,9 @@ func _initialize() -> void:
 	var pipeline := Pipeline.new()
 	if str(pipeline.describe().detector) != "early_rise" or str(Pipeline.new().describe().preprocessing.name) != "one_pole_lowpass":
 		return _fail("Default pipeline must be early_rise with preprocessing: %s" % str(pipeline.describe()))
+	var defaults: Dictionary = pipeline.describe().config
+	if float(defaults.onset_speed_rad_s) != 9.5 or int(defaults.refractory_ms) != 700:
+		return _fail("Default early-rise thresholds must match the TMB-033 tune selection: %s" % str(defaults))
 	var bad := pipeline.configure({"detector": "angular_speed_probe", "threshold_rad_s": -1.0})
 	if bool(bad.ok):
 		return _fail("Negative threshold accepted")
