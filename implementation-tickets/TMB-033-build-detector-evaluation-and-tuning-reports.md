@@ -69,5 +69,27 @@
 - Remaining: Galaxy and left-hand/player tune coverage, the one-time S4/N4
   held-out report, and the live idle/handling acceptance check. Do not retune
   on held-out results.
+- External-data applicability spike, Stage 1 (2026-11-07): an owner decision
+  allows public badminton datasets as supplementary **external/off-domain**
+  evidence. They are not part of the TMB-030 tune/held-out split and are not a
+  new ticket. `docs/external-dataset-evaluation.md` reviews BadminSense
+  BADS_CLL (repository README at `0408092`, CHI 2026 paper arXiv 2603.21825):
+  a wrist-worn Galaxy Watch 6 FE with 848 valid overhead strokes from 12
+  right-handed players, real shuttle impacts, and CC BY-NC-ND 4.0. It also
+  covers the domain gaps compared with a phone held as the racket handle,
+  separation of `internal tune` / `internal heldout` / `external/off-domain`,
+  why valid-strokes-only data cannot measure false triggers per 10 minutes,
+  and the eight metadata items that must be confirmed from a real sample
+  before an adapter. Five other datasets are recorded as later candidates
+  only. Source manifest: `docs/external-dataset-sources.json` (metadata only).
+- Recommendation: **defer**. Units, timestamps, frame, calibration and segment
+  boundaries are undocumented; forearm motion thresholds do not transfer to
+  racket-frame thresholds; and the NC/ND terms need an owner decision on
+  intended use. Stage 2 (one-file sample inspection outside Git, archive
+  SHA-256 recorded) waits for owner approval of the license terms and the
+  14 GB download. Nothing was downloaded, no external data was committed or
+  fed into `DetectorPipeline`, and no internal held-out session was evaluated
+  or exposed. No physical or product performance claim can be made from this
+  spike.
 
 

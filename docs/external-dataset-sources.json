@@ -1,0 +1,107 @@
+{
+  "schema_version": 1,
+  "purpose": "Provenance of public badminton datasets considered as external/off-domain evidence for TMB-033. Metadata only: no dataset content is mirrored here, and source data, derived samples, audio and video must never be committed.",
+  "result_category": "external/off-domain",
+  "reviewed": "2026-11-07",
+  "document": "docs/external-dataset-evaluation.md",
+  "sources": [
+    {
+      "id": "badminsense-bads-cll",
+      "name": "BadminSense BADS_CLL",
+      "status": "deferred_pending_owner_license_and_download_decision",
+      "repository": "https://github.com/taizhouchen/BadminSense_Dataset",
+      "readme_commit_reviewed": "0408092f7c54b9cb2a53a0605a1d08b2f286f966",
+      "paper": "https://arxiv.org/abs/2603.21825",
+      "dataset_version": "1.0 (BADS_CLL_OPENACCESS_V1)",
+      "archive": {
+        "host": "Google Drive (link in the repository README)",
+        "approx_size_gb": 14,
+        "sha256": null,
+        "downloaded": false
+      },
+      "license": {
+        "stated": "CC BY-NC-ND 4.0",
+        "url": "https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode",
+        "readme_note": "non-commercial use only; do not modify",
+        "owner_accepted": false
+      },
+      "stated_contents": {
+        "valid_strokes": 848,
+        "section_folders": 96,
+        "labels": ["actionType", "actionEval", "positionX", "positionY"],
+        "stroke_types": ["BackhandTransition", "ForehandHigh", "ForehandLob", "ForehandKill"],
+        "imu_streams": [
+          "ACCELEROMETER",
+          "GYROSCOPE",
+          "GYROSCOPE_UNCALIBRATED",
+          "MAGNETIC_FIELD",
+          "MAGNETIC_FIELD_UNCALIBRATED",
+          "ROTATION_VECTOR"
+        ],
+        "other_modalities": ["AUDIO (16 kHz)", "per-stroke GIF clip"],
+        "imu_rate_hz": 100
+      },
+      "placement": {
+        "device": "Samsung Galaxy Watch 6 FE, Wear OS (reported in the paper)",
+        "body_location": "dominant wrist",
+        "orientation": "unconfirmed",
+        "participants": "12, all right-handed (reported in the paper)"
+      },
+      "unconfirmed_metadata": [
+        "timestamp_units_and_epoch",
+        "sample_rate_and_jitter",
+        "sensor_units",
+        "coordinate_convention",
+        "calibration_and_filtering_status",
+        "segment_boundaries",
+        "missing_and_duplicate_samples"
+      ]
+    },
+    {
+      "id": "multisensebadminton",
+      "name": "MultiSenseBadminton",
+      "status": "later_candidate_not_detector_input",
+      "repository": "https://github.com/dailyminiii/MultiSenseBadminton",
+      "data": "https://doi.org/10.6084/m9.figshare.c.6725706.v1",
+      "license": {"stated": null, "reviewed": false},
+      "modalities": ["body tracking", "EMG", "eye tracking", "foot pressure", "annotations"],
+      "placement": "body-worn wearables; not a phone or racket-handle stream"
+    },
+    {
+      "id": "shuttleset",
+      "name": "ShuttleSet",
+      "status": "later_candidate_not_detector_input",
+      "repository": "https://github.com/wywyWang/CoachAI-Projects/tree/main/ShuttleSet",
+      "license": {"stated": null, "reviewed": false},
+      "modalities": ["tactical match annotations"],
+      "placement": "none (no controller IMU)"
+    },
+    {
+      "id": "bfmd",
+      "name": "BFMD",
+      "status": "later_candidate_not_detector_input",
+      "repository": "https://ning-d.github.io/BFMD-Dataset/",
+      "license": {"stated": null, "reviewed": false},
+      "modalities": ["broadcast video", "pose", "shuttle trajectories", "shot labels"],
+      "placement": "none (no controller IMU)"
+    },
+    {
+      "id": "mendeley-frame-level-motion",
+      "name": "Mendeley frame-level badminton motion dataset",
+      "status": "later_candidate_not_detector_input",
+      "repository": "https://data.mendeley.com/datasets/3sp4xntp34/1",
+      "license": {"stated": null, "reviewed": false},
+      "modalities": ["video frames"],
+      "placement": "none (no IMU)"
+    },
+    {
+      "id": "videobadminton",
+      "name": "VideoBadminton",
+      "status": "later_candidate_not_detector_input",
+      "repository": "https://github.com/qilimk/VideoBadminton",
+      "license": {"stated": null, "reviewed": false},
+      "modalities": ["video action recognition"],
+      "placement": "none (no IMU)"
+    }
+  ]
+}
