@@ -77,4 +77,16 @@
   provisional detector's over-triggering, not held-out or acceptance results.
 - Inventory after N2: iPhone 62/100 swings, 11.55/20 non-swing minutes
   (idle 3.63, handling 4.89, walking 3.03; all tune split).
+- 2026-11-07 iPhone S3 (swing, tune) captured: 28 right-handed fast swings,
+  exactly 7 each for smash, clear, drop and lift, plus 1.45 minutes of
+  handling. The handling take accidentally retained speed `fast` and count 7;
+  the owner confirmed that it contained no swings and should be speed `none`,
+  count 0, which was appended as label revision 2. The raw checksum verifies.
+- Default-pipeline replay succeeded for S3 and produced 21/17/17/19 events
+  for the four seven-swing takes and 25 events in handling, again confirming
+  substantial provisional-detector over-triggering. This is tune-only
+  diagnostic information, not held-out or acceptance evidence.
+- Inventory after S3: iPhone 90/100 swings and 13.00/20 non-swing minutes.
+  The three tune swing sessions now cover normal 34, gentle 28 and fast 28;
+  all are currently right-handed and player 1. S4 remains held out.
 
