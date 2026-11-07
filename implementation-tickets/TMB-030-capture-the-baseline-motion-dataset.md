@@ -89,4 +89,15 @@
 - Inventory after S3: iPhone 90/100 swings and 13.00/20 non-swing minutes.
   The three tune swing sessions now cover normal 34, gentle 28 and fast 28;
   all are currently right-handed and player 1. S4 remains held out.
+- 2026-11-07 iPhone N3 (non-swing, tune) captured: idle 2.20 minutes,
+  handling 2.47 minutes and walking 2.10 minutes (6.78 labeled minutes). The
+  session exceeded the plan's six-minute cap; the already-recorded data is
+  retained, and the deviation is explicit. Two earlier empty capture attempts
+  were marked `exclude` at the owner's direction to consider only the latest.
+- Default-pipeline replay succeeded for N3 and produced 5 idle, 14 handling
+  and 52 walking triggers. These remain tune-only hard-negative diagnostics,
+  not held-out or acceptance evidence.
+- Inventory after N3: iPhone 90/100 swings and 19.78/20 non-swing minutes
+  (idle 5.83, handling 8.82, walking 5.13; all tune split). The remaining
+  planned iPhone sessions are the pre-designated held-out S4 and N4.
 
