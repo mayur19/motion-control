@@ -56,4 +56,16 @@
   and 8.4 rad/s, well above the provisional 3 rad/s onset, so they are useful
   hard negatives for TMB-033.
 - Inventory after N1: iPhone 34/100 swings, 5.4/20 non-swing minutes.
+- 2026-11-07 iPhone S2 (swing, tune) captured: 28 right-handed gentle
+  swings, exactly 7 each for smash, clear, drop and lift, plus 1.11 minutes
+  of handling. The operator counted exactly seven during every swing take but
+  left the UI count at zero; the confirmed counts were appended afterwards as
+  label revision 2. Unlike S1, these are exact operator counts, not estimates.
+  The raw checksum still verifies after the append-only label corrections.
+- Default-pipeline replay succeeded for every S2 take and showed the expected
+  provisional-detector over-triggering: 16/11/16/11 events for the four
+  seven-swing takes and 18 events in handling. This is tune-only diagnostic
+  information, not held-out or acceptance evidence.
+- Inventory after S2: iPhone 62/100 swings, 6.51/20 non-swing minutes
+  (normal 34, gentle 28; all currently right-handed and player 1).
 
