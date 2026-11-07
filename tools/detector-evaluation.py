@@ -425,12 +425,13 @@ def markdown(report: dict) -> str:
 def run_replays(root: pathlib.Path, split: str, output: pathlib.Path, config: pathlib.Path | None,
                 godot: str, project: pathlib.Path) -> None:
     assignments = read_splits(root)
+    config_path = config.resolve() if config is not None else None
     for capture_id in sorted(item for item, assigned in assignments.items() if assigned == split):
         command = [godot, "--headless", "--path", str(project), "--script", "res://replay/replay_capture.gd", "--",
                    f"--capture={root / capture_id}", f"--output={output / (capture_id + '.json')}",
                    f"--series={output / (capture_id + '.series.jsonl')}"]
-        if config is not None:
-            command.append(f"--config={config}")
+        if config_path is not None:
+            command.append(f"--config={config_path}")
         completed = subprocess.run(command, capture_output=True, text=True)
         if completed.returncode != 0:
             detail = completed.stderr.strip() or completed.stdout.strip()

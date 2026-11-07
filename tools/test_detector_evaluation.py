@@ -5,6 +5,7 @@ import json
 import pathlib
 import subprocess
 import sys
+import types
 
 import pytest
 
@@ -221,3 +222,20 @@ def test_cli_requires_explicit_heldout_confirmation_and_writes_report(tmp_path: 
     repeated = subprocess.run([*command, "--confirm-heldout", "--markdown", str(tmp_path / "heldout.md")],
                               capture_output=True, text=True)
     assert repeated.returncode == 2 and "already exists" in repeated.stderr
+
+
+def test_replay_runner_passes_an_absolute_config_path(tmp_path: pathlib.Path, monkeypatch) -> None:
+    module = load_module()
+    root, _results = fixture(tmp_path)
+    output = tmp_path / "generated"
+    output.mkdir()
+    commands = []
+
+    def fake_run(command, **_kwargs):
+        commands.append(command)
+        return types.SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr(module.subprocess, "run", fake_run)
+    relative = pathlib.Path("candidate.json")
+    module.run_replays(root, "tune", output, relative, "godot", tmp_path / "project")
+    assert commands[0][-1] == f"--config={relative.resolve()}"
