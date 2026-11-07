@@ -8,7 +8,7 @@
     {
       "id": "badminsense-bads-cll",
       "name": "BadminSense BADS_CLL",
-      "status": "deferred_pending_owner_license_and_download_decision",
+      "status": "license_fit_confirmed_pending_download_approval",
       "repository": "https://github.com/taizhouchen/BadminSense_Dataset",
       "readme_commit_reviewed": "0408092f7c54b9cb2a53a0605a1d08b2f286f966",
       "paper": "https://arxiv.org/abs/2603.21825",
@@ -23,7 +23,7 @@
         "stated": "CC BY-NC-ND 4.0",
         "url": "https://creativecommons.org/licenses/by-nc-nd/4.0/legalcode",
         "readme_note": "non-commercial use only; do not modify",
-        "owner_accepted": false
+        "owner_decision": "2026-11-07: internal tool, never commercialized; NC satisfied. ND: source files unmodified, no derived material committed or shared."
       },
       "stated_contents": {
         "valid_strokes": 848,

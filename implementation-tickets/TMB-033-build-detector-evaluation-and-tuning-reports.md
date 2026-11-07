@@ -91,5 +91,12 @@
   fed into `DetectorPipeline`, and no internal held-out session was evaluated
   or exposed. No physical or product performance claim can be made from this
   spike.
+- Owner decision (2026-11-07): the project is an internal tool and will not
+  be commercialized at any point in the future, so BADS_CLL's non-commercial
+  term fits. No-derivatives still applies: source files stay unmodified, and
+  no derived material is committed or shared. The recommendation changes
+  from defer to **proceed with a minimal Stage 2 sample inspection** once the
+  owner approves the 14 GB download. The technical limits are unchanged: no
+  threshold transfer, and no false-triggers-per-10-minutes evidence.
 
 

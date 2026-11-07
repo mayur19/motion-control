@@ -1,8 +1,9 @@
 # External dataset evaluation (TMB-033 applicability spike)
 
 **Status:** Stage 1 (repository-only applicability review) done 2026-11-07.
-Stage 2 (sample inspection) waits for an owner decision. No external data has
-been downloaded, inspected or committed.
+The owner has confirmed internal, non-commercial use (2026-11-07). Stage 2
+(sample inspection) waits only for the owner's download approval. No external
+data has been downloaded, inspected or committed.
 
 **Scope:** an off-domain robustness check for the TMB-032 `early_rise`
 detector. It is supplementary evidence. It is not a replacement for TMB-030,
@@ -115,12 +116,11 @@ is CC BY 4.0, which does not cover the dataset.
 
 Consequences for this project (an engineering reading, not legal advice):
 
-- **Non-commercial:** the PRD does not say whether the game will be
-  commercial; the Architecture plan defers monetization and app-store
-  distribution beyond Release 1. If the product, or a later version, is
-  commercial, using this data to make product decisions
-  such as threshold choices may conflict with NC. **This is the owner's
-  call.**
+- **Non-commercial:** owner decision (2026-11-07): this is an internal
+  tool and will not be commercialized at any point in the future. Internal
+  use of the dataset is therefore within the NC term. If that decision ever
+  changes, every conclusion drawn from this dataset must be re-reviewed
+  before commercial use.
 - **No-derivatives:** sharing adapted material is prohibited, and the README's
   wording is stricter than the CC deed. Derived samples, converted files,
   plots of the raw signals and per-stroke tables must not be committed or
@@ -235,18 +235,24 @@ not been reviewed.
 
 ## 8. Recommendation
 
-**Defer.** Do not download the 14 GB archive yet. Proceed to a minimal sample
-inspection only after both owner conditions below are met.
+**Proceed with a minimal sample inspection (Stage 2) once the owner approves
+the download.** Do not build an adapter or an evaluation mode until that
+inspection answers Section 6.
 
-License reasons:
+History: Stage 1 originally recommended deferring until the intended use was
+known. On 2026-11-07 the owner confirmed internal, non-commercial use, which
+resolves the license blocker. The technical limits below are unchanged.
 
-- CC BY-NC-ND 4.0, with README wording that forbids modification "in any
-  way", conflicts with any commercial use and with sharing derived material.
-  Whether the product's intended use is non-commercial is an owner decision
-  that has not been made. If it may become commercial, reject the dataset for
-  product decisions.
+License position:
 
-Technical reasons:
+- NC: satisfied by the owner's internal-only decision.
+- ND and the README's "do not modify": keep source files unmodified (the
+  adapter is read-only) and never commit or share derived material. Per-stroke
+  values, converted files and raw-signal plots stay outside Git. Only
+  aggregate descriptive statistics may appear in internal reports, with the
+  paper cited.
+
+Technical limits, which bound what Stage 2 can show:
 
 - Wrist-worn forearm motion with real shuttle impact, compared with an air
   swing of a phone that is the racket: thresholds cannot transfer, and no
@@ -259,11 +265,10 @@ Technical reasons:
 - The best realistic payoff is narrow: descriptive forearm-rotation
   morphology (backswing presence, rise-to-peak time) across 12 players. Owner
   data from TMB-030 S4/N4 and Galaxy sessions answers the product question
-  directly.
+  directly and keeps priority.
 
-Proceed to Stage 2 only if the owner (1) accepts the CC BY-NC-ND terms for the
-intended use and (2) approves the download. Then extract only the minimum
-needed (one section `.json`) into a new directory outside the repository,
-record the archive SHA-256, answer Section 6, and decide again before writing
-an adapter. Reject if the owner expects commercial use or if Section 6 shows
-processed or unrecoverable units or timestamps.
+Stage 2 steps after download approval: download the archive into a new
+directory outside the repository, record its name, size and SHA-256, extract
+only one section `.json`, answer Section 6 in the TMB-033 log, and decide
+again before writing an adapter. Reject the dataset as a detector input if
+Section 6 shows processed or unrecoverable units or timestamps.
