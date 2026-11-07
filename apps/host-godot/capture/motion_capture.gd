@@ -119,9 +119,14 @@ func begin_take(labels: Dictionary, now_ns: int) -> Dictionary:
 	return {"ok": true, "take_id": int(_open_take.take_id)}
 
 
-func end_take(now_ns: int) -> Dictionary:
+func end_take(now_ns: int, labels: Dictionary = {}) -> Dictionary:
 	if _open_take.is_empty() or not is_recording():
 		return {"ok": false, "error": "no open take"}
+	if not labels.is_empty():
+		var error := validate_labels(labels)
+		if not error.is_empty():
+			return {"ok": false, "error": error}
+		_open_take.merge(_label_fields(labels), true)
 	var record := _merged({"record": "take", "revision": 1, "end_arrival_ns": now_ns}, _open_take)
 	_write(_labels, record)
 	_open_take = {}

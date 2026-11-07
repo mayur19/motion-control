@@ -27,7 +27,8 @@ func _initialize() -> void:
 		return _fail("Valid take rejected: %s" % str(take))
 	for index in 3:
 		capture.record_datagram(PackedByteArray([1, 2, 3, index]), "192.0.2.1:5000", 2_000 + index)
-	var ended := capture.end_take(5_000)
+	var ended := capture.end_take(5_000, {"player": 1, "phone": "iPhone", "handedness": "right",
+		"intended_shot": "smash", "valid": true, "speed": "fast", "swing_count": 8})
 	if not bool(ended.ok) or int(ended.take_id) != int(take.take_id):
 		return _fail("Take did not end: %s" % str(ended))
 	capture.begin_take({"player": 2, "phone": "Galaxy", "handedness": "left",
@@ -60,9 +61,9 @@ func _initialize() -> void:
 		return _fail("Expected labels header + 2 takes, got %d" % labels.size())
 	var first: Dictionary = JSON.parse_string(labels[1])
 	var second: Dictionary = JSON.parse_string(labels[2])
-	if str(first.speed) != "normal" or int(first.swing_count) != 7 or str(second.speed) != "none" \
+	if str(first.speed) != "fast" or int(first.swing_count) != 8 or str(second.speed) != "none" \
 			or int(second.swing_count) != 0:
-		return _fail("speed/swing_count labels wrong: %s / %s" % [str(first), str(second)])
+		return _fail("End-time speed/swing_count labels wrong: %s / %s" % [str(first), str(second)])
 	if str(first.record) != "take" or int(first.revision) != 1 or str(first.intended_shot) != "smash" \
 			or int(first.start_arrival_ns) != 1_000 or int(first.end_arrival_ns) != 5_000:
 		return _fail("First take label wrong: %s" % str(first))

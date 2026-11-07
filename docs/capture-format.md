@@ -42,6 +42,23 @@ Captures contain no account, device serial or installation identifiers; the
 `phone` label is operator-chosen text. `arrival_monotonic_ns` uses the host's
 monotonic clock (same clock as take boundaries).
 
+## Capture panel safeguards
+
+- **START CAPTURE** hides the F6 panel after a successful start so the pairing
+  QR remains visible; recording continues in the background and F6 reopens
+  the panel.
+- Labels shown when **END TAKE** is pressed are authoritative. This permits
+  entering the exact speed/count during the take instead of freezing a stale
+  snapshot from **BEGIN TAKE**.
+- Valid swing takes cannot end until speed is selected and swing count is
+  positive. The take remains open so the operator can correct the fields;
+  invalid/aborted swing takes may retain a zero count.
+- Selecting `idle`, `handling` or `walking` forces and locks speed `none` and
+  count `0`. Ending any take clears speed/count before the next take so a
+  swing value cannot leak into handling.
+- The phone choices include iPhone, Galaxy and Pixel; the stored field remains
+  the same privacy-safe operator label described below.
+
 ## labels.jsonl
 
 ```json

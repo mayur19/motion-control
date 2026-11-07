@@ -100,4 +100,9 @@
 - Inventory after N3: iPhone 90/100 swings and 19.78/20 non-swing minutes
   (idle 5.83, handling 8.82, walking 5.13; all tune split). The remaining
   planned iPhone sessions are the pre-designated held-out S4 and N4.
+- Capture-panel safeguards added after the S2/S3 labeling mistakes: END TAKE
+  uses the final visible labels, incomplete swing labels are refused,
+  non-swing speed/count is locked to `none`/0, values reset between takes, and
+  START CAPTURE hides the overlay so pairing remains visible. Pixel was added
+  as a phone label for the planned second-device sessions.
 

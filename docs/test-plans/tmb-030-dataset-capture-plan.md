@@ -44,7 +44,9 @@ CAPTURE** *before* pairing, then pair and calibrate.
 
 - Count swings aloud and do exactly the planned number. Set **Speed** and
   **Swings in take** *before* **END TAKE** (S1 had to be relabeled
-  afterwards from estimates). Exact counts are mandatory for held-out sessions.
+  afterwards from estimates). The panel now refuses an incomplete swing take
+  and clears these fields after each take. Exact counts are mandatory for
+  held-out sessions.
 - Set **Swings in take** to the number actually performed. Mark a take
   **invalid** (never delete it) if a swing was unsafe, ambiguous or
   performed incorrectly.

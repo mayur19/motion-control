@@ -46,4 +46,10 @@
   unchanged).
 - Known limits: the replay summary attributes events to takes by arrival
   time; the probe's event count is not a swing count.
+- Post-capture hardening (2026-11-07): END TAKE now commits the labels visible
+  at the end rather than the BEGIN TAKE snapshot; incomplete swing speed/count
+  blocks ending; non-swing shots force and lock `none`/0; ending resets those
+  fields; START CAPTURE hides the overlay to expose the pairing QR; and Pixel
+  is an available privacy-safe phone label. Regression coverage is in
+  `capture_panel_test.gd` and `motion_capture_test.gd`.
 

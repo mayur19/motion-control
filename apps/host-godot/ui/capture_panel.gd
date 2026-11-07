@@ -6,7 +6,8 @@ extends PanelContainer
 ## written to labels.jsonl only; raw datagrams are never relabeled.
 
 const Capture = preload("res://capture/motion_capture.gd")
-const PHONES := ["iPhone", "Galaxy"]
+const PHONES := ["iPhone", "Galaxy", "Pixel"]
+const SWING_SHOTS := ["smash", "clear", "drop", "lift", "other_swing"]
 const WIDTH := 300.0
 const HEIGHT := 430.0
 const MARGIN := 16.0
@@ -74,6 +75,7 @@ func set_labels(labels: Dictionary) -> void:
 	_valid.button_pressed = bool(labels.get("valid", true))
 	_select(_speed, str(labels.get("speed", "none")))
 	_swings.value = int(labels.get("swing_count", 0))
+	_sync_shot_controls()
 
 
 func current_labels() -> Dictionary:
@@ -91,6 +93,15 @@ func current_labels() -> Dictionary:
 func toggle_capture(now_ns := -1) -> Dictionary:
 	var now := _now(now_ns)
 	if _capture.is_recording():
+		if not _capture.open_take().is_empty():
+			var label_error := _end_label_error()
+			if not label_error.is_empty():
+				_set_status(label_error)
+				return {"ok": false, "error": label_error}
+			var ended := _capture.end_take(now, current_labels())
+			if not bool(ended.ok):
+				_set_status("End take failed: %s" % str(ended.get("error", "")))
+				return ended
 		var stopped := _capture.stop(now)
 		_set_status(
 			"Saved %d datagrams: %s" % [int(stopped.get("datagrams", 0)), _capture.capture_id()]
@@ -102,14 +113,23 @@ func toggle_capture(now_ns := -1) -> Dictionary:
 	var started := _capture.start(capture_root, {"source": "host capture panel"}, seed)
 	_set_status("Recording %s" % _capture.capture_id() if started == OK else "Start failed: %s" % error_string(started))
 	_refresh()
+	if started == OK:
+		_reset_take_fields()
+		visible = false  # expose the pairing QR; capture continues in the background
 	return {"ok": started == OK}
 
 
 func toggle_take(now_ns := -1) -> Dictionary:
 	var now := _now(now_ns)
 	if not _capture.open_take().is_empty():
-		var ended := _capture.end_take(now)
+		var label_error := _end_label_error()
+		if not label_error.is_empty():
+			_set_status(label_error)
+			return {"ok": false, "error": label_error}
+		var ended := _capture.end_take(now, current_labels())
 		_set_status("Take %d saved" % int(ended.get("take_id", 0)))
+		if bool(ended.ok):
+			_reset_take_fields()
 		_refresh()
 		return ended
 	var begun := _capture.begin_take(current_labels(), now)
@@ -146,6 +166,7 @@ func _build() -> void:
 	_phone = _options(box, "Phone", PHONES)
 	_hand = _options(box, "Hand", Capture.HANDEDNESS)
 	_shot = _options(box, "Intended shot", Capture.SHOTS)
+	_shot.item_selected.connect(func(_index: int) -> void: _sync_shot_controls())
 	_speed = _options(box, "Speed", Capture.SPEEDS)
 	var swings_row := HBoxContainer.new()
 	var swings_caption := _label("Swings in take")
@@ -165,6 +186,7 @@ func _build() -> void:
 	_take_button.pressed.connect(func() -> void: toggle_take())
 	box.add_child(_take_button)
 	_refresh()
+	_sync_shot_controls()
 
 
 func _options(box: VBoxContainer, title: String, items: Array) -> OptionButton:
@@ -194,6 +216,32 @@ func _select(option: OptionButton, text: String) -> void:
 		if option.get_item_text(index) == text:
 			option.select(index)
 			return
+
+
+func _sync_shot_controls() -> void:
+	if _shot == null or _speed == null or _swings == null:
+		return
+	var is_swing := SWING_SHOTS.has(_shot.get_item_text(_shot.selected))
+	if not is_swing:
+		_select(_speed, "none")
+		_swings.value = 0
+	_speed.disabled = not is_swing
+	_swings.editable = is_swing
+
+
+func _reset_take_fields() -> void:
+	_select(_speed, "none")
+	_swings.value = 0
+	_valid.button_pressed = true
+	_sync_shot_controls()
+
+
+func _end_label_error() -> String:
+	var labels := current_labels()
+	if bool(labels.valid) and SWING_SHOTS.has(str(labels.intended_shot)) \
+			and (str(labels.speed) == "none" or int(labels.swing_count) <= 0):
+		return "Set speed and swing count before END TAKE"
+	return ""
 
 
 func _refresh() -> void:
