@@ -2,7 +2,7 @@
 
 Checkpoint and working rules for coding agents (Codex, Claude Code). Read this
 first, then `git log`, `git status` and the ticket you are working on.
-Last checkpoint: 2026-11-06, written after `7836d3c` (TMB-029 done; TMB-030 capture in progress).
+Last checkpoint: 2026-11-11, written after `109ac58` (iPhone TMB-030 tune sessions done; public docs set added).
 
 ## Project
 
@@ -19,7 +19,8 @@ synchronizes clocks and (later) detects swings and runs the match.
 | `apps/controller-ios/` | SwiftUI/CoreMotion controller (XcodeGen `project.yml`) |
 | `apps/controller-android/` | Kotlin controller (AGP 9 built-in Kotlin) |
 | `tools/` | Python/Ruby analysis tools with pytest suites |
-| `docs/` | Guides (`development.md`, `reconnect.md`, `log-schema.md`, `racket-coordinate-system.md`, …), `test-plans/`, `evidence/` |
+| `README.md`, `CONTRIBUTING.md` | Public project overview and contributor rules |
+| `docs/` | `README.md` (index), `architecture.md`, `getting-started.md`, `roadmap.md`, `research.md`, guides (`development.md`, `reconnect.md`, `log-schema.md`, `racket-coordinate-system.md`, …), `test-plans/`, `evidence/` |
 
 ## Hard rules
 
@@ -123,16 +124,24 @@ In progress / review:
 - **TMB-030 dataset (owner-run, In Progress).** Plan:
   `docs/test-plans/tmb-030-dataset-capture-plan.md` (full target chosen: per
   phone 4 swing + 4 non-swing sessions of ≤ 6 min; S4/N4 held out). Done:
-  iPhone S1 (34 swings, estimated counts, tune) and N1 (tune). Inventory:
-  iPhone 34/100 swings, 5.4/20 non-swing minutes; Galaxy none. Captures and
+  iPhone tune sessions S1–S3 and N1–N3 (S1 counts are operator estimates).
+  Inventory: iPhone 90/100 swings (normal 34, gentle 28, fast 28; all right
+  hand, player 1), 19.78/20 non-swing minutes; Galaxy none. Captures and
   `dataset-splits.json` live in the host user-data `captures/` folder
   (not in git). Only the owner can record sessions; never invent labels or
   counts.
 - **TMB-031 preprocessing and TMB-032 `early_rise` detector: Review** under an
-  owner-approved dependency exception. Thresholds are provisional, and the
-  backswing vs forward-swing question needs labeled data
-  (`docs/motion-preprocessing.md`, `docs/swing-detection.md`).
-- TMB-033 onward are blocked by data; all gameplay waits for the TMB-035 gate.
+  owner-approved dependency exception. iPhone tune defaults selected
+  (onset 9.5 rad/s, refractory 700 ms, cutoff 25 Hz): tune split recall 95.6%,
+  precision 96.6%, 0.51 false triggers / 10 min
+  (`docs/evidence/TMB-033-iphone-tune-v1.md`). Not acceptance: iPhone-only,
+  one hand/player, count-based. Galaxy re-check and the backswing vs
+  forward-swing question remain (`docs/motion-preprocessing.md`,
+  `docs/swing-detection.md`).
+- TMB-033 (In Progress): evaluation tooling done; held-out S4/N4 must be
+  evaluated once with a frozen config (`--confirm-heldout`). The read-only
+  BADS_CLL reader (`tools/external-stroke-reader.py`) is off-domain only.
+  TMB-034 onward are blocked; all gameplay waits for the TMB-035 gate.
 
 Open items:
 
@@ -155,5 +164,7 @@ Hard-won gotchas:
 - `--print-session` prints the live pairing secret: don't use it in agent runs.
 - zsh does not word-split `$var` in loops.
 
-Next by plan: owner sessions for TMB-030 (iPhone S2/N2 next), TMB-033
-evaluation tooling, then onward per `implementation-tickets/README.md`.
+Next by plan: owner sessions for TMB-030 (iPhone held-out S4/N4 next, then
+Galaxy S1–S4/N1–N4 when available), one-time held-out evaluation (TMB-033),
+then onward per `implementation-tickets/README.md`. Keep `docs/roadmap.md`
+and `docs/research.md` in sync when status or measured results change.
