@@ -27,6 +27,11 @@ synchronizes clocks and (later) detects swings and runs the match.
   numbers or the Apple team ID. Filter all `xcrun devicectl`, `xcodebuild -destination id=…`
   and `adb` output: redact UUID-form IDs, `ecid_[0-9]+` and adb serials.
   Host screenshots show the pairing code, so do not open or commit them.
+- **Never commit BadminSense (`BADS_CLL`) data** or anything derived from it
+  (section JSON, stroke GIFs, per-stroke values, plots of it). Its CC BY-NC-ND
+  license conflicts with this public MIT repo. Keep the archive outside the
+  repo (or in git-ignored `external-data/`); docs may hold only aggregate prose
+  findings. `tools/test_no_external_data.py` enforces this.
 - The Xcode project is generated and git-ignored. Device builds:
   `DEVELOPMENT_TEAM=<team> xcodegen generate` (the value lives only in the
   developer's environment).

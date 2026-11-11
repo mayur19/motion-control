@@ -6,6 +6,11 @@ internal, non-commercial use and approved the download. The archive is stored
 outside Git. Only aggregate metadata findings are recorded here; no source
 data or derived per-stroke values are committed.
 
+> **Public repository (2026-11-11):** this repo is now public under MIT. The
+> dataset stays a local, non-commercial reference only. Never commit the archive,
+> extracted files or anything derived from them (`.gitignore` blocks the known
+> names; `tools/test_no_external_data.py` fails if any are tracked).
+
 **Scope:** an off-domain robustness check for the TMB-032 `early_rise`
 detector. It is supplementary evidence. It is not a replacement for TMB-030,
 not part of the tune/held-out split, and not a new ticket.
