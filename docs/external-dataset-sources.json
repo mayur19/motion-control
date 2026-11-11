@@ -8,7 +8,7 @@
     {
       "id": "badminsense-bads-cll",
       "name": "BadminSense BADS_CLL",
-      "status": "sample_inspected_descriptive_adapter_recommended",
+      "status": "descriptive_reader_built_no_detector_evaluation",
       "repository": "https://github.com/taizhouchen/BadminSense_Dataset",
       "readme_commit_reviewed": "0408092f7c54b9cb2a53a0605a1d08b2f286f966",
       "paper": "https://arxiv.org/abs/2603.21825",
@@ -71,7 +71,6 @@
       "unconfirmed_metadata": [
         "watch_orientation_on_wrist",
         "device_field_meaning",
-        "consistency_across_other_95_files",
         "platform_low_pass_filtering"
       ],
       "confirmed_metadata": {
@@ -109,7 +108,22 @@
           "accelerometer_m_s2": 78.41,
           "gyroscope_x_rad_s": 40.03
         },
-        "resampled": false
+        "resampled": false,
+        "entries": {
+          "total": 961,
+          "valid_strokes": 848,
+          "invalid_placeholders": 113,
+          "placeholder_shape": "info kept; label and data null"
+        },
+        "record_name_gender_prefixes": [
+          "Man",
+          "Women"
+        ]
+      },
+      "reader": {
+        "tool": "tools/external-stroke-reader.py",
+        "adapter_version": 1,
+        "full_archive_read": "2026-11-11"
       }
     },
     {

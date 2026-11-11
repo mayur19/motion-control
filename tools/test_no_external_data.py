@@ -14,7 +14,7 @@ ROOT = pathlib.Path(__file__).resolve().parent.parent
 # Gender_Exp_StrokeType_PlayerCode_Section_Device, e.g. Man_High_ForehandKill_Play6_1_1.json
 FORBIDDEN_PATH = re.compile(
     r"(?i)(bads_cll|badminsense|(^|/)external-data/|"
-    r"(^|/)(man|woman|male|female)_(low|medium|high)_[^/]*\.(json|gif|csv|npz|npy|parquet|pkl))"
+    r"(^|/)(man|woman|women|male|female)_(low|medium|high)_[^/]*\.(json|gif|csv|npz|npy|parquet|pkl))"
 )
 # Keys that only appear in raw dataset JSON (the docs mention them in prose, never as JSON keys).
 FORBIDDEN_JSON_KEY = re.compile(r'"(recordName|actionEval)"\s*:')
@@ -25,7 +25,16 @@ SHOULD_BE_IGNORED = [
     "external-data/anything.json",
     "tools/Man_High_ForehandKill_Play6_1_1.json",
     "docs/evidence/Woman_Low_BackhandDrive_Play2_1_1.gif",
+    # The published v1.0 archive spells the female prefix "Women_".
+    "Women_Low_BackhandTransition_Play11_1_1/Women_Low_BackhandTransition_Play11_1_1.json",
+    "tools/Women_Low_ForehandLob_Play12_2_1@2.gif",
 ]
+
+
+def test_forbidden_path_pattern_matches_published_record_names():
+    for path in ("Women_Low_BackhandTransition_Play11_1_1/Women_Low_BackhandTransition_Play11_1_1.json", "a/Women_High_ForehandKill_Play2_1_1.gif",
+                 "Man_High_ForehandKill_Play6_1_1.json"):
+        assert FORBIDDEN_PATH.search(path), path
 
 
 def tracked_files() -> list[str]:

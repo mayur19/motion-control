@@ -274,6 +274,45 @@ Consequences:
 - The domain gap (forearm against racket, real impact against air swing) is
   unchanged by anything in the sample.
 
+### 6.2 Full-archive reader (2026-11-11)
+
+`tools/external-stroke-reader.py` reads the archive `.zip` directly (or an
+extracted folder or one section file). It never writes to the source. It
+validates the schema and the confirmed units strictly and fails with the file
+and stroke index on any mismatch. Tests use only hand-authored synthetic
+fixtures built in `tools/test_external_stroke_reader.py`.
+
+```sh
+python3 -I tools/external-stroke-reader.py BADS_CLL_OPENACCESS_V1.zip \
+  --json OUT.json --markdown OUT.md   # OUT must be outside the repo or under external-data/
+```
+
+Reading all 96 files surfaced two facts the README does not state:
+
+- **Invalid attempts are published as placeholders.** The section files hold
+  961 entries; 113 keep `info` but have both `label` and `data` null. The
+  remaining 848 are the valid strokes. The reader counts and skips exact
+  placeholders, and any partly null entry is still an error.
+- **The female prefix is `Women_`**, not the README's "Female" or the
+  paper's wording. The public-repo guard (`.gitignore` and
+  `tools/test_no_external_data.py`) originally missed this spelling and now
+  covers it.
+
+Aggregate format findings over all 848 strokes (adapter v1): every file
+matches the Section 6.1 schema, units checks and 2000 ms windows. The median
+interval is 10 ms everywhere. 50 strokes contain a gap over 50 ms (the largest
+is 460 ms), and 4.5 % of gyro samples repeat the previous sample exactly. 142
+strokes (17 %) reach gyro saturation, mostly smashes (42 % of
+`ForehandKill`). 597 reach accelerometer saturation. The peak lies about
+0.94 s into each window. These are dataset-format facts, not detector
+results.
+
+The reader's descriptive statistics (peak, 20 %-of-peak rise time,
+prior-peak ratio, pre-peak history, by stroke type, experience level and
+player) are derived material. Under the CC BY-NC-ND terms they stay in local
+reports outside Git. The reader refuses to write inside this public
+repository except to the git-ignored `external-data/`.
+
 ## 7. Other public datasets (later candidates, not detector inputs)
 
 None of these can validate TMB-032 trigger thresholds. Their licenses have
@@ -290,7 +329,8 @@ not been reviewed.
 ## 8. Recommendation
 
 **Proceed, narrowly: build a read-only, tests-first descriptive adapter. Do
-not build an external detector-evaluation mode yet.**
+not build an external detector-evaluation mode yet.** The adapter now exists
+(Section 6.2). An external detector-evaluation mode remains out of scope.
 
 History: Stage 1 recommended deferring until the intended use was known. On
 2026-11-07 the owner confirmed internal, non-commercial use and approved the

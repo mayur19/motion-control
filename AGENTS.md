@@ -74,6 +74,7 @@ python3 -m pytest -q tools/
 python3 -I tools/check-reconnect-log.py <session.jsonl>          # TMB-021 physical reconnect checks
 python3 -I tools/soak-report.py <session.jsonl> <start_s> [end_s] # TMB-022 thresholds
 python3 -I tools/latency-frames.py VIDEO --capture-fps 240 --marker X,Y,W,H --display X,Y,W,H
+python3 -I tools/external-stroke-reader.py ARCHIVE.zip --json OUT --markdown OUT  # external/off-domain; OUT outside repo
 ```
 
 Host session logs (JSONL) are written to

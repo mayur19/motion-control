@@ -119,3 +119,22 @@
   dataset format only, not detector performance.
 
 
+- External spike, read-only reader (2026-11-11; the repository is now public
+  under MIT): added `tools/external-stroke-reader.py` with tests written
+  first on hand-authored synthetic fixtures (`tools/test_external_stroke_reader.py`).
+  It reads the `.zip` directly without modifying it, strictly checks schema,
+  integer-ms timestamps and the confirmed units, keeps the original values,
+  flags saturation, gaps over 50 ms and held values, and reports only
+  aggregate descriptive statistics labeled `external/off-domain`: peak, rise
+  time from 20 % of peak, a prior-peak ratio measured before the pre-rise
+  valley, and pre-peak history, by stroke type, experience and player. It
+  refuses to write reports inside the repository except to the git-ignored
+  `external-data/`.
+- The full-archive read verified the SHA-256 and parsed 848 strokes from 96
+  files. It found 113 published invalid-attempt placeholders (label and data
+  null; 961 entries in total) and the `Women_` record prefix. The public-repo
+  guard missed `Women_`, so the guard and its tests were fixed. Saturation
+  affects 142 strokes (gyro) and 597 (accelerometer); 50 strokes contain a gap
+  over 50 ms. The descriptive report stays local because, under ND, it is
+  derived material. No external data entered `DetectorPipeline`, no
+  threshold changed, and no TMB-030 session was touched.
