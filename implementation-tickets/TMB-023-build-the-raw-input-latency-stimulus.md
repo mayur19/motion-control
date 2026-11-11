@@ -41,5 +41,13 @@
   Any manual F4 toggle cancels auto-arm. Covered by
   `tests/raw_latency_auto_arm_test.gd` (`TMB-023_LATENCY_AUTO_ARM_OK`).
   Automated only; not yet checked on a physical phone.
+- 2026-11-11 physical check (iPhone 17e, owner-observed): with
+  `--latency-test`, the pairing QR was visible at launch and the phone paired
+  without pressing F4. The overlay then appeared on its own with no flash on
+  arming, each swing gave about one flash, and F4 returned to the QR and
+  re-armed. The session log agrees: pairing, then Connected, with no stimulus
+  before pairing and 16 `raw_latency_stimulus` events afterwards at the default
+  3.5 rad/s threshold. This was a functional check only: AWDL was active and no
+  camera was used, so it is not a latency measurement.
 
 
