@@ -54,7 +54,7 @@ for t in apps/host-godot/tests/*_test.gd; do
 done
 godot --headless --path apps/host-godot -- --smoke-test        # TMB-004_HOST_SMOKE_OK
 godot --path apps/host-godot -- --print-session --session-log-max-mb=128   # visible host
-#   options: --reconnect-window-s=N (5-60, default 30), --latency-test (F4 toggles stimulus),
+#   options: --reconnect-window-s=N (5-60, default 30), --latency-test (arms after pairing; F4 toggles),
 #            --log-normalized-motion (raw vs normalized records; F5 shows the live plot)
 
 # iOS (simulator)
@@ -146,8 +146,6 @@ In progress / review:
 Open items:
 
 - TMB-022: no Ethernet-host run is possible on this Mac.
-- `--latency-test` starts armed, which hides the pairing QR (press F4 twice);
-  small host fix pending.
 - Android stops background traffic after ~5 s; a foreground service is an
   owner decision.
 - A paused controller (invalid calibration) is not told on screen (no

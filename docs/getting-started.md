@@ -101,7 +101,7 @@ calibration. Use **Recalibrate** in the app to redo calibration.
 
 | Key / option | Effect |
 | --- | --- |
-| **F4** / `--latency-test` | Latency stimulus: full-screen flash on a raw gyro threshold; `[` and `]` adjust the threshold. The mode starts armed and hides the QR, so press F4 twice to pair |
+| **F4** / `--latency-test` | Latency stimulus: full-screen flash on a raw gyro threshold; `[` and `]` adjust the threshold. With `--latency-test` the QR stays visible and the stimulus arms on the first motion sample after pairing; F4 exits or re-arms |
 | **F5** / `--log-normalized-motion` | Live raw vs calibrated plot; logs both |
 | **F6** | Capture panel for labeled takes (see [capture format](capture-format.md)) |
 | `--session-log-max-mb=N` | Session log size cap |

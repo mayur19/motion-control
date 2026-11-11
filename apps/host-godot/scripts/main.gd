@@ -175,7 +175,7 @@ func _start_raw_latency_stimulus() -> void:
 	)
 	add_child(raw_latency_stimulus)
 	raw_latency_stimulus.bind(motion_ingest, session_logger)
-	raw_latency_stimulus.armed = OS.get_cmdline_user_args().has("--latency-test")
+	raw_latency_stimulus.apply_cmdline(OS.get_cmdline_user_args())
 
 
 func _start_session_logger(port: int) -> void:

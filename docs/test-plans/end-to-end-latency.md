@@ -23,7 +23,9 @@ Start the host in raw latency mode:
 godot --path apps/host-godot -- --latency-test --session-log-max-mb=128
 ```
 
-F4 arms/exits the full-screen stimulus. `[`/`-` lowers and `]`/`=` raises the
+The pairing QR stays visible until a phone pairs; the full-screen stimulus
+arms itself on the first motion sample from a paired phone. F4 exits or re-arms
+it (press F4 to bring the QR back for another phone). `[`/`-` lowers and `]`/`=` raises the
 gyro threshold by 0.25 rad/s without rebuilding. Choose the lowest threshold
 that does not trigger during ten seconds of stillness and produces exactly one
 response for five controlled practice swings. Record the final value. The

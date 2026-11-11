@@ -15,6 +15,11 @@ var armed := false:
 		visible = value
 		_update_label()
 
+## Set by `--latency-test`: stay hidden (the pairing QR stays visible) and arm
+## on the first motion sample, which only arrives once a phone has paired.
+## Any manual F4 toggle cancels it.
+var arm_on_first_sample := false
+
 var _logger: SessionLogger
 var _pending := false
 var _last_trigger_ms: Dictionary = {}
@@ -37,6 +42,16 @@ func bind(ingest: MotionIngest, logger: SessionLogger = null) -> void:
 		ingest.sample_received.connect(_on_sample_received)
 
 
+func apply_cmdline(args: PackedStringArray) -> void:
+	armed = false
+	arm_on_first_sample = args.has("--latency-test")
+
+
+func toggle_armed() -> void:
+	arm_on_first_sample = false
+	armed = not armed
+
+
 func set_threshold(value: float) -> void:
 	threshold_rad_s = clampf(value, 0.25, 50.0)
 	_update_label()
@@ -47,7 +62,7 @@ func _unhandled_key_input(event: InputEvent) -> void:
 		return
 	match event.keycode:
 		KEY_F4:
-			armed = not armed
+			toggle_armed()
 		KEY_BRACKETLEFT, KEY_MINUS:
 			set_threshold(threshold_rad_s - 0.25)
 		KEY_BRACKETRIGHT, KEY_EQUAL:
@@ -58,6 +73,10 @@ func _unhandled_key_input(event: InputEvent) -> void:
 
 
 func _on_sample_received(sample: Dictionary) -> void:
+	if arm_on_first_sample:
+		arm_on_first_sample = false
+		armed = true
+		return
 	if not armed or _pending:
 		return
 	var magnitude := _magnitude(sample.get("angular_velocity", []))

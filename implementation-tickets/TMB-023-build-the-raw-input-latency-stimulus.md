@@ -34,5 +34,12 @@
   threshold test. The path has no animation, batching or gameplay dependency.
 - The required physical swing video is deferred until a phone and high-speed
   camera are available; the implementation and log contract are complete.
+- 2026-11-11: `--latency-test` no longer arms at startup, where the full-screen
+  overlay hid the pairing QR (the workaround was pressing F4 twice). It now
+  stays hidden and arms on the first motion sample, which the host only
+  delivers after a phone has paired; that arming sample never triggers a flash.
+  Any manual F4 toggle cancels auto-arm. Covered by
+  `tests/raw_latency_auto_arm_test.gd` (`TMB-023_LATENCY_AUTO_ARM_OK`).
+  Automated only; not yet checked on a physical phone.
 
 

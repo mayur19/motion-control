@@ -120,7 +120,6 @@ Planned once the M2 gate says `GO`:
 | Item | Impact | Plan |
 | --- | --- | --- |
 | No Ethernet-host soak run | Two-wireless-hop penalty not quantified | Run when an Ethernet host is available |
-| `--latency-test` starts armed, hiding the pairing QR | Press F4 twice to see the QR | Small host fix pending |
 | Android stops background traffic after ~5 s | App must stay in the foreground | Foreground service is an owner decision |
 | A controller paused for invalid calibration is not told on screen | Confusing for the player | Needs a protocol/status message |
 | Android physical clock-drift plot missing | Only iPhone drift is physically plotted | Record on the next Galaxy session |
