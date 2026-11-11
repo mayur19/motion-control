@@ -15,7 +15,7 @@ Implemented at checkpoint
 
 Verified
 1. Android JVM suite
-   ANDROID_HOME=/Users/napkin/Library/Android/sdk ./gradlew testDebugUnitTest --no-daemon
+   ANDROID_HOME=$HOME/Library/Android/sdk ./gradlew testDebugUnitTest --no-daemon
    Result: BUILD SUCCESSFUL; includes both hands, repeatability, invalid
    orientation and CALIBRATION handedness round trip.
 
@@ -46,7 +46,7 @@ Verified
    Result: TMB-008_FIXTURES_OK positives=8 negatives=7; no whitespace errors.
 
 7. Remaining build/smoke checks
-   ANDROID_HOME=/Users/napkin/Library/Android/sdk ./gradlew assembleDebug --no-daemon
+   ANDROID_HOME=$HOME/Library/Android/sdk ./gradlew assembleDebug --no-daemon
    godot --headless --path apps/host-godot --script res://tests/racket_frame_test.gd
    Result: Android BUILD SUCCESSFUL; TMB-026_RACKET_FRAME_OK cases=7 invalid_checks=2.
 

@@ -3,7 +3,7 @@
 Use this prompt verbatim in Claude Code:
 
 ```text
-Continue TMB-027 in /Users/napkin/IdeaProjects/motion-control from the latest
+Continue TMB-027 in ~/IdeaProjects/motion-control from the latest
 commit. Read AGENTS.md, implementation-tickets/TMB-027-implement-slow-swing-
 calibration-on-both-controllers.md, docs/racket-coordinate-system.md,
 docs/adr/ADR-010-carry-handedness-in-calibration.md, and
@@ -26,7 +26,7 @@ Then finish the verification/fix loop:
      CODE_SIGNING_ALLOWED=NO
 2. Run Android tests and assemble:
    cd apps/controller-android
-   ANDROID_HOME=/Users/napkin/Library/Android/sdk \
+   ANDROID_HOME=$HOME/Library/Android/sdk \
      ./gradlew testDebugUnitTest assembleDebug --no-daemon
 3. Run protocol fixture check:
    ruby protocol/golden-vectors/generate.rb --check

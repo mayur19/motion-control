@@ -50,7 +50,7 @@ corner laterally; place the marker region away from surfaces the flash lights.
 
 Second run and accepted stage-attributed result (2026-11-06)
 ============================================================
-Video: /Users/napkin/Downloads/IMG_9712.MOV, 726,722,125 bytes.
+Video: ~/Downloads/IMG_9712.MOV, 726,722,125 bytes.
 SHA-256: 3e3bba41605ba6e04664bd7ffd954ade81012aca6923fcf441a628e26522fd74.
 Container: H.264 1920x1080, 11,521 frames at 30 fps in an 8x-slow iPhone
 Slo-mo container; analysed as 240 fps capture.

@@ -4,7 +4,7 @@ Paste the block below into Codex.
 
 ```text
 You are continuing development of Two-Phone Motion Badminton in
-/Users/napkin/IdeaProjects/motion-control (branch main, remote origin =
+~/IdeaProjects/motion-control (branch main, remote origin =
 private github.com/mayur19/motion-control). Two phones act as badminton-racket
 motion controllers for a Godot 4.7 desktop host over UDP.
 

@@ -41,3 +41,9 @@ change can be accepted.
 Hardware acceptance checks may be deferred during software-only development,
 but they must be completed before the corresponding latency, resilience or
 release gate is accepted.
+
+## License
+
+MIT; see [LICENSE](LICENSE). External datasets referenced in `docs/` (for
+example BadminSense `BADS_CLL`) are not included in this repository and keep
+their own licenses.

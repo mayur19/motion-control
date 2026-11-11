@@ -1,6 +1,6 @@
 # Claude Code handoff — external badminton dataset spike
 
-Continue development in `/Users/napkin/IdeaProjects/motion-control` on branch
+Continue development in `~/IdeaProjects/motion-control` on branch
 `main`. Read, in order:
 
 1. `AGENTS.md`, then `git log --oneline -15` and `git status`.

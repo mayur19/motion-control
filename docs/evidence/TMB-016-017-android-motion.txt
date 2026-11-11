@@ -4,7 +4,7 @@ Date: 2026-11-06
 Build and unit tests
 --------------------
 Command:
-  ANDROID_HOME=/Users/napkin/Library/Android/sdk \
+  ANDROID_HOME=$HOME/Library/Android/sdk \
     ./gradlew testDebugUnitTest assembleDebug
 Result:
   BUILD SUCCESSFUL

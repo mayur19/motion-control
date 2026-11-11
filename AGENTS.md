@@ -36,7 +36,7 @@ synchronizes clocks and (later) detects swings and runs the match.
   never present automated or estimated results as physical measurements; record
   gaps and owner decisions explicitly in the ticket implementation log.
 - Commits: conventional (`feat:`, `fix:`, `docs:`, `chore:` …), no AI attribution
-  lines. Remote: `origin` = private `github.com/mayur19/motion-control`, branch `main`.
+  lines. Remote: `origin` = public `github.com/mayur19/motion-control` (MIT), branch `main`.
 
 ## Commands
 
